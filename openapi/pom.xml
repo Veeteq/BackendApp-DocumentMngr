@@ -13,11 +13,25 @@
     <artifactId>openapi</artifactId>
 
     <properties>
+        <java.version>21</java.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <default.package>${project.groupId}.${project.artifactId}</default.package>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+            <version>0.2.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>1.8.0</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
@@ -34,17 +48,20 @@
                         <configuration>
                             <skipValidateSpec>true</skipValidateSpec>
                             <inputSpec>https://veeteq.github.io/OpenAPI-DocumentMngr/openapi.yaml</inputSpec>
-                            <generatorName>java</generatorName>
-                            <library>resttemplate</library>
+                            <generatorName>spring</generatorName>
+                            <library>spring-boot</library>
                             <apiPackage>${default.package}.rest.api</apiPackage>
                             <modelPackage>${default.package}.rest.dto</modelPackage>
                             <modelNameSuffix>Dto</modelNameSuffix>
+<!--                            <generateSupportingFiles>false</generateSupportingFiles>-->
                             <configOptions>
+                                <delegatePattern>true</delegatePattern>
                                 <openApiNullable>false</openApiNullable>
                                 <interfaceOnly>true</interfaceOnly>
                                 <hideGenerationTimestamp>true</hideGenerationTimestamp>
                                 <useJakartaEe>true</useJakartaEe>
                                 <useBeanValidation>true</useBeanValidation>
+                                <useTags>true</useTags>
                             </configOptions>
                             <typeMappings>
                                 <!-- convert Double to BigDecimal -->
