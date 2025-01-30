@@ -19,6 +19,7 @@
 
 	<modules>
 		<module>openapi</module>
+		<module>documentmngr-app</module>
 	</modules>
 
 	<properties>
