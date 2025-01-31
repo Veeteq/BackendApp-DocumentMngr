@@ -1,5 +1,6 @@
 package com.veeteq.documentmngr.rest.api;
 
+import com.veeteq.documentmngr.rest.dto.ItemsResponseDto;
 import com.veeteq.documentmngr.service.ItemService;
 import com.veeteq.documentmngr.rest.dto.ItemDto;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,13 +28,13 @@ public class ItemController implements ItemApi {
         this.itemService = itemService;
     }
 
-    public ResponseEntity<List<ItemDto>> listItems(@RequestParam(value = "pattern", required = false) String pattern,
-                                                   @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
-                                                   @RequestParam(value = "size", required = false, defaultValue = "25") Integer size) {
-
-        var sort = Sort.by("id").ascending();
-        var pageRequest = PageRequest.of(page, size, sort);
-        List<ItemDto> result = null;
+    @Override
+    public ResponseEntity<ItemsResponseDto> listItems(Integer pageNumber, Integer pageSize, String orderBy, String orderDirection) {
+        String pattern = null;
+        var direction = Sort.Direction.fromString(orderDirection);
+        var sort = Sort.by(direction, orderBy);
+        var pageRequest = PageRequest.of(pageNumber, pageSize, sort);
+        ItemsResponseDto result;
         if (pattern == null) {
             result = itemService.getItems(pageRequest);
         } else {
@@ -64,18 +65,4 @@ public class ItemController implements ItemApi {
                         .build());
     }
 
-    @Override
-    public ResponseEntity<List<ItemDto>> listItems() {
-        String pattern = null;
-
-        var sort = Sort.by("id").ascending();
-        var pageRequest = PageRequest.of(0, 25, sort);
-        List<ItemDto> result = null;
-        if (pattern == null) {
-            result = itemService.getItems(pageRequest);
-        } else {
-            result = itemService.getItemsWithPattern(pattern, pageRequest);
-        }
-        return ResponseEntity.ok(result);
-    }
 }
