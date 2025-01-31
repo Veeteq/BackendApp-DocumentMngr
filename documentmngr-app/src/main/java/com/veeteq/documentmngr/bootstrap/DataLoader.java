@@ -1,27 +1,39 @@
 package com.veeteq.documentmngr.bootstrap;
 
 import com.veeteq.documentmngr.model.Account;
+import com.veeteq.documentmngr.model.Category;
+import com.veeteq.documentmngr.model.CategoryType;
+import com.veeteq.documentmngr.model.Item;
 import com.veeteq.documentmngr.repository.AccountRepository;
+import com.veeteq.documentmngr.repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @Component
 @Profile("test")
 public class DataLoader implements CommandLineRunner {
 
     private final AccountRepository accountRepository;
+    private final ItemRepository itemRepository;
 
     @Autowired
-    public DataLoader(AccountRepository accountRepository) {
+    public DataLoader(AccountRepository accountRepository, ItemRepository itemRepository) {
         this.accountRepository = accountRepository;
+        this.itemRepository = itemRepository;
     }
 
     @Override
     public void run(String... args) throws Exception {
+        loadAccounts();
+        loadItems();
+    }
+
+    private void loadAccounts() {
         var list = List.of(
                 new Account().setId(1L).setName("ABC"),
                 new Account().setId(2L).setName("BCD"),
@@ -35,5 +47,29 @@ public class DataLoader implements CommandLineRunner {
                 new Account().setId(10L).setName("JKL")
         );
         accountRepository.saveAll(list);
+    }
+
+    private void loadItems() {
+        Map<Long, Category> categories = Map.of(
+                1L, new Category().setId(1L).setName("CAT_01").setCategoryType(CategoryType.Exp),
+                2L, new Category().setId(2L).setName("CAT_02").setCategoryType(CategoryType.Exp),
+                3L, new Category().setId(3L).setName("CAT_03").setCategoryType(CategoryType.Inc),
+                4L, new Category().setId(4L).setName("CAT_04").setCategoryType(CategoryType.Inc),
+                5L, new Category().setId(5L).setName("CAT_05").setCategoryType(CategoryType.Both)
+        );
+
+        var list = List.of(
+                new Item().setId(101L).setName("Item_01").setCategory(categories.get(1L)),
+                new Item().setId(102L).setName("Item_02").setCategory(categories.get(2L)),
+                new Item().setId(103L).setName("Item_03").setCategory(categories.get(3L)),
+                new Item().setId(104L).setName("Item_04").setCategory(categories.get(4L)),
+                new Item().setId(105L).setName("Item_05").setCategory(categories.get(5L)),
+                new Item().setId(106L).setName("Item_06").setCategory(categories.get(1L)),
+                new Item().setId(107L).setName("Item_07").setCategory(categories.get(2L)),
+                new Item().setId(108L).setName("Item_08").setCategory(categories.get(3L)),
+                new Item().setId(109L).setName("Item_09").setCategory(categories.get(4L)),
+                new Item().setId(110L).setName("Item_10").setCategory(categories.get(5L))
+        );
+        itemRepository.saveAll(list);
     }
 }
