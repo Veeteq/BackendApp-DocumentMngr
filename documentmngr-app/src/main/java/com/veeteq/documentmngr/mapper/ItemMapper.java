@@ -4,43 +4,35 @@ import com.veeteq.documentmngr.model.Category;
 import com.veeteq.documentmngr.model.Item;
 import com.veeteq.documentmngr.rest.dto.CategoryDto;
 import com.veeteq.documentmngr.rest.dto.ItemDto;
+import com.veeteq.documentmngr.rest.dto.ItemsResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
 public class ItemMapper {
 
     public ItemDto toDto(Item entity) {
-        var dto = new ItemDto()
+        var categoryDto = toDto(entity.getCategory());
+        return new ItemDto()
                 .itemId(entity.getId())
                 .itemName(entity.getName())
-                .itemCategory(toDto(entity.getCategory()));
-        return dto;
+                .itemCategory(categoryDto);
     }
 
-    public List<ItemDto> toDto(Page<Item> result) {
-        /* TODO
-        var dto = new ItemPageDto()
+    public ItemsResponseDto toDto(Page<Item> result) {
+        return new ItemsResponseDto()
                 .data(result.stream().map(this::toDto).collect(Collectors.toList()))
-                .size(result.getSize())
-                .page(result.getNumber())
+                .pageSize(result.getSize())
+                .currentPage(result.getNumber())
                 .totalPages(result.getTotalPages())
-                .numberOfElements(result.getNumberOfElements())
-                .totalElements(result.getTotalElements());
-        return dto;
-         */
-        return result.stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
+                .totalItems(result.getTotalElements());
     }
 
     public CategoryDto toDto(Category entity) {
-        var dto = new CategoryDto()
+        return new CategoryDto()
                 .categoryId(entity.getId())
                 .categoryName(entity.getName());
-        return dto;
     }
 }

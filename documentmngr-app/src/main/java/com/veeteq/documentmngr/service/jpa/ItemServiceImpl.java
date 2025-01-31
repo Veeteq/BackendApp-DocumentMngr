@@ -3,8 +3,8 @@ package com.veeteq.documentmngr.service.jpa;
 import com.veeteq.documentmngr.mapper.ItemMapper;
 import com.veeteq.documentmngr.model.Item;
 import com.veeteq.documentmngr.repository.ItemRepository;
-import com.veeteq.documentmngr.rest.dto.AccountDto;
 import com.veeteq.documentmngr.rest.dto.ItemDto;
+import com.veeteq.documentmngr.rest.dto.ItemsResponseDto;
 import com.veeteq.documentmngr.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -34,7 +34,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getItems(Pageable pageable) {
+    public ItemsResponseDto getItems(Pageable pageable) {
         var result = itemRepository.findAll(pageable);
         return itemMapper.toDto(result);
     }
@@ -48,7 +48,7 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
     }
 
-    public List<ItemDto> getItemsWithPattern(String pattern, Pageable pageable) {
+    public ItemsResponseDto getItemsWithPattern(String pattern, Pageable pageable) {
         var result = itemRepository.findByNameContainingIgnoreCase(pattern, pageable);
         return itemMapper.toDto(result);
     }
