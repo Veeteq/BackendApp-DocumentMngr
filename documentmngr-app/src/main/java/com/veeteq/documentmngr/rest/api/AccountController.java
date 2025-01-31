@@ -23,7 +23,6 @@ public class AccountController implements AccountApi {
 
     @Override
     public ResponseEntity<AccountDto> getAccountById(Long id) {
-        var dto = accountService.getAccountById(id);
 
         return accountService.getAccountById(id)
                 .map(accountDto -> ResponseEntity.ok()
