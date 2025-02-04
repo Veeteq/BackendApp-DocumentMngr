@@ -1,7 +1,10 @@
 # BackendApp-DocumentMngr
 
 ## Follows the API first contract using:
-[OpenAPI](https://veeteq.github.io/OpenAPI-DocumentMngr/)
+### [OpenAPI](https://veeteq.github.io/OpenAPI-DocumentMngr/)  / [openapi.yaml](https://veeteq.github.io/OpenAPI-DocumentMngr/openapi.yaml)
+
+## Financial Document OpenAPI repository:
+### [OpenAPI-DocumentMngr](https://github.com/Veeteq/OpenAPI-DocumentMngr)
 
 ## Documentation:
 * [Documentation for the Spring Generator](https://openapi-generator.tech/docs/generators/spring/)

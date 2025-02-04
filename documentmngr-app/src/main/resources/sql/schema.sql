@@ -91,14 +91,3 @@ create table document_items (
 create unique index docu_item_pk on document_items(docu_id, sequ_nm);
 alter table document_items add constraint pk_document_items primary key (docu_id, sequ_nm);
 alter table document_items add constraint fk_document_items_docu_id foreign key(docu_id) references documents (docu_id);
-
-create table z_parents (
-  id bigint not null,
-  abc varchar(10)
-);
-
-create table z_children (
-  id bigint not null,
-  seq integer not null,
-  xyz varchar(10)
-);
