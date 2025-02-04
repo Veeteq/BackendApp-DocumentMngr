@@ -17,9 +17,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/api")
-@CrossOrigin(origins = "http://localhost:4200")
+@RequestMapping(path = ItemController.BASE_URL)
+@CrossOrigin(origins = {"http://localhost:4200", "*"})
 public class ItemController implements ItemApi {
+    public  final static String BASE_URL = "/api";
     private final Logger log = LoggerFactory.getLogger(ItemController.class);
 
     private final ItemService itemService;
