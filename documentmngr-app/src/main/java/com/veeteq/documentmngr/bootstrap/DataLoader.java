@@ -1,16 +1,19 @@
 package com.veeteq.documentmngr.bootstrap;
 
-import com.veeteq.documentmngr.model.Account;
-import com.veeteq.documentmngr.model.Category;
-import com.veeteq.documentmngr.model.CategoryType;
-import com.veeteq.documentmngr.model.Item;
+import com.veeteq.documentmngr.model.*;
 import com.veeteq.documentmngr.repository.AccountRepository;
+import com.veeteq.documentmngr.repository.DocumentRepository;
 import com.veeteq.documentmngr.repository.ItemRepository;
+import com.veeteq.documentmngr.repository.UtilityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Currency;
 import java.util.List;
 import java.util.Map;
 
@@ -20,17 +23,22 @@ public class DataLoader implements CommandLineRunner {
 
     private final AccountRepository accountRepository;
     private final ItemRepository itemRepository;
+    private final DocumentRepository documentRepository;
+    private final UtilityRepository utilityRepository;
 
     @Autowired
-    public DataLoader(AccountRepository accountRepository, ItemRepository itemRepository) {
+    public DataLoader(AccountRepository accountRepository, ItemRepository itemRepository, DocumentRepository documentRepository, UtilityRepository utilityRepository) {
         this.accountRepository = accountRepository;
         this.itemRepository = itemRepository;
+        this.documentRepository = documentRepository;
+        this.utilityRepository = utilityRepository;
     }
 
     @Override
     public void run(String... args) throws Exception {
         loadAccounts();
         loadItems();
+        loadDocuments();
     }
 
     private void loadAccounts() {
@@ -71,5 +79,56 @@ public class DataLoader implements CommandLineRunner {
                 new Item().setId(110L).setName("Item_10").setCategory(categories.get(5L))
         );
         itemRepository.saveAll(list);
+    }
+
+    private void loadDocuments() {
+        var document1 = createExpense();
+        documentRepository.save(document1);
+        var document2 = createTransfer();
+        documentRepository.save(document2);
+    }
+
+    private Document createExpense() {
+        var accRef = accountRepository.getReferenceById(3L);
+        var document = Document.builder()
+                .withRepository(utilityRepository)
+                .withOperationDate(LocalDate.now())
+                .withDocumentType(DocumentType.INVOICE)
+                .withDocumentName("Car insurance")
+                .withDocumentDescription("January invoice for Car Insurance, 1st installment")
+                .withPaymentMethod(PaymentMethod.EFT)
+                .withAccount(accRef)
+                .withCurrencyCode(Currency.getInstance("PLN").getCurrencyCode())
+                .withExchangeRate(BigDecimal.ONE)
+                .build();
+        document.addToDocumentItems(
+                DocumentItem.builder()
+                        .withDocument(document)
+                        .withDocumentItemType(DocumentItemType.EXP)
+                        .withItemId(utilityRepository.getNextId(UtilityRepository.EntityIdMapping.EXPENSE))
+                        .withItem(itemRepository.getReferenceById(102L))
+                        .withItemQuantity(BigDecimal.ONE)
+                        .withItemPrice(BigDecimal.TWO)
+                        .withItemComment("Personal Liability")
+                        .build()
+        );
+        return document;
+    }
+
+    @Transactional
+    private Document createTransfer() {
+        var document = Document.builder()
+                .withRepository(utilityRepository)
+                .withOperationDate(LocalDate.now().minusDays(1))
+                .withDocumentType(DocumentType.TRANSFER)
+                .withPaymentMethod(PaymentMethod.EFT)
+                .withAccount(accountRepository.findById(4L).orElseThrow())
+                .withTargetAccount(accountRepository.findById(5L).orElseThrow())
+                .withCurrencyCode(Currency.getInstance("PLN").getCurrencyCode())
+                .withExchangeRate(BigDecimal.ONE)
+                .withTransferAmount(BigDecimal.valueOf(99.99))
+                .withTransferItem(itemRepository.findById(110L).orElseThrow())
+                .build();
+        return document;
     }
 }
