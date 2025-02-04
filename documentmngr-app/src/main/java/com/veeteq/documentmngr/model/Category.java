@@ -8,7 +8,7 @@ public class Category {
 
     @Id
     @Column(name = "cate_id")
-    Long id;
+    private Long id;
 
     @Column(name = "cate_name_tx")
     String name;
@@ -17,30 +17,54 @@ public class Category {
     @Enumerated(value = EnumType.STRING)
     private CategoryType categoryType;
 
-    public Long getId() {
-        return id;
+    public Category() {}
+
+    public Category(Builder builder) {
+        this.id = builder.id;
+        this.name = builder.name;
+        this.categoryType = builder.categoryType;
     }
 
-    public Category setId(Long id) {
-        this.id = id;
-        return this;
+    public Long getId() {
+        return id;
     }
 
     public String getName() {
         return name;
     }
 
-    public Category setName(String name) {
-        this.name = name;
-        return this;
-    }
-
     public CategoryType getCategoryType() {
         return categoryType;
     }
 
-    public Category setCategoryType(CategoryType categoryType) {
-        this.categoryType = categoryType;
-        return this;
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private Long id;
+        private String name;
+        private CategoryType categoryType;
+
+        private Builder() {}
+
+        public Builder withId(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder withName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder withCategoryType(CategoryType categoryType) {
+            this.categoryType = categoryType;
+            return this;
+        }
+
+        public Category build() {
+            return new Category(this);
+        }
     }
 }

@@ -31,44 +31,60 @@ public class Account {
         return id;
     }
 
-    public Account setId(Long id) {
-        this.id = id;
-        return this;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public Account setName(String name) {
-        this.name = name;
-        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public Account setDescription(String description) {
-        this.description = description;
-        return this;
-    }
-
     public String getImageUrl() {
         return imageUrl;
-    }
-
-    public Account setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-        return this;
     }
 
     public Currency getCurrency() {
         return currency;
     }
 
-    public Account setCurrency(Currency currency) {
-        this.currency = currency;
-        return this;
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private final Account entity;
+
+        private Builder() {
+            entity = new Account();
+        }
+
+        public Builder withId(Long id) {
+            entity.id = id;
+            return this;
+        }
+
+        public Builder withName(String name) {
+            entity.name = name;
+            return this;
+        }
+
+        public Builder withCurrency(Currency currency) {
+            entity.currency = currency;
+            return this;
+        }
+
+        public Builder withDescription(String description) {
+            entity.description = description;
+            return this;
+        }
+
+        public Builder withImageUrl(String imageUrl) {
+            entity.imageUrl = imageUrl;
+            return this;
+        }
+
+        public Account build() {
+            return entity;
+        }
     }
 }

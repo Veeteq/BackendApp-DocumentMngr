@@ -35,40 +35,40 @@ public class DataLoader implements CommandLineRunner {
 
     private void loadAccounts() {
         var list = List.of(
-                new Account().setId(1L).setName("ABC"),
-                new Account().setId(2L).setName("BCD"),
-                new Account().setId(3L).setName("CDE"),
-                new Account().setId(4L).setName("DEF"),
-                new Account().setId(5L).setName("EFG"),
-                new Account().setId(6L).setName("FGH"),
-                new Account().setId(7L).setName("GHI"),
-                new Account().setId(8L).setName("HIJ"),
-                new Account().setId(9L).setName("IJK"),
-                new Account().setId(10L).setName("JKL")
+                Account.builder().withId(1L).withName("ABC").build(),
+                Account.builder().withId(2L).withName("BCD").build(),
+                Account.builder().withId(3L).withName("CDE").build(),
+                Account.builder().withId(4L).withName("DEF").build(),
+                Account.builder().withId(5L).withName("EFG").build(),
+                Account.builder().withId(6L).withName("FGH").build(),
+                Account.builder().withId(7L).withName("GHI").build(),
+                Account.builder().withId(8L).withName("HIJ").build(),
+                Account.builder().withId(9L).withName("IJK").build(),
+                Account.builder().withId(10L).withName("JKL").build()
         );
         accountRepository.saveAll(list);
     }
 
     private void loadItems() {
         Map<Long, Category> categories = Map.of(
-                1L, new Category().setId(1L).setName("CAT_01").setCategoryType(CategoryType.Exp),
-                2L, new Category().setId(2L).setName("CAT_02").setCategoryType(CategoryType.Exp),
-                3L, new Category().setId(3L).setName("CAT_03").setCategoryType(CategoryType.Inc),
-                4L, new Category().setId(4L).setName("CAT_04").setCategoryType(CategoryType.Inc),
-                5L, new Category().setId(5L).setName("CAT_05").setCategoryType(CategoryType.Both)
+                1L, Category.builder().withId(1L).withName("CAT_01").withCategoryType(CategoryType.Exp).build(),
+                2L, Category.builder().withId(2L).withName("CAT_02").withCategoryType(CategoryType.Exp).build(),
+                3L, Category.builder().withId(3L).withName("CAT_03").withCategoryType(CategoryType.Inc).build(),
+                4L, Category.builder().withId(4L).withName("CAT_04").withCategoryType(CategoryType.Inc).build(),
+                5L, Category.builder().withId(5L).withName("CAT_05").withCategoryType(CategoryType.Both).build()
         );
 
         var list = List.of(
-                new Item().setId(101L).setName("Item_01").setCategory(categories.get(1L)),
-                new Item().setId(102L).setName("Item_02").setCategory(categories.get(2L)),
-                new Item().setId(103L).setName("Item_03").setCategory(categories.get(3L)),
-                new Item().setId(104L).setName("Item_04").setCategory(categories.get(4L)),
-                new Item().setId(105L).setName("Item_05").setCategory(categories.get(5L)),
-                new Item().setId(106L).setName("Item_06").setCategory(categories.get(1L)),
-                new Item().setId(107L).setName("Item_07").setCategory(categories.get(2L)),
-                new Item().setId(108L).setName("Item_08").setCategory(categories.get(3L)),
-                new Item().setId(109L).setName("Item_09").setCategory(categories.get(4L)),
-                new Item().setId(110L).setName("Item_10").setCategory(categories.get(5L))
+                Item.builder().withId(101L).withName("Item_01").withCategory(categories.get(1L)).build(),
+                Item.builder().withId(102L).withName("Item_02").withCategory(categories.get(2L)).build(),
+                Item.builder().withId(103L).withName("Item_03").withCategory(categories.get(3L)).build(),
+                Item.builder().withId(104L).withName("Item_04").withCategory(categories.get(4L)).build(),
+                Item.builder().withId(105L).withName("Item_05").withCategory(categories.get(5L)).build(),
+                Item.builder().withId(106L).withName("Item_06").withCategory(categories.get(1L)).build(),
+                Item.builder().withId(107L).withName("Item_07").withCategory(categories.get(2L)).build(),
+                Item.builder().withId(108L).withName("Item_08").withCategory(categories.get(3L)).build(),
+                Item.builder().withId(109L).withName("Item_09").withCategory(categories.get(4L)).build(),
+                Item.builder().withId(110L).withName("Item_10").withCategory(categories.get(5L)).build()
         );
         itemRepository.saveAll(list);
     }
