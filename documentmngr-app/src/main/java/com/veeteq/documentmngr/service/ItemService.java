@@ -19,4 +19,5 @@ public interface ItemService {
 
     Optional<ItemDto> getItemById(Long id);
 
+    ItemDto save(ItemDto dto);
 }

@@ -29,7 +29,7 @@ public class OpenApiValidationConfig {
         final OpenApiInteractionValidator validator = OpenApiInteractionValidator
                 .createForSpecificationUrl(apiSpecification)
                 .withLevelResolver(SpringMVCLevelResolverFactory.create())
-                .withBasePathOverride("/v1")
+                .withBasePathOverride("/api")
                 .build();
         final OpenApiValidationInterceptor openApiValidationInterceptor = new OpenApiValidationInterceptor(validator);
         return new WebMvcConfigurer() {

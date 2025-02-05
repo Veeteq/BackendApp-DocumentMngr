@@ -13,7 +13,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -53,6 +55,17 @@ public class ItemController implements ItemApi {
         return ResponseEntity
                 .ok()
                 .body(response);
+    }
+
+    @Override
+    public ResponseEntity<Void> createItem(ItemDto dto) {
+        var savedItem = itemService.save(dto);
+
+        var uriComponents = UriComponentsBuilder.fromPath(BASE_URL.concat("/v1/items".concat("/{item_id}")))
+                .buildAndExpand(savedItem.getItemId());
+        URI uri = URI.create(uriComponents.getPath());
+
+        return ResponseEntity.created(uri).build();
     }
 
     @Override

@@ -1,12 +1,13 @@
 create table users (
   user_id bigint not null,
   user_name_tx varchar(30),
-  user_desc_tx varchar(30),
+  user_desc_tx varchar(60),
   user_curr_cd varchar(3),
   user_imag_tx varchar(40)
 );
 create unique index pk_users on users(user_id);
 alter table users add constraint pk_users primary key (user_id);
+create sequence user_seq start with 1 increment by 1;
 
 create table categories (
   cate_id bigint not null,
@@ -15,6 +16,7 @@ create table categories (
 );
 create unique index pk_categories on categories(cate_id);
 alter table categories add constraint pk_categories primary key (cate_id);
+create sequence cate_seq start with 1 increment by 1;
 
 create table items (
   item_id bigint not null,
@@ -24,6 +26,7 @@ create table items (
 create unique index pk_items on items(item_id);
 alter table items add constraint pk_items primary key (item_id);
 alter table items add constraint fk_items_cate_id foreign key(cate_id) references categories (cate_id);
+create sequence item_seq start with 1 increment by 1;
 
 create table expenses (
   expe_id bigint not null,
