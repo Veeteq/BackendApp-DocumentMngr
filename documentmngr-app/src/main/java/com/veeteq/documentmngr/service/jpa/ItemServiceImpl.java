@@ -58,4 +58,11 @@ public class ItemServiceImpl implements ItemService {
         var result = itemRepository.findById(id);
         return result.map(itemMapper::toDto);
     }
+
+    @Override
+    public ItemDto save(ItemDto dto) {
+        var item = itemMapper.toEntity(dto);
+        var savedItem = itemRepository.save(item);
+        return itemMapper.toDto(savedItem);
+    }
 }

@@ -16,10 +16,13 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
+import static com.veeteq.documentmngr.rest.api.DocumentController.BASE_URL;
+
 @RestController
-@RequestMapping(path = "/api")
+@RequestMapping(path = BASE_URL)
 @CrossOrigin(origins = {"http://localhost:4200", "*"})
 public class DocumentController implements DocumentApi {
+    public static final String BASE_URL = "/api";
     private final static Logger LOGGER = LoggerFactory.getLogger(DocumentController.class);
 
     private final DocumentService documentService;
@@ -37,14 +40,16 @@ public class DocumentController implements DocumentApi {
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest() // Get the current request URI
                 .path("/{id}") // Append the account ID to the URI path
-                .buildAndExpand(document.getId())// Replace the path variable with the document ID
+                .buildAndExpand(document.getDocumentId())// Replace the path variable with the document ID
                 .toUri();
 
         var headers = new HttpHeaders();
         //headers.set(TRANSACTION_ID, transactionId.toString());
 
         // Return the response with status 201 Created and set the Location header
-        return ResponseEntity.created(location).headers(headers).build();
+        return ResponseEntity.created(location)
+                .headers(headers)
+                .build();
     }
 
     @Override
@@ -55,16 +60,17 @@ public class DocumentController implements DocumentApi {
         var headers = new HttpHeaders();
         var response = documentService.getDocumentById(id)
                 .map(itemDto -> ResponseEntity.ok()
-                        //.headers(headers)
+                        .headers(headers)
                         .body(itemDto))
                 .orElse(ResponseEntity.notFound()
-                        //.headers(headers)
+                        .headers(headers)
                         .build());
         return response;
     }
 
     @Override
     public ResponseEntity<List<DocumentResponseDto>> listDocuments(Long cookieParam, String acceptLanguage) {
-        return null;
+        var dtos = documentService.listDocuments();
+        return ResponseEntity.ok(dtos);
     }
 }
