@@ -7,10 +7,10 @@ import com.veeteq.documentmngr.processor.DocumentProcessor;
 import java.util.stream.Stream;
 
 public enum DocumentType {
-    TRANSFER("Transfer", DocumentProcessor.Type.BASE),
+    TRANSFER("Transfer", DocumentProcessor.Type.TRANSFER),
     NOTE("Note", DocumentProcessor.Type.BASE),
     BILL("Bill", DocumentProcessor.Type.BASE),
-    INVOICE("Invoice", DocumentProcessor.Type.TRANSFER);
+    INVOICE("Invoice", DocumentProcessor.Type.BASE);
 
     private final String displayName;
     private final String processorType;

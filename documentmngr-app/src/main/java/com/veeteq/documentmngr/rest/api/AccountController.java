@@ -6,7 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 import static com.veeteq.documentmngr.rest.api.AccountController.BASE_URL;
@@ -25,6 +27,17 @@ public class AccountController implements AccountApi {
     public ResponseEntity<List<AccountDto>> listAccounts() {
         var dtos = accountService.listAccounts();
         return ResponseEntity.ok(dtos);
+    }
+
+    @Override
+    public ResponseEntity<Void> createAccount(AccountDto dto) {
+        var savedAccount = accountService.save(dto);
+
+        var uriComponents = UriComponentsBuilder.fromPath(BASE_URL.concat("/v1/accounts".concat("/account_id")))
+                .buildAndExpand(savedAccount.getAccountId());
+        URI uri = URI.create(uriComponents.getPath());
+
+        return ResponseEntity.created(uri).build();
     }
 
     @Override
