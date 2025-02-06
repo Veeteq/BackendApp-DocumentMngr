@@ -1,5 +1,6 @@
 package com.veeteq.documentmngr.controller;
 
+import com.veeteq.documentmngr.DocumentMngrApp;
 import com.veeteq.documentmngr.rest.api.DocumentController;
 import com.veeteq.documentmngr.rest.dto.DocumentItemRequestDto;
 import com.veeteq.documentmngr.rest.dto.DocumentRequestDto;
@@ -20,7 +21,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
+@SpringBootTest(classes = DocumentMngrApp.class)
 public class DocumentControllerTest extends BaseTest {
 
     @DisplayName("Test List Documents")
