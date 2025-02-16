@@ -31,7 +31,7 @@ public class AccountController implements AccountApi {
 
     @Override
     public ResponseEntity<Void> createAccount(AccountDto dto) {
-        var savedAccount = accountService.save(dto);
+        var savedAccount = accountService.saveAccount(dto);
 
         var uriComponents = UriComponentsBuilder.fromPath(BASE_URL.concat("/v1/accounts".concat("/account_id")))
                 .buildAndExpand(savedAccount.getAccountId());

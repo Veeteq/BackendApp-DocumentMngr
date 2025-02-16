@@ -1,76 +1,43 @@
 package com.veeteq.documentmngr.mapper;
 
-import com.veeteq.documentmngr.model.*;
-import com.veeteq.documentmngr.rest.dto.DocumentItemResponseDto;
+import com.veeteq.documentmngr.model.Document;
+import com.veeteq.documentmngr.repository.AccountRepository;
+import com.veeteq.documentmngr.rest.dto.DocumentRequestDto;
 import com.veeteq.documentmngr.rest.dto.DocumentResponseDto;
-import org.springframework.stereotype.Component;
+import org.mapstruct.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+@Mapper(componentModel = "spring", uses = {AccountMapper.class, DocumentItemMapper.class})
+@DecoratedWith(DocumentMapperDecorator.class)
+public interface DocumentMapper {
 
-@Component
-public class DocumentMapper {
+    @Mapping(target = "documentId",   source = "id")
+    @Mapping(target = "documentDate", source = "documentDate")
+    @Mapping(target = "documentType", source = "documentType")
+    @Mapping(target = "documentName", source = "documentName")
+    @Mapping(target = "documentComment", source = "documentDescription")
+    @Mapping(target = "invoiceNumber", source = "invoiceNumber")
+    @Mapping(target = "account",       source = "account")
+    //@Mapping(target = "targetAccount", source = "account")
+    //@Mapping(target = "counterpartyId", source = "counterpartyId")
+    @Mapping(target = "paymentMethod", source = "paymentMethod")
+    @Mapping(target = "currencyCode",  source = "currency")
+    @Mapping(target = "exchangeRate",  source = "exchangeRate")
+    @Mapping(target = "documentItemsCount", source = "documentItemsCount")
+    @Mapping(target = "documentItems", source = "documentItems")
+    DocumentResponseDto toDto(Document entity);
 
-    public DocumentResponseDto toDto(Document entity) {
-        var dto = new DocumentResponseDto()
-                .documentId(entity.getId())
-                .documentDate(entity.getDocumentDate())
-                .documentType(entity.getDocumentType() != null ? entity.getDocumentType().getDisplayName() : "N/A")
-                .documentName(entity.getDocumentName())
-                .currencyCode(entity.getCurrency() != null ? entity.getCurrency().getCurrencyCode() : "PLN")
-                .exchangeRate(entity.getExchangeRate())
-                .documentItemsCount(entity.getDocumentItems().size());
+    @Mapping(target = "withDocumentDate",        source = "dto.date")
+    @Mapping(target = "withDocumentType",        source = "dto.documentType")
+    @Mapping(target = "withDocumentName",        source = "dto.documentName")
+    @Mapping(target = "withDocumentDescription", source = "dto.documentDescription")
+    @Mapping(target = "withAccount",             expression  = "java(accountRepository.findById(dto.getAccountId()).orElseThrow())")
+    @Mapping(target = "withInvoiceNumber",       source = "dto.invoiceNumber")
+    @Mapping(target = "withCounterpartyId",      source = "dto.counterpartyId")
+    @Mapping(target = "withPaymentMethod",       source = "dto.paymentMethod")
+    @Mapping(target = "withCurrencyCode",        source = "dto.currencyCode")
+    @Mapping(target = "withExchangeRate",        source = "dto.exchangeRate")
+    @Mapping(target = "withTransferAmount",      source = "dto.transferAmount")
+    Document toEntity(DocumentRequestDto dto,  @Autowired AccountRepository accountRepository);
 
-        Supplier<Stream<DocumentItem>> documentItemsStream = () -> entity.getDocumentItems().stream();
-        var documentItems = documentItemsStream.get()
-                .map(this::toDto)
-                .collect(Collectors.toList());
-        dto.documentItems(documentItems);
-
-        var documentAmount = getDocumentAmmount(entity.getDocumentType(), documentItemsStream);
-        dto.setDocumentAmount(documentAmount);
-
-        return dto;
-    }
-
-    private DocumentItemResponseDto toDto(DocumentItem documentItem) {
-        var financialRecord = documentItem.getExpense() != null ? documentItem.getExpense() : documentItem.getIncome();
-        var multiplicand = financialRecord instanceof Expense ? BigDecimal.ONE.negate() : BigDecimal.ONE;
-        var dto = new DocumentItemResponseDto()
-                //.setType(documentItem.getType().getDisplayName())
-                .documentItemId(financialRecord.getId())
-                //.item(itemMapper.toDto(financialRecord.getItem()))
-                //itemQuantity(financialRecord.getCount())
-                //.itemPrice(financialRecord.getPrice().multiply(multiplicand))
-                .itemComment(financialRecord.getComment());
-        return dto;
-    }
-
-    private BigDecimal getDocumentAmmount(DocumentType documentType, Supplier<Stream<DocumentItem>> documentItemsStream) {
-        BigDecimal documentAmount;
-
-        if (documentType == DocumentType.TRANSFER) {
-            documentAmount = documentItemsStream.get()
-                    .filter(documentItem -> documentItem.getType() == DocumentItemType.INC)
-                    .map(DocumentItem::getIncome)
-                    .findFirst()
-                    .map(income -> income.getCount().multiply(income.getPrice()).setScale(2, RoundingMode.HALF_UP))
-                    .get();
-        } else {
-            documentAmount = documentItemsStream.get()
-                    .map(item -> item.getType() == DocumentItemType.EXP ? item.getExpense() : item.getIncome())
-                    .map(item -> {
-                        var retVal = item.getCount().multiply(item.getPrice()).setScale(2, RoundingMode.HALF_UP);
-                        if (item instanceof Expense) {
-                            return retVal.negate();
-                        }
-                        return retVal;
-                    })
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-        }
-        return documentAmount;
-    }
 }

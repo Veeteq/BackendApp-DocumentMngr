@@ -107,7 +107,7 @@ public class DocumentItem {
     public static class Builder {
         private Document document;
         private DocumentItemType type;
-        private Long itemId;
+        private Long id;
         private Item item;
         private BigDecimal itemQuantity;
         private BigDecimal itemPrice;
@@ -125,8 +125,8 @@ public class DocumentItem {
             return this;
         }
 
-        public Builder withItemId(long itemId) {
-            this.itemId = itemId;
+        public Builder withId(long id) {
+            this.id = id;
             return this;
         }
 
@@ -163,7 +163,7 @@ public class DocumentItem {
                 case EXP -> new Expense.ExpenseBuilder();
                 case INC -> new Income.IncomeBuilder();
             };
-            a.withId(builder.itemId)
+            a.withId(builder.id)
                     .withOperationDate(builder.document.getDocumentDate())
                     .withAccount(builder.document.getAccount())
                     .withPrice(builder.itemPrice)

@@ -1,10 +1,7 @@
 package com.veeteq.documentmngr.bootstrap;
 
 import com.veeteq.documentmngr.model.*;
-import com.veeteq.documentmngr.repository.AccountRepository;
-import com.veeteq.documentmngr.repository.DocumentRepository;
-import com.veeteq.documentmngr.repository.ItemRepository;
-import com.veeteq.documentmngr.repository.UtilityRepository;
+import com.veeteq.documentmngr.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -17,7 +14,7 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Map;
 
-import static com.veeteq.documentmngr.repository.UtilityRepository.EntityIdMapping.*;
+import static com.veeteq.documentmngr.repository.EntityIdMapping.*;
 
 @Component
 @Profile("test")
@@ -46,10 +43,10 @@ public class DataLoader implements CommandLineRunner {
     private void loadAccounts() {
         var list = List.of(
                 Account.builder().withId(nextId(ACCOUNT)).withName("ABC").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("BCD").build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("BCD").withDescription("BCD Description").withCurrency(Currency.getInstance("EUR")).withImageUrl("https://image.com/logo.png").build(),
                 Account.builder().withId(nextId(ACCOUNT)).withName("CDE").build(),
                 Account.builder().withId(nextId(ACCOUNT)).withName("DEF").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("EFG").build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("EFG").withDescription("EFG Description").withCurrency(Currency.getInstance("GBP")).withImageUrl("https://image.com/logo.png").build(),
                 Account.builder().withId(nextId(ACCOUNT)).withName("FGH").build(),
                 Account.builder().withId(nextId(ACCOUNT)).withName("GHI").build(),
                 Account.builder().withId(nextId(ACCOUNT)).withName("HIJ").build(),
@@ -94,7 +91,7 @@ public class DataLoader implements CommandLineRunner {
         var accRef = accountRepository.getReferenceById(3L);
         var document = Document.builder()
                 .withRepository(utilityRepository)
-                .withOperationDate(LocalDate.now())
+                .withDocumentDate(LocalDate.now())
                 .withDocumentType(DocumentType.INVOICE)
                 .withDocumentName("Car insurance")
                 .withDocumentDescription("January invoice for Car Insurance, 1st installment")
@@ -107,7 +104,6 @@ public class DataLoader implements CommandLineRunner {
                 DocumentItem.builder()
                         .withDocument(document)
                         .withDocumentItemType(DocumentItemType.EXP)
-                        .withItemId(utilityRepository.getNextId(UtilityRepository.EntityIdMapping.EXPENSE))
                         .withItem(itemRepository.getReferenceById(2L))
                         .withItemQuantity(BigDecimal.ONE)
                         .withItemPrice(BigDecimal.TWO)
@@ -121,7 +117,7 @@ public class DataLoader implements CommandLineRunner {
     private Document createTransfer() {
         var document = Document.builder()
                 .withRepository(utilityRepository)
-                .withOperationDate(LocalDate.now().minusDays(1))
+                .withDocumentDate(LocalDate.now().minusDays(1))
                 .withDocumentType(DocumentType.TRANSFER)
                 .withPaymentMethod(PaymentMethod.EFT)
                 .withAccount(accountRepository.findById(4L).orElseThrow())
@@ -134,7 +130,7 @@ public class DataLoader implements CommandLineRunner {
         return document;
     }
 
-    private Long nextId(UtilityRepository.EntityIdMapping mapping) {
+    private Long nextId(EntityIdMapping mapping) {
         return utilityRepository.getNextId(mapping);
     }
 }
