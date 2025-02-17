@@ -29,27 +29,12 @@ public class Item {
         return id;
     }
 
-    public Item setId(Long id) {
-        this.id = id;
-        return this;
-    }
-
     public String getName() {
         return name;
     }
 
-    public Item setName(String name) {
-        this.name = name;
-        return this;
-    }
-
     public Category getCategory() {
         return category;
-    }
-
-    public Item setCategory(Category category) {
-        this.category = category;
-        return this;
     }
 
     public static Builder builder() {

@@ -1,64 +1,40 @@
 package com.veeteq.documentmngr.mapper;
 
 import com.veeteq.documentmngr.model.Category;
-import com.veeteq.documentmngr.model.CategoryType;
 import com.veeteq.documentmngr.model.Item;
-import com.veeteq.documentmngr.repository.UtilityRepository;
 import com.veeteq.documentmngr.rest.dto.CategoryDto;
 import com.veeteq.documentmngr.rest.dto.ItemDto;
 import com.veeteq.documentmngr.rest.dto.ItemsResponseDto;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Component;
 
-import java.util.stream.Collectors;
+@Mapper(componentModel = "spring")
+public interface ItemMapper {
 
-import static com.veeteq.documentmngr.repository.UtilityRepository.EntityIdMapping.ITEM;
+    @Mapping(target = "withId", source = "itemId")
+    @Mapping(target = "withName", source = "itemName")
+    @Mapping(target = "withCategory", source = "itemCategory")
+    Item toEntity(ItemDto dto);
 
-@Component
-public class ItemMapper {
+    @Mapping(target = "itemId", source = "id")
+    @Mapping(target = "itemName", source = "name")
+    @Mapping(target = "itemCategory", source = "category")
+    ItemDto toDto(Item entity);
 
-    private final UtilityRepository utilityRepository;
+    @Mapping(target = "pageSize", source = "size")
+    @Mapping(target = "totalItems", source = "totalElements")
+    @Mapping(target = "totalPages", source = "totalPages")
+    @Mapping(target = "currentPage", source = "number")
+    @Mapping(target = "data", source = "content")
+    ItemsResponseDto toDto(Page<Item> items);
 
-    public ItemMapper(UtilityRepository utilityRepository) {
-        this.utilityRepository = utilityRepository;
-    }
+    @Mapping(target = "withId", source = "categoryId")
+    @Mapping(target = "withName", source = "categoryName")
+    @Mapping(target = "withCategoryType", constant = "Both")
+    Category toEntity(CategoryDto dto);
 
-    public ItemDto toDto(Item entity) {
-        var categoryDto = toDto(entity.getCategory());
-        return new ItemDto()
-                .itemId(entity.getId())
-                .itemName(entity.getName())
-                .itemCategory(categoryDto);
-    }
-
-    public ItemsResponseDto toDto(Page<Item> result) {
-        return new ItemsResponseDto()
-                .data(result.stream().map(this::toDto).collect(Collectors.toList()))
-                .pageSize(result.getSize())
-                .currentPage(result.getNumber())
-                .totalPages(result.getTotalPages())
-                .totalItems(result.getTotalElements());
-    }
-
-    public CategoryDto toDto(Category entity) {
-        return new CategoryDto()
-                .categoryId(entity.getId())
-                .categoryName(entity.getName());
-    }
-
-    public Item toEntity(ItemDto dto) {
-        return Item.builder()
-                .withId(dto.getItemId() != null ? dto.getItemId() : utilityRepository.getNextId(ITEM))
-                .withName(dto.getItemName())
-                .withCategory(toEntity(dto.getItemCategory()))
-                .build();
-    }
-
-    private Category toEntity(CategoryDto itemCategory) {
-        return Category.builder()
-                .withId(itemCategory.getCategoryId())
-                .withName(itemCategory.getCategoryName())
-                .withCategoryType(CategoryType.Both)
-                .build();
-    }
+    @Mapping(target = "categoryId", source = "id")
+    @Mapping(target = "categoryName", source = "name")
+    CategoryDto toDto(Category entity);
 }

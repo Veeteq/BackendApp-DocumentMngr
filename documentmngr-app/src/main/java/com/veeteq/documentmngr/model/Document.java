@@ -19,6 +19,12 @@ import java.util.List;
 public class Document {
 
     @Id
+    /*@GeneratedValue(generator = "doc-generator")
+    @GenericGenerator(name = "doc-generator",
+                      parameters = {@Parameter(name = "prefix", value = "prod")},
+                      strategy = "com.veeteq.documentmngr.model.generator.DocumentIdGenerator")*/
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "docu_seq")
+    @SequenceGenerator(name = "docu_seq", allocationSize = 1)
     @Column(name = "docu_id")
     private Long id;
 
@@ -138,6 +144,10 @@ public class Document {
         return version;
     }
 
+    public Integer getDocumentItemsCount() {
+        return this.documentItems.size();
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -154,8 +164,13 @@ public class Document {
             entity = new Document();
         }
 
-        public Builder withOperationDate(LocalDate operationDate) {
-            entity.documentDate = operationDate;
+        public Builder withId(Long id) {
+            entity.id = id;
+            return this;
+        }
+
+        public Builder withDocumentDate(LocalDate documentDate) {
+            entity.documentDate = documentDate;
             return this;
         }
 
@@ -219,15 +234,17 @@ public class Document {
             return this;
         }
 
-
         public Builder withTransferItem(Item transferItem) {
             this.transferItem = transferItem;
             return this;
         }
 
-        public Document build() {
-            entity.id = utilityRepository.getNextId(UtilityRepository.EntityIdMapping.DOCUMENT);
+        public Builder withRepository(UtilityRepository utilityRepository) {
+            this.utilityRepository = utilityRepository;
+            return this;
+        }
 
+        public Document build() {
             if (entity.documentType == DocumentType.TRANSFER) {
                 entity.documentName = DocumentType.TRANSFER.name();
                 entity.documentDescription = MessageFormat.format("Transfer of {0} from {1} to {2}", transferAmount, entity.account.getName(), targetAccount.getName());
@@ -239,7 +256,6 @@ public class Document {
         public Document buildTransfer() {
             // Create the EXPENSE record for the source account
             Expense expense = Expense.builder()
-                    .withId(utilityRepository.getNextId(UtilityRepository.EntityIdMapping.EXPENSE))
                     .withOperationDate(entity.documentDate)
                     .withAccount(entity.account)
                     .withItem(this.transferItem)
@@ -250,7 +266,6 @@ public class Document {
 
             // Create the INCOME record for the target account
             Income income = Income.builder()
-                    .withId(utilityRepository.getNextId(UtilityRepository.EntityIdMapping.INCOME))
                     .withOperationDate(entity.documentDate)
                     .withAccount(this.targetAccount)
                     .withItem(this.transferItem)
@@ -271,11 +286,6 @@ public class Document {
             entity.addToDocumentItems(incomeItem);
 
             return entity;
-        }
-
-        public Builder withRepository(UtilityRepository utilityRepository) {
-            this.utilityRepository = utilityRepository;
-            return this;
         }
     }
 

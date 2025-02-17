@@ -28,6 +28,7 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
+    @Transactional
     public DocumentResponseDto createDocument(DocumentRequestDto documentRequestDto) {
         var documentType = DocumentType.findByValue(documentRequestDto.getDocumentType().getValue());
         DocumentProcessor processor = documentProcessorFactory.get(documentType.getProcessorType());

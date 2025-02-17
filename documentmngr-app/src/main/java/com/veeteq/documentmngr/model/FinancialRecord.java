@@ -14,6 +14,11 @@ public abstract class FinancialRecord {
     protected FinancialRecord() {}
 
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "default_gen")
+    /*@GeneratedValue(generator = "doc-generator")
+    @GenericGenerator(name = "doc-generator",
+            parameters = {@Parameter(name = "prefix", value = "prod")},
+            strategy = "com.veeteq.documentmngr.model.generator.DocumentIdGenerator")*/
     protected Long id;
 
     @Column(name = "oper_dt", nullable = false, columnDefinition = "DATE")

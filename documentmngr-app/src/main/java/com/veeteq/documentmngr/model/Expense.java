@@ -1,12 +1,10 @@
 package com.veeteq.documentmngr.model;
 
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "expenses")
+@SequenceGenerator(name = "default_gen", sequenceName = "expe_seq", allocationSize = 1)
 @AttributeOverride(name = "id",      column = @Column(name = "expe_id"))
 @AttributeOverride(name = "count",   column = @Column(name = "expe_item_cn"))
 @AttributeOverride(name = "price",   column = @Column(name = "expe_pric_am"))
