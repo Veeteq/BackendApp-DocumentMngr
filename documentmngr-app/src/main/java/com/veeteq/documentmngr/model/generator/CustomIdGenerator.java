@@ -24,7 +24,7 @@ public class CustomIdGenerator implements IdentifierGenerator {
             return identifier;
         }
 
-        return generateIdForEntity(session, className);
+        return generateIdForEntity(session, persister.getEntityName());
     }
 
     @Override

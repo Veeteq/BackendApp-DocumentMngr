@@ -42,8 +42,8 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     public AccountDto saveAccount(AccountDto dto) {
         var account = accountMapper.toEntity(dto);
-        account = accountRepository.save(account);
-        return accountMapper.toDto(account);
+        var savedAccount = accountRepository.save(account);
+        return accountMapper.toDto(savedAccount);
     }
 
 }
