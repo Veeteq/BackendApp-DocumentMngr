@@ -59,7 +59,7 @@ public class DocumentControllerTest extends BaseTest {
                 .invoiceNumber("EL/2025/JAN/13579")
                 .paymentMethod("EFT")
                 .documentItems(List.of(new DocumentItemRequestDto()
-                        .itemType("Expense")
+                        .itemType("EXP")
                         .itemId(5L)
                         .itemName("Item_05")
                         .itemQuantity(BigDecimal.ONE)
