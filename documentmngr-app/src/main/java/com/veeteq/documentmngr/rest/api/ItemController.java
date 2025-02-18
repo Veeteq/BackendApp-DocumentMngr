@@ -1,5 +1,6 @@
 package com.veeteq.documentmngr.rest.api;
 
+import com.veeteq.documentmngr.rest.dto.ItemRequestDto;
 import com.veeteq.documentmngr.rest.dto.ItemsResponseDto;
 import com.veeteq.documentmngr.service.ItemService;
 import com.veeteq.documentmngr.rest.dto.ItemDto;
@@ -58,7 +59,7 @@ public class ItemController implements ItemApi {
     }
 
     @Override
-    public ResponseEntity<Void> createItem(ItemDto dto) {
+    public ResponseEntity<Void> createItem(ItemRequestDto dto) {
         var savedItem = itemService.save(dto);
 
         var uriComponents = UriComponentsBuilder.fromPath(BASE_URL.concat("/v1/items".concat("/{item_id}")))

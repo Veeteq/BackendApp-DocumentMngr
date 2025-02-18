@@ -4,6 +4,7 @@ import com.veeteq.documentmngr.DocumentMngrApp;
 import com.veeteq.documentmngr.rest.api.ItemController;
 import com.veeteq.documentmngr.rest.dto.CategoryDto;
 import com.veeteq.documentmngr.rest.dto.ItemDto;
+import com.veeteq.documentmngr.rest.dto.ItemRequestDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,9 +39,9 @@ public class ItemControllerTest extends BaseTest {
     @DisplayName("Test Create Item")
     @Test
     void testCreateItem() throws Exception {
-        ItemDto dto = new ItemDto()
+        ItemRequestDto dto = new ItemRequestDto()
                 .itemName("Test Item")
-                .itemCategory(new CategoryDto().categoryId(1L).categoryName("CAT_01"));
+                .categoryId(1L);
         mockMvc.perform(post(ItemController.BASE_URL.concat("/v1/items"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))

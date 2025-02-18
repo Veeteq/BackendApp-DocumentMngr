@@ -1,6 +1,7 @@
 package com.veeteq.documentmngr.service;
 
 import com.veeteq.documentmngr.rest.dto.ItemDto;
+import com.veeteq.documentmngr.rest.dto.ItemRequestDto;
 import com.veeteq.documentmngr.rest.dto.ItemsResponseDto;
 import org.springframework.data.domain.Pageable;
 
@@ -19,5 +20,5 @@ public interface ItemService {
 
     Optional<ItemDto> getItemById(Long id);
 
-    ItemDto save(ItemDto dto);
+    ItemDto save(ItemRequestDto dto);
 }

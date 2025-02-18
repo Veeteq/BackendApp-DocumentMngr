@@ -2,8 +2,12 @@ package com.veeteq.documentmngr.service.jpa;
 
 import com.veeteq.documentmngr.mapper.ItemMapper;
 import com.veeteq.documentmngr.model.Item;
+import com.veeteq.documentmngr.repository.CategoryRepository;
+import com.veeteq.documentmngr.repository.EntityIdMapping;
 import com.veeteq.documentmngr.repository.ItemRepository;
+import com.veeteq.documentmngr.repository.UtilityRepository;
 import com.veeteq.documentmngr.rest.dto.ItemDto;
+import com.veeteq.documentmngr.rest.dto.ItemRequestDto;
 import com.veeteq.documentmngr.rest.dto.ItemsResponseDto;
 import com.veeteq.documentmngr.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +23,15 @@ import java.util.stream.StreamSupport;
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
+    private final CategoryRepository categoryRepository;
+    private final UtilityRepository utilityRepository;
     private final ItemMapper itemMapper;
 
     @Autowired
-    public ItemServiceImpl(ItemRepository itemRepository, ItemMapper itemMapper) {
+    public ItemServiceImpl(ItemRepository itemRepository, CategoryRepository categoryRepository, UtilityRepository utilityRepository, ItemMapper itemMapper) {
         this.itemRepository = itemRepository;
+        this.categoryRepository = categoryRepository;
+        this.utilityRepository = utilityRepository;
         this.itemMapper = itemMapper;
     }
 
@@ -60,8 +68,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto save(ItemDto dto) {
-        var item = itemMapper.toEntity(dto);
+    public ItemDto save(ItemRequestDto dto) {
+        if (dto.getItemId() == null) {
+            dto.setItemId(utilityRepository.getNextId(EntityIdMapping.ITEM));
+        }
+        var category = categoryRepository.getReferenceById(dto.getCategoryId());
+        var item = itemMapper.toEntity(dto, category);
         var savedItem = itemRepository.save(item);
         return itemMapper.toDto(savedItem);
     }
