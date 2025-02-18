@@ -5,6 +5,7 @@ import com.veeteq.documentmngr.model.CategoryType;
 import com.veeteq.documentmngr.model.Item;
 import com.veeteq.documentmngr.rest.dto.CategoryDto;
 import com.veeteq.documentmngr.rest.dto.ItemDto;
+import com.veeteq.documentmngr.rest.dto.ItemRequestDto;
 import com.veeteq.documentmngr.rest.dto.ItemsResponseDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,23 +55,25 @@ class ItemMapperTest {
     @Test
     public void test_ItemDto_To_ItemEntity() {
         // Arrange
-        CategoryDto categoryDto = new CategoryDto();
-        categoryDto.setCategoryId(1L);
-        categoryDto.setCategoryName("Test Category");
+        Category category = Category.builder()
+                .withId(1L)
+                .withName("Test Category")
+                .withCategoryType(CategoryType.Exp)
+                .build();
 
-        ItemDto itemDto = new ItemDto();
+        ItemRequestDto itemDto = new ItemRequestDto();
         itemDto.setItemId(1L);
         itemDto.setItemName("Test Item");
-        itemDto.setItemCategory(categoryDto);
+        itemDto.setCategoryId(3L);
 
         // Act
-        Item item = itemMapper.toEntity(itemDto);
+        Item item = itemMapper.toEntity(itemDto, category);
 
         // Assert
         assertEquals(itemDto.getItemId(), item.getId());
         assertEquals(itemDto.getItemName(), item.getName());
-        assertEquals(categoryDto.getCategoryId(), item.getCategory().getId());
-        assertEquals(categoryDto.getCategoryName(), item.getCategory().getName());
+        assertEquals(category.getId(), item.getCategory().getId());
+        assertEquals(category.getName(), item.getCategory().getName());
         assertEquals(3, item.getClass().getDeclaredFields().length);
     }
 
