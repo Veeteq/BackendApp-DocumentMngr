@@ -49,10 +49,11 @@ public class DocumentControllerTest extends BaseTest {
     @Test
     void testCreateDocument() throws Exception {
         DocumentRequestDto dto = new DocumentRequestDto()
-                .documentName("Home electricity")
-                .accountId(6L)
-                .documentDescription("Home electricity; January invoice")
                 .documentType(DocumentTypeDto.INVOICE)
+                .documentName("Home electricity")
+                .documentDescription("Home electricity; January invoice")
+                .invoiceNumber("EL/2025/01/ABCDE")
+                .accountId(6L)
                 .currencyCode("EUR")
                 .exchangeRate(BigDecimal.valueOf(1.1))
                 .date(LocalDate.of(2025, Month.JANUARY, 3))

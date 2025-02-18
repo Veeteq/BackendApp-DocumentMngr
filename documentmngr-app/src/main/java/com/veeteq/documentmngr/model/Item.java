@@ -1,5 +1,6 @@
 package com.veeteq.documentmngr.model;
 
+import com.veeteq.documentmngr.model.generator.CustomId;
 import jakarta.persistence.*;
 
 @Entity
@@ -7,6 +8,7 @@ import jakarta.persistence.*;
 public class Item {
 
     @Id
+    @CustomId
     @Column(name = "item_id")
     Long id;
 

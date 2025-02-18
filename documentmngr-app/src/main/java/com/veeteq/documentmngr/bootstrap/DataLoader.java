@@ -40,6 +40,7 @@ public class DataLoader implements CommandLineRunner {
         loadDocuments();
     }
 
+    @Transactional
     private void loadAccounts() {
         var list = List.of(
                 Account.builder().withId(nextId(ACCOUNT)).withName("ABC").build(),
@@ -95,6 +96,7 @@ public class DataLoader implements CommandLineRunner {
                 .withDocumentType(DocumentType.INVOICE)
                 .withDocumentName("Car insurance")
                 .withDocumentDescription("January invoice for Car Insurance, 1st installment")
+                .withInvoiceNumber("CAR/INS/2025/17900")
                 .withPaymentMethod(PaymentMethod.EFT)
                 .withAccount(accRef)
                 .withCurrencyCode(Currency.getInstance("PLN").getCurrencyCode())
