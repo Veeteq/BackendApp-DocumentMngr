@@ -70,7 +70,7 @@ public class AccountServiceTest {
         var entity = accountRepository.findById(savedAccountDto.getAccountId()).orElseThrow();
 
         assertNotNull(entity);
-        assertNotNull(dto.getAccountId());
+        assertNotNull(entity.getId());
         assertEquals(dto.getAccountName(), entity.getName());
         assertEquals(dto.getAccountDescription(), entity.getDescription());
         assertEquals(dto.getAccountCurrency(), entity.getCurrency().getCurrencyCode());

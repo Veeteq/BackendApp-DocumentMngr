@@ -1,9 +1,7 @@
 package com.veeteq.documentmngr.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.veeteq.documentmngr.model.generator.CustomId;
+import jakarta.persistence.*;
 
 import java.util.Currency;
 
@@ -12,6 +10,7 @@ import java.util.Currency;
 public class Account {
 
     @Id
+    @CustomId
     @Column(name = "user_id")
     private Long id;
 

@@ -6,6 +6,7 @@ import com.veeteq.documentmngr.repository.EntityIdMapping;
 import com.veeteq.documentmngr.rest.dto.AccountDto;
 import com.veeteq.documentmngr.repository.AccountRepository;
 import com.veeteq.documentmngr.service.AccountService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,13 +39,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @Transactional
     public AccountDto saveAccount(AccountDto dto) {
-        if (dto.getAccountId() == null) {
-            dto.setAccountId(utilityRepository.getNextId(EntityIdMapping.ACCOUNT));
-        }
         var account = accountMapper.toEntity(dto);
-        account = accountRepository.save(account);
-        return accountMapper.toDto(account);
+        var savedAccount = accountRepository.save(account);
+        return accountMapper.toDto(savedAccount);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.veeteq.documentmngr.model;
 
+import com.veeteq.documentmngr.model.generator.CustomId;
 import com.veeteq.documentmngr.repository.UtilityRepository;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -19,12 +20,7 @@ import java.util.List;
 public class Document {
 
     @Id
-    /*@GeneratedValue(generator = "doc-generator")
-    @GenericGenerator(name = "doc-generator",
-                      parameters = {@Parameter(name = "prefix", value = "prod")},
-                      strategy = "com.veeteq.documentmngr.model.generator.DocumentIdGenerator")*/
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "docu_seq")
-    @SequenceGenerator(name = "docu_seq", allocationSize = 1)
+    @CustomId
     @Column(name = "docu_id")
     private Long id;
 
