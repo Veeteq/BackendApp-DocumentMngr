@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.Currency;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 @Entity
 @Table(name = "documents", uniqueConstraints = @UniqueConstraint(columnNames = "docu_id"))
@@ -291,17 +292,11 @@ public class Document {
         public Document build() {
             if (entity.documentType == DocumentType.TRANSFER) {
                 entity.documentName = DocumentType.TRANSFER.name();
-                var targetAmount = calculateTargetAmount(transferAmount, entity.exchangeRate);
-                entity.documentDescription = MessageFormat.format("Transfer of {0} {1} from {2} to {3} {4} {5}", transferAmount, entity.account.getCurrency(), entity.account.getName(), targetAmount, entity.getCurrency(), targetAccount.getName());
+                entity.documentDescription = createTransferDescription(transferAmount, entity.account, targetAccount);
                 return buildTransfer();
             }
             entity.version = 0;
             return entity;
-        }
-
-        private BigDecimal calculateTargetAmount(BigDecimal transferAmount, BigDecimal exchangeRate) {
-            var a = transferAmount.divide(entity.exchangeRate, MathContext.DECIMAL32);
-            return a.setScale(2, RoundingMode.HALF_UP);
         }
 
         private Document buildTransfer() {
@@ -344,6 +339,20 @@ public class Document {
 
             return entity;
         }
+
+        private BigDecimal calculateTargetAmount(BigDecimal transferAmount, BigDecimal exchangeRate) {
+            var a = transferAmount.divide(entity.exchangeRate, MathContext.DECIMAL32);
+            return a.setScale(2, RoundingMode.HALF_UP);
+        }
+
+        private String createTransferDescription(BigDecimal transferAmount, Account sourceAccount, Account targetAccount) {
+            var messageFormat = new MessageFormat("Transfer of {0} {1} from {2} to {3} {4} {5}", new Locale("pl", "PL"));
+
+            var targetAmount = calculateTargetAmount(transferAmount, entity.exchangeRate);
+            var args = new Object[]{transferAmount, sourceAccount.getCurrency(), sourceAccount.getName(), targetAmount, entity.getCurrency(), targetAccount.getName()};
+            return messageFormat.format(args);
+        }
+
     }
 
 }
