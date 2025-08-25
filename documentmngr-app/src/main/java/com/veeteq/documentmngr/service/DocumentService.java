@@ -8,9 +8,11 @@ import java.util.Optional;
 
 public interface DocumentService {
 
-    DocumentResponseDto createDocument(DocumentRequestDto documentRequestDto);
+    DocumentResponseDto createDocument(DocumentRequestDto documentDto);
 
     Optional<DocumentResponseDto> getDocumentById(Long id);
 
     List<DocumentResponseDto> listDocuments();
+
+    Optional<DocumentResponseDto> updateDocument(Long id, DocumentRequestDto dto);
 }

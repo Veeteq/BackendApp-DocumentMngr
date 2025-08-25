@@ -12,4 +12,6 @@ public interface AccountService {
     Optional<AccountDto> getAccountById(Long id);
 
     AccountDto saveAccount(AccountDto dto);
+
+    Optional<AccountDto> updateAccount(Long id, AccountDto dto);
 }

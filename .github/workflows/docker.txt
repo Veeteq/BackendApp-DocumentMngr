@@ -1,4 +1,4 @@
-In case a deploy to Docker hub is required
+In case doc deploy to Docker hub is required
 https://www.techbasicsexplained.com/2024/08/setting-up-cicd-for-your-spring-boot.html
 
 name: Build & Deploy CRM Spring app

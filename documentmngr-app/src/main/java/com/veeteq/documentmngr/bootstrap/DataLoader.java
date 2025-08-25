@@ -43,16 +43,16 @@ public class DataLoader implements CommandLineRunner {
     @Transactional
     private void loadAccounts() {
         var list = List.of(
-                Account.builder().withId(nextId(ACCOUNT)).withName("ABC").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("BCD").withDescription("BCD Description").withCurrency(Currency.getInstance("EUR")).withImageUrl("https://image.com/logo.png").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("CDE").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("DEF").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("EFG").withDescription("EFG Description").withCurrency(Currency.getInstance("GBP")).withImageUrl("https://image.com/logo.png").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("FGH").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("GHI").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("HIJ").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("IJK").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("JKL").build()
+                Account.builder().withId(nextId(ACCOUNT)).withName("ABC").withDescription("ABC Description").withCurrency(Currency.getInstance("PLN")).withImageUrl("https://image.com/abc.png").build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("BCD").withDescription("BCD Description").withCurrency(Currency.getInstance("EUR")).withImageUrl("https://image.com/bcd.png").build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("CDE").withDescription("CDE Description").withCurrency(Currency.getInstance("CZK")).withImageUrl("https://image.com/cde.png").build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("DEF").withDescription("DEF Description").withCurrency(Currency.getInstance("USD")).withImageUrl("https://image.com/def.png").build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("EFG").withDescription("EFG Description").withCurrency(Currency.getInstance("GBP")).withImageUrl("https://image.com/efg.png").build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("FGH").withDescription("FGH Description").withCurrency(Currency.getInstance("HRK")).withImageUrl("https://image.com/fgh.png").build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("GHI").withDescription("GHI Description").withCurrency(Currency.getInstance("HUF")).withImageUrl("https://image.com/ghi.png").build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("HIJ").withDescription("HIJ Description").withCurrency(Currency.getInstance("BAM")).withImageUrl("https://image.com/hij.png").build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("IJK").withDescription("IJK Description").withCurrency(Currency.getInstance("RON")).withImageUrl("https://image.com/ijk.png").build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("JKL").withDescription("JKL Description").withCurrency(Currency.getInstance("CAD")).withImageUrl("https://image.com/jkl.png").build()
         );
         accountRepository.saveAll(list);
     }
@@ -67,6 +67,8 @@ public class DataLoader implements CommandLineRunner {
         );
 
         var list = List.of(
+                Item.builder().withId(0L).withName("TRANSFER").withCategory(categories.get(5L)).build(),
+
                 Item.builder().withId(nextId(ITEM)).withName("Item_01").withCategory(categories.get(1L)).build(),
                 Item.builder().withId(nextId(ITEM)).withName("Item_02").withCategory(categories.get(2L)).build(),
                 Item.builder().withId(nextId(ITEM)).withName("Item_03").withCategory(categories.get(3L)).build(),
@@ -91,7 +93,6 @@ public class DataLoader implements CommandLineRunner {
     private Document createExpense() {
         var accRef = accountRepository.getReferenceById(3L);
         var document = Document.builder()
-                .withRepository(utilityRepository)
                 .withDocumentDate(LocalDate.now())
                 .withDocumentType(DocumentType.INVOICE)
                 .withDocumentName("Car insurance")
@@ -118,7 +119,6 @@ public class DataLoader implements CommandLineRunner {
     @Transactional
     private Document createTransfer() {
         var document = Document.builder()
-                .withRepository(utilityRepository)
                 .withDocumentDate(LocalDate.now().minusDays(1))
                 .withDocumentType(DocumentType.TRANSFER)
                 .withPaymentMethod(PaymentMethod.EFT)

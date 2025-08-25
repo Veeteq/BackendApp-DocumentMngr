@@ -22,9 +22,9 @@ public class Item {
     public Item() {}
 
     public Item(Builder builder) {
-        this.id = builder.id;
-        this.name = builder.name;
-        this.category = builder.category;
+        this.id = builder.entity.id;
+        this.name = builder.entity.name;
+        this.category = builder.entity.category;
     }
 
     public Long getId() {
@@ -43,30 +43,38 @@ public class Item {
         return new Builder();
     }
 
-    public static class Builder {
-        private Long id;
-        private String name;
-        private Category category;
+    public static Builder updater(Item item) {
+        return new Builder(item);
+    }
 
-        private Builder() {}
+    public static class Builder {
+        private final Item entity;
+
+        private Builder() {
+            entity = new Item();
+        }
+
+        private Builder(Item item) {
+            entity = item;
+        }
 
         public Builder withId(Long id) {
-            this.id = id;
+            entity.id = id;
             return this;
         }
 
         public Builder withName(String name) {
-            this.name = name;
+            entity.name = name;
             return this;
         }
 
         public Builder withCategory(Category category) {
-            this.category = category;
+            entity.category = category;
             return this;
         }
 
         public Item build() {
-            return new Item(this);
+            return entity;
         }
     }
 

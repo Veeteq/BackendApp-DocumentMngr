@@ -1,7 +1,9 @@
 package com.veeteq.documentmngr.mapper;
 
+import com.veeteq.documentmngr.model.Account;
 import com.veeteq.documentmngr.model.Document;
-import com.veeteq.documentmngr.repository.AccountRepository;
+import com.veeteq.documentmngr.model.DocumentType;
+import com.veeteq.documentmngr.model.Item;
 import com.veeteq.documentmngr.repository.ItemRepository;
 import com.veeteq.documentmngr.rest.dto.DocumentRequestDto;
 import com.veeteq.documentmngr.rest.dto.DocumentResponseDto;
@@ -28,8 +30,8 @@ public abstract class DocumentMapperDecorator implements DocumentMapper {
     }
 
     @Override
-    public Document toEntity(DocumentRequestDto dto, AccountRepository accountRepository) {
-        var entity = documentMapper.toEntity(dto, accountRepository);
+    public Document toEntity(DocumentRequestDto dto, Account account) {
+        var entity = documentMapper.toEntity(dto, account);
         after(dto, entity);
         return entity;
     }
@@ -40,4 +42,49 @@ public abstract class DocumentMapperDecorator implements DocumentMapper {
                 .map(itemDto -> documentItemMapper.toEntity(itemDto, entity, itemRepository))
                 .forEach(entity::addToDocumentItems);
     }
+
+    @Override
+    public Document updateWith(Document entity, DocumentRequestDto dto, Account account) {
+        var document = Document.builder(entity)
+                .withDocumentDate(dto.getDocumentDate())
+                .withDocumentType(DocumentType.valueOf(dto.getDocumentType().name()))
+                .withDocumentName(dto.getDocumentName())
+                .withDocumentDescription(dto.getDocumentDescription())
+                .withInvoiceNumber(dto.getInvoiceNumber())
+                .withAccount(account)
+                .withCounterpartyId(dto.getCounterpartyId())
+                .withPaymentMethod(dto.getPaymentMethod())
+                .withCurrencyCode(dto.getCurrencyCode())
+                .withExchangeRate(dto.getExchangeRate())
+                .withVersion(dto.getVersion())
+                .build();
+        after(dto, document);
+        return document;
+    }
+
+    @Override
+    public Document updateWith(Document entity, DocumentRequestDto dto, Account sourceAccount, Account targetAccount, Item transferItem) {
+        var document = Document.builder(entity)
+                .withDocumentDate(dto.getDocumentDate())
+                .withDocumentType(DocumentType.valueOf(dto.getDocumentType().name()))
+                .withAccount(sourceAccount)
+                .withTargetAccount(targetAccount)
+                .withTransferAmount(dto.getTransferAmount())
+                .withTransferItem(transferItem)
+                .withPaymentMethod(dto.getPaymentMethod())
+                .withCurrencyCode(dto.getCurrencyCode())
+                .withExchangeRate(dto.getExchangeRate())
+                .withVersion(dto.getVersion())
+                .build();
+        after(dto, document);
+        return document;
+    }
+/*
+    @AfterMapping
+    public void after(DocumentRequestDto dto, @MappingTarget Document entity) {
+        dto.getDocumentItems().stream()
+                .map(itemDto -> documentItemMapper.toEntity(itemDto, entity, itemRepository))
+                .forEach(entity::addToDocumentItems);
+    }
+*/
 }

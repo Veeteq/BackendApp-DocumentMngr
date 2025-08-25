@@ -1,0 +1,208 @@
+package com.veeteq.documentmngr.poc;
+
+import com.veeteq.documentmngr.model.DocumentType;
+import com.veeteq.documentmngr.model.PaymentMethod;
+import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Currency;
+import java.util.LinkedList;
+import java.util.List;
+
+@Entity
+@Table(name = "docs", uniqueConstraints = @UniqueConstraint(columnNames = "docu_id"))
+public class Doc {
+
+    @Id
+    @Column(name = "docu_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "doc_generator")
+    @SequenceGenerator(name = "doc_generator", sequenceName = "doc_seq", allocationSize = 1)
+    private Long id;
+
+    @Column(name = "docu_dt", nullable = false)
+    @DateTimeFormat(pattern = "yyyy-mm-dd")
+    private LocalDate documentDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="docu_type_tx", nullable = false)
+    private DocumentType documentType;
+
+    @Column(name="docu_name_tx")
+    private String documentName;
+
+    @Column(name="docu_desc_tx")
+    private String documentDescription;
+
+    @Column(name="invo_numb_tx")
+    private String invoiceNumber;
+
+    @Column(name="cprt_id")
+    private Long counterpartyId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "paym_meth_tx", length = 15)
+    private PaymentMethod paymentMethod;
+
+    @Column(name="curr_cd")
+    private Currency currency;
+
+    @Column(name="curr_exch_am")
+    private BigDecimal exchangeRate;
+
+    @OneToMany(mappedBy = "doc", cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<DocItem> docItems = new LinkedList<>();
+
+    @CreationTimestamp
+    @Column(name = "crea_dt", nullable = false, updatable = false)
+    private LocalDateTime createDateTime;
+
+    @UpdateTimestamp
+    @Column(name = "updt_dt", nullable = false, updatable = true)
+    private LocalDateTime updateDateTime;
+
+    @Version
+    @Column(name = "vers_nm")
+    private Integer version;
+
+    public Doc addToDocItems(DocItem docItem) {
+        var docItemId = new DocItemId(this.id, this.docItems.size() + 1);
+        docItem.setId(docItemId);
+        docItem.setDoc(this);
+        docItems.add(docItem);
+        return this;
+    }
+
+    public void clearDocItems() {
+        for (var docItem : docItems) {
+            docItem.setDoc(null);
+        }
+        this.docItems.clear();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Doc setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    public LocalDate getDocumentDate() {
+        return documentDate;
+    }
+
+    public Doc setDocumentDate(LocalDate documentDate) {
+        this.documentDate = documentDate;
+        return this;
+    }
+
+    public DocumentType getDocumentType() {
+        return documentType;
+    }
+
+    public Doc setDocumentType(DocumentType documentType) {
+        this.documentType = documentType;
+        return this;
+    }
+
+    public String getDocumentName() {
+        return documentName;
+    }
+
+    public Doc setDocumentName(String documentName) {
+        this.documentName = documentName;
+        return this;
+    }
+
+    public String getDocumentDescription() {
+        return documentDescription;
+    }
+
+    public Doc setDocumentDescription(String documentDescription) {
+        this.documentDescription = documentDescription;
+        return this;
+    }
+
+    public String getInvoiceNumber() {
+        return invoiceNumber;
+    }
+
+    public Doc setInvoiceNumber(String invoiceNumber) {
+        this.invoiceNumber = invoiceNumber;
+        return this;
+    }
+
+    public Long getCounterpartyId() {
+        return counterpartyId;
+    }
+
+    public Doc setCounterpartyId(Long counterpartyId) {
+        this.counterpartyId = counterpartyId;
+        return this;
+    }
+
+    public PaymentMethod getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public Doc setPaymentMethod(PaymentMethod paymentMethod) {
+        this.paymentMethod = paymentMethod;
+        return this;
+    }
+
+    public Currency getCurrency() {
+        return currency;
+    }
+
+    public Doc setCurrency(Currency currency) {
+        this.currency = currency;
+        return this;
+    }
+
+    public BigDecimal getExchangeRate() {
+        return exchangeRate;
+    }
+
+    public Doc setExchangeRate(BigDecimal exchangeRate) {
+        this.exchangeRate = exchangeRate;
+        return this;
+    }
+
+    public List<DocItem> getDocItems() {
+        return docItems;
+    }
+
+    public LocalDateTime getCreateDateTime() {
+        return createDateTime;
+    }
+
+    public Doc setCreateDateTime(LocalDateTime createDateTime) {
+        this.createDateTime = createDateTime;
+        return this;
+    }
+
+    public LocalDateTime getUpdateDateTime() {
+        return updateDateTime;
+    }
+
+    public Doc setUpdateDateTime(LocalDateTime updateDateTime) {
+        this.updateDateTime = updateDateTime;
+        return this;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public Doc setVersion(Integer version) {
+        this.version = version;
+        return this;
+    }
+    
+}

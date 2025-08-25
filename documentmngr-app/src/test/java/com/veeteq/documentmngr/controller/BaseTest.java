@@ -22,7 +22,7 @@ public class BaseTest {
     private AccountRepository accountRepository;
 
     @Autowired
-    private DocumentRepository documentRepository;
+    protected DocumentRepository documentRepository;
 
     @Autowired
     protected ObjectMapper objectMapper;
@@ -41,6 +41,6 @@ public class BaseTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
         item = itemRepository.findById(3L).get();
         account = accountRepository.findById(1L).get();
-        document = documentRepository.findById(2L).get();
+        document = documentRepository.findById(1L).get();
     }
 }

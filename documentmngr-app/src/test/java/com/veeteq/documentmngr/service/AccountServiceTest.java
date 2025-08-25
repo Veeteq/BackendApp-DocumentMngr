@@ -1,6 +1,7 @@
 package com.veeteq.documentmngr.service;
 
 import com.veeteq.documentmngr.DocumentMngrApp;
+import com.veeteq.documentmngr.model.Account;
 import com.veeteq.documentmngr.repository.AccountRepository;
 import com.veeteq.documentmngr.rest.dto.AccountDto;
 import org.junit.jupiter.api.DisplayName;
@@ -42,7 +43,7 @@ public class AccountServiceTest {
         assertEquals("EFG", savedAccountDto.getAccountName());
         assertEquals("EFG Description", savedAccountDto.getAccountDescription());
         assertEquals("GBP", savedAccountDto.getAccountCurrency());
-        assertEquals("https://image.com/logo.png", savedAccountDto.getAccountImageUrl());
+        assertEquals("https://image.com/efg.png", savedAccountDto.getAccountImageUrl());
     }
 
     @DisplayName("Test Save Account - With Id")
@@ -75,6 +76,20 @@ public class AccountServiceTest {
         assertEquals(dto.getAccountDescription(), entity.getDescription());
         assertEquals(dto.getAccountCurrency(), entity.getCurrency().getCurrencyCode());
         assertEquals(dto.getAccountImageUrl(), entity.getImageUrl());
+    }
+
+    @DisplayName("Test Update Account")
+    @Test
+    void updateAccount() {
+        var account = accountRepository.findById(7L).orElseThrow();
+
+        var updatedAccount = Account.updater(account)
+                .withName("Updated Account Name")
+                .build();
+        var saved = accountRepository.save(updatedAccount);
+        System.out.println(saved.getId());
+        System.out.println(saved.getName());
+        System.out.println(saved.getDescription());
     }
 
     private AccountDto createAccountDto_WithId() {

@@ -1,10 +1,9 @@
 package com.veeteq.documentmngr.service.jpa;
 
 import com.veeteq.documentmngr.mapper.AccountMapper;
-import com.veeteq.documentmngr.repository.UtilityRepository;
-import com.veeteq.documentmngr.repository.EntityIdMapping;
-import com.veeteq.documentmngr.rest.dto.AccountDto;
 import com.veeteq.documentmngr.repository.AccountRepository;
+import com.veeteq.documentmngr.repository.UtilityRepository;
+import com.veeteq.documentmngr.rest.dto.AccountDto;
 import com.veeteq.documentmngr.service.AccountService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -46,4 +45,14 @@ public class AccountServiceImpl implements AccountService {
         return accountMapper.toDto(savedAccount);
     }
 
+    @Transactional
+    @Override
+    public Optional<AccountDto> updateAccount(Long id, AccountDto dto) {
+        return accountRepository.findById(id)
+                .map(account -> {
+                    var updated = accountMapper.updateWith(dto, account);
+                    var savedAccount = accountRepository.save(updated);
+                    return accountMapper.toDto(savedAccount);
+                });
+    }
 }
