@@ -71,8 +71,8 @@
                         </goals>
                         <configuration>
                             <skipValidateSpec>true</skipValidateSpec>
-<!--                            <inputSpec>https://veeteq.github.io/OpenAPI-DocumentMngr/openapi.yaml</inputSpec>-->
-                            <inputSpec>http://127.0.0.1:8181/openapi.json</inputSpec>
+                            <inputSpec>https://veeteq.github.io/OpenAPI-DocumentMngr/openapi.yaml</inputSpec>
+<!--                            <inputSpec>http://127.0.0.1:8181/openapi.json</inputSpec>-->
                             <generatorName>spring</generatorName>
                             <library>spring-boot</library>
                             <apiPackage>${default.package}.rest.api</apiPackage>
@@ -83,8 +83,10 @@
                                 <delegatePattern>false</delegatePattern>
                                 <openApiNullable>false</openApiNullable>
                                 <interfaceOnly>true</interfaceOnly>                <!-- Generate only interfaces -->
-                                <generateAliasAsModel>false</generateAliasAsModel> <!-- Avoid generating aliases as models -->
-                                <skipDefaultInterface>true</skipDefaultInterface>  <!-- Skip default method implementations -->
+                                <generateAliasAsModel>false
+                                </generateAliasAsModel> <!-- Avoid generating aliases as models -->
+                                <skipDefaultInterface>true
+                                </skipDefaultInterface>  <!-- Skip default method implementations -->
                                 <hideGenerationTimestamp>true</hideGenerationTimestamp>
                                 <useJakartaEe>true</useJakartaEe>
                                 <useBeanValidation>true</useBeanValidation>
