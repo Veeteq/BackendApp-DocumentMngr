@@ -21,4 +21,6 @@ public interface ItemService {
     Optional<ItemDto> getItemById(Long id);
 
     ItemDto save(ItemRequestDto dto);
+
+    Optional<ItemDto> updateItem(Long id, ItemRequestDto dto);
 }

@@ -1,13 +1,9 @@
 package com.veeteq.documentmngr.mapper;
 
-import com.veeteq.documentmngr.model.Document;
-import com.veeteq.documentmngr.model.DocumentItemType;
-import com.veeteq.documentmngr.model.DocumentType;
+import com.veeteq.documentmngr.model.*;
 import com.veeteq.documentmngr.repository.AccountRepository;
-import com.veeteq.documentmngr.rest.dto.DocumentItemRequestDto;
-import com.veeteq.documentmngr.rest.dto.DocumentRequestDto;
-import com.veeteq.documentmngr.rest.dto.DocumentResponseDto;
-import com.veeteq.documentmngr.rest.dto.DocumentTypeDto;
+import com.veeteq.documentmngr.rest.dto.*;
+import com.veeteq.documentmngr.rest.dto.DocumentItemRequestDto.ItemTypeEnum;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,6 +12,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -49,19 +46,20 @@ class DocumentMapperTest {
         assertEquals(document.getAccount().getId(), dto.getAccount().getAccountId());
         assertEquals(document.getAccount().getName(), dto.getAccount().getAccountName());
 
-        assertEquals(17, dto.getClass().getDeclaredFields().length);
+        assertEquals(18, dto.getClass().getDeclaredFields().length);
     }
 
     @Test
     void toEntity() {
         //given
-        DocumentRequestDto dto = createDocumentRequestDto();
+        var dto = createDocumentRequestDto();
+        var sourceAccount = accountRepository.findById(dto.getAccountId()).orElseThrow();
 
         //when
-        Document document = documentMapper.toEntity(dto, accountRepository);
+        Document document = documentMapper.toEntity(dto, sourceAccount);
 
         //then
-        assertEquals(dto.getDate(), document.getDocumentDate());
+        assertEquals(dto.getDocumentDate(), document.getDocumentDate());
         assertEquals(dto.getDocumentType().name(), document.getDocumentType().name());
         assertEquals(dto.getDocumentName(), document.getDocumentName());
         assertEquals(dto.getDocumentDescription(), document.getDocumentDescription());
@@ -84,9 +82,9 @@ class DocumentMapperTest {
         assertEquals("Payment for: Home electricity", documentItem.getExpense().getComment());
 
         assertNotNull(documentItem.getExpense().getAccount());
-        var account = documentItem.getExpense().getAccount();
-        assertEquals(dto.getAccountId(), account.getId());
-        assertEquals("FGH", account.getName());
+        var targetAccount = documentItem.getExpense().getAccount();
+        assertEquals(dto.getAccountId(), targetAccount.getId());
+        assertEquals("FGH", targetAccount.getName());
 
         assertNotNull(documentItem.getExpense().getItem());
         var item = documentItem.getExpense().getItem();
@@ -94,6 +92,69 @@ class DocumentMapperTest {
         assertEquals("Item_05", item.getName());
 
         assertEquals(15, document.getClass().getDeclaredFields().length);
+    }
+
+    @Test
+    void toTransferEntity() {
+        // Given
+        var transferDto = createTransferRequestDto();
+        Account sourceAccount = accountRepository.findById(transferDto.getAccountId()).orElseThrow();
+        Account targetAccount = accountRepository.findById(transferDto.getTargetAccountId()).orElseThrow();
+        Item trnasferItem = null;
+        // When
+        Document document = documentMapper.toEntity(transferDto, sourceAccount, targetAccount, trnasferItem);
+
+        // Then
+        assertEquals(transferDto.getDocumentDate(),        document.getDocumentDate());
+        assertEquals(transferDto.getDocumentType().name(), document.getDocumentType().name());
+        assertEquals(sourceAccount.getId(),                document.getAccount().getId());
+        assertEquals(2,                           document.getDocumentItems().size());
+        assertNotNull(document.getDocumentItems().stream().filter(di -> di.getType().equals(DocumentItemType.EXP)));
+        assertNotNull(document.getDocumentItems().stream().filter(di -> di.getType().equals(DocumentItemType.INC)));
+    }
+
+    @Test
+    void testUpdateDocument() {
+        Document entity = createDocument();
+        var dto = createDocumentPutRequestDto();
+        Account account = accountRepository.findById(dto.getAccountId()).orElseThrow();
+        var updated = documentMapper.updateWith(entity, dto, account);
+
+        //then
+        assertNotNull(updated);
+        assertEquals(dto.getDocumentDate(), updated.getDocumentDate());
+        assertEquals(dto.getDocumentType().name(), updated.getDocumentType().name());
+        assertEquals(dto.getDocumentName(), updated.getDocumentName());
+        assertEquals(dto.getDocumentDescription(), updated.getDocumentDescription());
+        assertEquals(dto.getInvoiceNumber(), updated.getInvoiceNumber());
+        assertEquals(dto.getCounterpartyId(), updated.getCounterpartyId());
+        assertEquals(dto.getPaymentMethod(), updated.getPaymentMethod().name());
+        assertEquals(dto.getCurrencyCode(), updated.getCurrency().getCurrencyCode());
+        assertEquals(dto.getExchangeRate(), updated.getExchangeRate());
+
+        assertNotNull(updated.getAccount());
+        assertEquals(dto.getAccountId(), updated.getAccount().getId());
+
+        assertTrue(updated.getDocumentItems().size() > 0);
+        var documentItem = updated.getDocumentItems().get(0);
+        assertEquals(DocumentItemType.EXP, documentItem.getType());
+        assertNull(documentItem.getIncome());
+        assertNotNull(documentItem.getExpense());
+        assertEquals(BigDecimal.valueOf(1), documentItem.getExpense().getCount());
+        assertEquals(BigDecimal.valueOf(199.99), documentItem.getExpense().getPrice());
+        assertEquals("Payment for: Home electricity", documentItem.getExpense().getComment());
+
+        assertNotNull(documentItem.getExpense().getAccount());
+        var targetAccount = documentItem.getExpense().getAccount();
+        assertEquals(dto.getAccountId(), targetAccount.getId());
+        assertEquals("FGH", targetAccount.getName());
+
+        assertNotNull(documentItem.getExpense().getItem());
+        var item = documentItem.getExpense().getItem();
+        assertEquals(5L, item.getId());
+        assertEquals("Item_05", item.getName());
+
+        assertEquals(15, updated.getClass().getDeclaredFields().length);
     }
 
     private Document createDocument() {
@@ -113,18 +174,18 @@ class DocumentMapperTest {
     }
 
     private DocumentRequestDto createDocumentRequestDto() {
-        DocumentRequestDto dto = new DocumentRequestDto()
+        var dto = new DocumentRequestDto()
                 .documentName("Home electricity")
                 .accountId(6L)
                 .documentDescription("Home electricity; January invoice")
                 .documentType(DocumentTypeDto.INVOICE)
                 .currencyCode("EUR")
                 .exchangeRate(BigDecimal.valueOf(1.1))
-                .date(LocalDate.of(2025, Month.JANUARY, 3))
+                .documentDate(LocalDate.of(2025, Month.JANUARY, 3))
                 .invoiceNumber("EL/2025/JAN/13579")
                 .paymentMethod("EFT")
                 .documentItems(List.of(new DocumentItemRequestDto()
-                        .itemType("EXP")
+                        .itemType(ItemTypeEnum.EXP)
                         .itemId(5L)
                         .itemName("Item_05")
                         .itemQuantity(BigDecimal.ONE)
@@ -134,7 +195,37 @@ class DocumentMapperTest {
     }
 
     private DocumentRequestDto createTransferRequestDto() {
-        DocumentRequestDto dto = new DocumentRequestDto();
+        var dto = new DocumentRequestDto()
+                .documentDate(LocalDate.of(2025, Month.JANUARY, 23))
+                .documentType(DocumentTypeDto.TRANSFER)
+                .paymentMethod("EFT")
+                .accountId(6L)
+                .targetAccountId(7L)
+                .transferAmount(BigDecimal.valueOf(99.99))
+                .currencyCode("EUR")
+                .exchangeRate(BigDecimal.valueOf(1.1));
+        return dto;
+    }
+
+    private DocumentRequestDto createDocumentPutRequestDto() {
+        var dto = new DocumentRequestDto()
+                .documentName("Home electricity")
+                .accountId(6L)
+                .documentDescription("Home electricity; January invoice")
+                .documentType(DocumentTypeDto.INVOICE)
+                .currencyCode("EUR")
+                .exchangeRate(BigDecimal.valueOf(1.1))
+                .documentDate(LocalDate.of(2025, Month.JANUARY, 3))
+                .invoiceNumber("EL/2025/JAN/13579")
+                .paymentMethod("EFT")
+                .documentItems(List.of(new DocumentItemRequestDto()
+                        .seqId(BigDecimal.valueOf(1))
+                        .itemType(DocumentItemRequestDto.ItemTypeEnum.EXP)
+                        .itemId(5L)
+                        .itemName("Item_05")
+                        .itemQuantity(BigDecimal.ONE)
+                        .itemPrice(BigDecimal.valueOf(199.99))
+                        .itemDescription("Payment for: Home electricity")));
         return dto;
     }
 }

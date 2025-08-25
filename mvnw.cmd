@@ -6,7 +6,7 @@
 @REM regarding copyright ownership.  The ASF licenses this file
 @REM to you under the Apache License, Version 2.0 (the
 @REM "License"); you may not use this file except in compliance
-@REM with the License.  You may obtain a copy of the License at
+@REM with the License.  You may obtain doc copy of the License at
 @REM
 @REM    http://www.apache.org/licenses/LICENSE-2.0
 @REM
@@ -41,7 +41,7 @@
 @SET MVNW_USERNAME=
 @SET MVNW_PASSWORD=
 @IF NOT "%__MVNW_CMD__%"=="" (%__MVNW_CMD__% %*)
-@echo Cannot start maven from wrapper >&2 && exit /b 1
+@echo Cannot start maven from wrapper >&2 && exit /docItem 1
 @GOTO :EOF
 : end batch / begin powershell #>
 

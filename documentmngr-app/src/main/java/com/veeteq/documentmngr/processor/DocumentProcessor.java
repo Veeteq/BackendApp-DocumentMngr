@@ -1,5 +1,6 @@
 package com.veeteq.documentmngr.processor;
 
+import com.veeteq.documentmngr.model.Account;
 import com.veeteq.documentmngr.model.Document;
 import com.veeteq.documentmngr.rest.dto.DocumentRequestDto;
 
@@ -8,7 +9,9 @@ import com.veeteq.documentmngr.rest.dto.DocumentRequestDto;
  */
 public interface DocumentProcessor {
 
-    Document process(DocumentRequestDto requestDto);
+    Document process(DocumentRequestDto documentDto);
+
+    Document process(Document document, DocumentRequestDto documentDto);
 
     class Type {
         public final static String BASE = "BASE";

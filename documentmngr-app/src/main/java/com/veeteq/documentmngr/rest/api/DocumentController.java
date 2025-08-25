@@ -15,6 +15,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 
 import static com.veeteq.documentmngr.rest.api.DocumentController.BASE_URL;
 
@@ -22,8 +23,10 @@ import static com.veeteq.documentmngr.rest.api.DocumentController.BASE_URL;
 @RequestMapping(path = BASE_URL)
 @CrossOrigin(origins = {"http://localhost:4200", "*"})
 public class DocumentController implements DocumentApi {
-    public static final String BASE_URL = "/api";
+    public final static String BASE_URL = "/api";
+
     private final static Logger LOGGER = LoggerFactory.getLogger(DocumentController.class);
+    private final static String TRANSACTION_ID = "Transaction-Id";
 
     private final DocumentService documentService;
 
@@ -32,9 +35,10 @@ public class DocumentController implements DocumentApi {
     }
 
     @Override
-    public ResponseEntity<Void> createDocument(Long cookieParam, DocumentRequestDto documentRequestDto, String acceptLanguage) {
-        LOGGER.info("Request to create document: {}. TransactionID: {}", documentRequestDto, acceptLanguage);
-        var document = documentService.createDocument(documentRequestDto);
+    public ResponseEntity<Void> createDocument(UUID transactionId, DocumentRequestDto dto, String acceptLanguage) {
+        LOGGER.info("Request received to create document: {}. TransactionID: {}", dto, transactionId);
+
+        var document = documentService.createDocument(dto);
 
         // Build the URI for the newly created account
         URI location = ServletUriComponentsBuilder
@@ -44,7 +48,7 @@ public class DocumentController implements DocumentApi {
                 .toUri();
 
         var headers = new HttpHeaders();
-        //headers.set(TRANSACTION_ID, transactionId.toString());
+        headers.set(TRANSACTION_ID, transactionId.toString());
 
         // Return the response with status 201 Created and set the Location header
         return ResponseEntity.created(location)
@@ -54,10 +58,12 @@ public class DocumentController implements DocumentApi {
 
     @Override
     @Transactional
-    public ResponseEntity<DocumentResponseDto> getDocumentById(Long id) {
+    public ResponseEntity<DocumentResponseDto> getDocumentById(UUID transactionId, Long id) {
         LOGGER.info("Request to get single document by its id: {}.", id);
 
         var headers = new HttpHeaders();
+        headers.set(TRANSACTION_ID, transactionId.toString());
+
         var response = documentService.getDocumentById(id)
                 .map(itemDto -> ResponseEntity.ok()
                         .headers(headers)
@@ -69,8 +75,34 @@ public class DocumentController implements DocumentApi {
     }
 
     @Override
-    public ResponseEntity<List<DocumentResponseDto>> listDocuments(Long cookieParam, String acceptLanguage) {
+    public ResponseEntity<List<DocumentResponseDto>> listDocuments(UUID transactionId, String acceptLanguage) {
+        LOGGER.info("Request received to list all documents. TransactionID: {}", transactionId);
+
+        var headers = new HttpHeaders();
+        headers.set(TRANSACTION_ID, transactionId.toString());
+
         var dtos = documentService.listDocuments();
-        return ResponseEntity.ok(dtos);
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .body(dtos);
+    }
+
+    @Override
+    public ResponseEntity<DocumentResponseDto> updateDocument(UUID transactionId, Long id, DocumentRequestDto dto) {
+        LOGGER.info("Request received to update document with ID: {}. TransactionID: {}", id, transactionId);
+
+        var headers = new HttpHeaders();
+        headers.set(TRANSACTION_ID, transactionId.toString());
+
+        var updated = documentService.updateDocument(id, dto)
+                .map(documentDto -> ResponseEntity.ok()
+                        .headers(headers)
+                        .body(documentDto))
+                .orElse(ResponseEntity.notFound()
+                        .headers(headers)
+                        .build());
+
+        return updated;
     }
 }

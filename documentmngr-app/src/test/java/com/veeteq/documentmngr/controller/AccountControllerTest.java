@@ -2,6 +2,7 @@ package com.veeteq.documentmngr.controller;
 
 import com.veeteq.documentmngr.DocumentMngrApp;
 import com.veeteq.documentmngr.rest.api.AccountController;
+import com.veeteq.documentmngr.rest.api.ItemController;
 import com.veeteq.documentmngr.rest.dto.AccountDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,8 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 
 import static org.hamcrest.Matchers.greaterThan;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(classes = DocumentMngrApp.class)
@@ -47,5 +47,26 @@ public class AccountControllerTest extends BaseTest {
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"));
+    }
+
+    @DisplayName("Test Update Account")
+    @Test
+    void testUpdateAccount_Success() throws Exception {
+        long accountIdToSearch = 3;
+        AccountDto dto = new AccountDto()
+                .accountName("Updated Test Account #3")
+                .accountDescription("Test Account #3 with updated description")
+                .accountCurrency("NOK")
+                .accountImageUrl("http://images.com/account3.png");
+        mockMvc.perform(put(ItemController.BASE_URL.concat("/v1/accounts/{accountId}"), accountIdToSearch)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.accountId").value(accountIdToSearch))
+                .andExpect(jsonPath("$.accountName").value(dto.getAccountName()))
+                .andExpect(jsonPath("$.accountDescription").value(dto.getAccountDescription()))
+                .andExpect(jsonPath("$.accountCurrency").value(dto.getAccountCurrency()))
+                .andExpect(jsonPath("$.accountImageUrl").value(dto.getAccountImageUrl()));
     }
 }

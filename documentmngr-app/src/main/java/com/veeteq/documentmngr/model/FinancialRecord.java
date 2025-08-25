@@ -48,7 +48,7 @@ public abstract class FinancialRecord {
 
     @Version
     @Column(name = "vers_nm")
-    private Integer version;
+    protected Integer version;
 
     public Long getId() {
         return id;
@@ -115,6 +115,11 @@ public abstract class FinancialRecord {
 
         public B withComment(String comment) {
             entity.comment = comment;
+            return self();
+        }
+
+        public B withVersion(Integer version) {
+            entity.version = version;
             return self();
         }
 

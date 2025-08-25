@@ -50,11 +50,19 @@ public class Account {
         return new Builder();
     }
 
+    public static Builder updater(Account account) {
+        return new Builder(account);
+    }
+
     public static class Builder {
         private final Account entity;
 
         private Builder() {
             entity = new Account();
+        }
+
+        private Builder(Account account) {
+            entity = account;
         }
 
         public Builder withId(Long id) {

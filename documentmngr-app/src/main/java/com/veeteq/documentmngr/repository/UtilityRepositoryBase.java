@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 @Repository
-@Profile("test")
+@Profile({"test", "qa"})
 public class UtilityRepositoryBase implements UtilityRepository {
 
     @PersistenceContext

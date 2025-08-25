@@ -38,4 +38,12 @@ public interface ItemMapper {
     @Mapping(target = "categoryId",   source = "id")
     @Mapping(target = "categoryName", source = "name")
     CategoryDto toDto(Category entity);
+
+    default Item updateWith(ItemRequestDto dto, Item item, Category category) {
+        var updated = Item.updater(item)
+                .withName(dto.getItemName())
+                .withCategory(category)
+                .build();
+        return updated;
+    }
 }

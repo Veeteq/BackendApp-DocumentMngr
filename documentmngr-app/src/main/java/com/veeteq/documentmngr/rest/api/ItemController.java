@@ -1,9 +1,9 @@
 package com.veeteq.documentmngr.rest.api;
 
+import com.veeteq.documentmngr.rest.dto.ItemDto;
 import com.veeteq.documentmngr.rest.dto.ItemRequestDto;
 import com.veeteq.documentmngr.rest.dto.ItemsResponseDto;
 import com.veeteq.documentmngr.service.ItemService;
-import com.veeteq.documentmngr.rest.dto.ItemDto;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.validation.Valid;
@@ -24,7 +24,7 @@ import java.util.List;
 @CrossOrigin(origins = {"http://localhost:4200", "*"})
 public class ItemController implements ItemApi {
     public  final static String BASE_URL = "/api";
-    private final Logger log = LoggerFactory.getLogger(ItemController.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(ItemController.class);
 
     private final ItemService itemService;
 
@@ -49,7 +49,7 @@ public class ItemController implements ItemApi {
 
     @GetMapping(path = "/items/search", produces = { "application/json" })
     public ResponseEntity<List<ItemDto>> searchItemsByName(@NotNull @Parameter(name = "name", description = "Name to search for", in = ParameterIn.QUERY) @Valid @RequestParam(value = "name", required = true) String name) {
-        log.info("Request to search for accounts starting with name: {}", name);
+        LOGGER.info("Request to search for accounts starting with name: {}", name);
 
         var response = itemService.searchItemsByName(name);
 
@@ -80,4 +80,18 @@ public class ItemController implements ItemApi {
                         .build());
     }
 
+
+    @Override
+    public ResponseEntity<ItemDto> updateItem(Long id, ItemRequestDto dto) {
+        LOGGER.info("Request received to update item: {}. Item Id: {}", dto, id);
+
+        var updated = itemService.updateItem(id, dto)
+                .map(itemDto -> ResponseEntity.ok()
+                        //.headers(headers)
+                        .body(itemDto))
+                .orElse(ResponseEntity.notFound()
+                        //.headers(headers)
+                        .build());
+        return updated;
+    }
 }

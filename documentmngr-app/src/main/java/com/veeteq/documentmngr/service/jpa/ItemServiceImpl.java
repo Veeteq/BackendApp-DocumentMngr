@@ -3,7 +3,6 @@ package com.veeteq.documentmngr.service.jpa;
 import com.veeteq.documentmngr.mapper.ItemMapper;
 import com.veeteq.documentmngr.model.Item;
 import com.veeteq.documentmngr.repository.CategoryRepository;
-import com.veeteq.documentmngr.repository.EntityIdMapping;
 import com.veeteq.documentmngr.repository.ItemRepository;
 import com.veeteq.documentmngr.repository.UtilityRepository;
 import com.veeteq.documentmngr.rest.dto.ItemDto;
@@ -75,5 +74,16 @@ public class ItemServiceImpl implements ItemService {
         var item = itemMapper.toEntity(dto, category);
         var savedItem = itemRepository.save(item);
         return itemMapper.toDto(savedItem);
+    }
+
+    @Override
+    public Optional<ItemDto> updateItem(Long id, ItemRequestDto dto) {
+        var category = categoryRepository.getReferenceById(dto.getCategoryId());
+        return itemRepository.findById(id)
+                .map(item -> {
+                    var updated = itemMapper.updateWith(dto, item, category);
+                    var savedItem = itemRepository.save(updated);
+                    return itemMapper.toDto(savedItem);
+                });
     }
 }

@@ -23,12 +23,12 @@ public class DocumentItem {
     @JoinColumn(name = "docu_id", nullable = false)
     private Document document;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "expe_id", nullable = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "expe_id", referencedColumnName = "expe_id", nullable = true)
     private Expense expense;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "inco_id", nullable = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "inco_id", referencedColumnName = "inco_id", nullable = true)
     private Income income;
 
     @CreationTimestamp
@@ -90,6 +90,15 @@ public class DocumentItem {
         return income;
     }
 
+    public Integer getVersion() {
+        return version;
+    }
+
+    public DocumentItem setVersion(Integer version) {
+        this.version = version;
+        return this;
+    }
+
     public <T extends FinancialRecord> DocumentItem setFinancialRecord(T financialRecord) {
         if (financialRecord instanceof Expense expense) {
             this.expense = expense;
@@ -98,6 +107,10 @@ public class DocumentItem {
             this.income = income;
         }
         return this;
+    }
+
+    public FinancialRecord getFinancialRecord() {
+        return this.expense != null ? this.expense : this.income;
     }
 
     public static Builder builder() {
@@ -112,6 +125,7 @@ public class DocumentItem {
         private BigDecimal itemQuantity;
         private BigDecimal itemPrice;
         private String comment;
+        private Integer version;
 
         private Builder() {}
 
@@ -150,9 +164,15 @@ public class DocumentItem {
             return this;
         }
 
+        public Builder withVersion(Integer version) {
+            this.version = version;
+            return this;
+        }
+
         public DocumentItem build() {
             var entity = new DocumentItem();
             entity.type = this.type;
+            entity.version = this.version;
             var financialRecord = createFinancialRecord(this);
             entity.setFinancialRecord(financialRecord);
             return entity;
@@ -169,7 +189,8 @@ public class DocumentItem {
                     .withPrice(builder.itemPrice)
                     .withItem(builder.item)
                     .withCount(builder.itemQuantity)
-                    .withComment(builder.comment);
+                    .withComment(builder.comment)
+                    .withVersion(builder.version);
             return a.build();
         }
     }
