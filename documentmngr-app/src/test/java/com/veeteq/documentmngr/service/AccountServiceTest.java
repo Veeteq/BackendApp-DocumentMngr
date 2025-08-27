@@ -36,7 +36,7 @@ public class AccountServiceTest {
     @DisplayName("Test Account by Id")
     @Test
     void getAccountById() {
-        var savedAccountDto = accountService.getAccountById(5L).orElseThrow();
+        var savedAccountDto = accountService.getAccountById(5L);
 
         assertNotNull(savedAccountDto);
         assertEquals(5L, savedAccountDto.getAccountId());
@@ -60,6 +60,8 @@ public class AccountServiceTest {
         assertEquals(dto.getAccountDescription(), entity.getDescription());
         assertEquals(dto.getAccountCurrency(), entity.getCurrency().getCurrencyCode());
         assertEquals(dto.getAccountImageUrl(), entity.getImageUrl());
+
+        accountRepository.delete(entity);
     }
 
     @DisplayName("Test Save Account - No Id")
@@ -76,6 +78,8 @@ public class AccountServiceTest {
         assertEquals(dto.getAccountDescription(), entity.getDescription());
         assertEquals(dto.getAccountCurrency(), entity.getCurrency().getCurrencyCode());
         assertEquals(dto.getAccountImageUrl(), entity.getImageUrl());
+
+        accountRepository.delete(entity);
     }
 
     @DisplayName("Test Update Account")

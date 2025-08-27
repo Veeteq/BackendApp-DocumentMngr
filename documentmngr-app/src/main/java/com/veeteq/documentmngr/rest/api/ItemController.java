@@ -71,13 +71,12 @@ public class ItemController implements ItemApi {
 
     @Override
     public ResponseEntity<ItemDto> getItemById(Long id) {
-        return itemService.getItemById(id)
-                .map(itemDto -> ResponseEntity.ok()
-                        //.headers(headers)
-                        .body(itemDto))
-                .orElse(ResponseEntity.notFound()
-                        //.headers(headers)
-                        .build());
+        LOGGER.info("Request received to search for item by Id: {}", id);
+
+        var itemDto = itemService.getItemById(id);
+        return ResponseEntity.ok()
+                //.headers(headers)
+                .body(itemDto);
     }
 
 
@@ -85,13 +84,18 @@ public class ItemController implements ItemApi {
     public ResponseEntity<ItemDto> updateItem(Long id, ItemRequestDto dto) {
         LOGGER.info("Request received to update item: {}. Item Id: {}", dto, id);
 
-        var updated = itemService.updateItem(id, dto)
-                .map(itemDto -> ResponseEntity.ok()
-                        //.headers(headers)
-                        .body(itemDto))
-                .orElse(ResponseEntity.notFound()
-                        //.headers(headers)
-                        .build());
-        return updated;
+        var updated = itemService.updateItem(id, dto);
+        return ResponseEntity.ok()
+                //.headers(headers)
+                .body(updated);
     }
+
+    @Override
+    public ResponseEntity<Void> deleteItem(Long id) {
+        LOGGER.info("Request received to delete item with Id: {}", id);
+
+        itemService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

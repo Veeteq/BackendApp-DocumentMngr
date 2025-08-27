@@ -1,9 +1,12 @@
 package com.veeteq.documentmngr.rest.api;
 
 import com.veeteq.documentmngr.rest.dto.AccountDto;
+import com.veeteq.documentmngr.rest.dto.AccountsResponseDto;
 import com.veeteq.documentmngr.service.AccountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
 
 import static com.veeteq.documentmngr.rest.api.AccountController.BASE_URL;
 
@@ -28,13 +30,21 @@ public class AccountController implements AccountApi {
         this.accountService = accountService;
     }
 
-    public ResponseEntity<List<AccountDto>> listAccounts() {
-        var dtos = accountService.listAccounts();
-        return ResponseEntity.ok(dtos);
+    @Override
+    public ResponseEntity<AccountsResponseDto> listAccounts(Integer pageNumber, Integer pageSize, String orderBy, String orderDirection) {
+        LOGGER.info("Request received to list all accounts");
+
+        var direction = Sort.Direction.fromString(orderDirection);
+        var sort = Sort.by(direction, orderBy);
+        var pageRequest = PageRequest.of(pageNumber, pageSize, sort);
+        var result = accountService.getAccounts(pageRequest);
+        return ResponseEntity.ok(result);
     }
 
     @Override
     public ResponseEntity<Void> createAccount(AccountDto dto) {
+        LOGGER.info("Request received to create new account");
+
         var savedAccount = accountService.saveAccount(dto);
 
         var uriComponents = UriComponentsBuilder.fromPath(BASE_URL.concat("/v1/accounts".concat("/{account_id}")))
@@ -46,27 +56,30 @@ public class AccountController implements AccountApi {
 
     @Override
     public ResponseEntity<AccountDto> getAccountById(Long id) {
+        LOGGER.info("Request received to search for account by Id: {}", id);
 
-        return accountService.getAccountById(id)
-                .map(accountDto -> ResponseEntity.ok()
-                        //.headers(headers)
-                        .body(accountDto))
-                .orElse(ResponseEntity.notFound()
-                        //.headers(headers)
-                        .build());
+        var accountDto = accountService.getAccountById(id);
+        return ResponseEntity.ok()
+                //.headers(headers)
+                .body(accountDto);
     }
 
     @Override
     public ResponseEntity<AccountDto> updateAccount(Long id, AccountDto dto) {
         LOGGER.info("Request received to update account: {}. Account Id: {}", dto, id);
 
-        var updated = accountService.updateAccount(id, dto)
-                .map(accountDto -> ResponseEntity.ok()
-                        //.headers(headers)
-                        .body(accountDto))
-                .orElse(ResponseEntity.notFound()
-                        //.headers(headers)
-                        .build());
-        return updated;
+        var updated = accountService.updateAccount(id, dto);
+        return ResponseEntity.ok()
+                //.headers(headers)
+                .body(updated);
     }
+
+    @Override
+    public ResponseEntity<Void> deleteAccount(Long id) {
+        LOGGER.info("Request received to delete account with Id: {}", id);
+
+        accountService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

@@ -105,4 +105,10 @@ public class DocumentController implements DocumentApi {
 
         return updated;
     }
+
+    @Override
+    public ResponseEntity<Void> deleteDocument(Long id, UUID transactionId) {
+        return ResponseEntity.noContent().build();
+    }
+
 }
