@@ -60,6 +60,8 @@ public class AccountServiceTest {
         assertEquals(dto.getAccountDescription(), entity.getDescription());
         assertEquals(dto.getAccountCurrency(), entity.getCurrency().getCurrencyCode());
         assertEquals(dto.getAccountImageUrl(), entity.getImageUrl());
+
+        accountRepository.delete(entity);
     }
 
     @DisplayName("Test Save Account - No Id")
@@ -76,6 +78,8 @@ public class AccountServiceTest {
         assertEquals(dto.getAccountDescription(), entity.getDescription());
         assertEquals(dto.getAccountCurrency(), entity.getCurrency().getCurrencyCode());
         assertEquals(dto.getAccountImageUrl(), entity.getImageUrl());
+
+        accountRepository.delete(entity);
     }
 
     @DisplayName("Test Update Account")
