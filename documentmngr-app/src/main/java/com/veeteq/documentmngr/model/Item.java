@@ -15,7 +15,7 @@ public class Item {
     @Column(name = "item_name_tx")
     String name;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinColumn(name = "cate_id", nullable = false)
     Category category;
 

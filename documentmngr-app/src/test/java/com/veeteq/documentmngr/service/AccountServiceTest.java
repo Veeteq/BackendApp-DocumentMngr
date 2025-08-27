@@ -36,7 +36,7 @@ public class AccountServiceTest {
     @DisplayName("Test Account by Id")
     @Test
     void getAccountById() {
-        var savedAccountDto = accountService.getAccountById(5L).orElseThrow();
+        var savedAccountDto = accountService.getAccountById(5L);
 
         assertNotNull(savedAccountDto);
         assertEquals(5L, savedAccountDto.getAccountId());

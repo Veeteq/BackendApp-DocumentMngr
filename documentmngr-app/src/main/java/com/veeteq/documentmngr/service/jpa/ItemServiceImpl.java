@@ -1,5 +1,6 @@
 package com.veeteq.documentmngr.service.jpa;
 
+import com.veeteq.documentmngr.exception.NotFoundException;
 import com.veeteq.documentmngr.mapper.ItemMapper;
 import com.veeteq.documentmngr.model.Item;
 import com.veeteq.documentmngr.repository.CategoryRepository;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -62,9 +62,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Optional<ItemDto> getItemById(Long id) {
+    public ItemDto getItemById(Long id) {
         var result = itemRepository.findById(id);
-        return result.map(itemMapper::toDto);
+        return result.map(itemMapper::toDto)
+                .orElseThrow(NotFoundException::new);
     }
 
     @Override
@@ -77,13 +78,20 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Optional<ItemDto> updateItem(Long id, ItemRequestDto dto) {
+    public ItemDto updateItem(Long id, ItemRequestDto dto) {
         var category = categoryRepository.getReferenceById(dto.getCategoryId());
         return itemRepository.findById(id)
                 .map(item -> {
                     var updated = itemMapper.updateWith(dto, item, category);
                     var savedItem = itemRepository.save(updated);
                     return itemMapper.toDto(savedItem);
-                });
+                }).orElseThrow(NotFoundException::new);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        itemRepository.findById(id).ifPresentOrElse(itemRepository::delete, () -> {
+            throw new NotFoundException("Item not found");
+        });
     }
 }

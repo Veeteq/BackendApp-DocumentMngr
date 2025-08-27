@@ -18,9 +18,11 @@ public interface ItemService {
 
     ItemsResponseDto getItemsWithPattern(String pattern, Pageable pageable);
 
-    Optional<ItemDto> getItemById(Long id);
+    ItemDto getItemById(Long id);
 
     ItemDto save(ItemRequestDto dto);
 
-    Optional<ItemDto> updateItem(Long id, ItemRequestDto dto);
+    ItemDto updateItem(Long id, ItemRequestDto dto);
+
+    void deleteById(Long id);
 }

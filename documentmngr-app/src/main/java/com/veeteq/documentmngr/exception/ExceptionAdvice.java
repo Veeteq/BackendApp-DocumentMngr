@@ -11,7 +11,7 @@ public class ExceptionAdvice {
 
     @ResponseStatus(value = HttpStatus.CONFLICT, reason = "Data integrity violation")
     @ExceptionHandler(exception = DataIntegrityViolationException.class)
-    public void conflict(Exception exc) {
+    public void handleDataIntegrityViolationException(Exception exc) {
         exc.printStackTrace();
     }
 }

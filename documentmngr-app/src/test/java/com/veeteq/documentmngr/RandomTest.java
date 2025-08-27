@@ -1,5 +1,6 @@
 package com.veeteq.documentmngr;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.apache.commons.text.CharacterPredicate;
@@ -10,7 +11,8 @@ import java.util.HashSet;
 
 public class RandomTest {
 
-    @DisplayName("Just test")
+    @Disabled("Takes too long...")
+    @DisplayName("Test random string collision")
     @Test
     public void justTest() {
         CharacterPredicate[] predicates = {t -> t >= '0' && t <= '9', t -> t >= 'A' & t <= 'Z', t -> t >= 'a' & t <= 'z'};

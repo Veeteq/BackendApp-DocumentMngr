@@ -2,9 +2,11 @@ package com.veeteq.documentmngr.mapper;
 
 import com.veeteq.documentmngr.model.Account;
 import com.veeteq.documentmngr.rest.dto.AccountDto;
+import com.veeteq.documentmngr.rest.dto.AccountsResponseDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.springframework.data.domain.Page;
 
 import java.util.Currency;
 
@@ -25,7 +27,12 @@ public interface AccountMapper {
     @Mapping(target = "accountImageUrl",    source = "imageUrl")
     AccountDto toDto(Account entity);
 
-    //void updateWith(AccountDto dto, @MappingTarget Account entity);
+    @Mapping(target = "pageSize",    source = "size")
+    @Mapping(target = "totalItems",  source = "totalElements")
+    @Mapping(target = "totalPages",  source = "totalPages")
+    @Mapping(target = "currentPage", source = "number")
+    @Mapping(target = "data",        source = "content")
+    AccountsResponseDto toDto(Page<Account> result);
 
     default Account updateWith(AccountDto dto, Account entity) {
         var updated = Account.updater(entity)
