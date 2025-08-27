@@ -1,17 +1,9 @@
 package com.veeteq.documentmngr.exception;
 
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.zalando.problem.spring.web.advice.ProblemHandling;
 
 @ControllerAdvice
-public class ExceptionAdvice {
+public class ExceptionAdvice implements DataIntegrityViolationExceptionTrait, ProblemHandling {
 
-    @ResponseStatus(value = HttpStatus.CONFLICT, reason = "Data integrity violation")
-    @ExceptionHandler(exception = DataIntegrityViolationException.class)
-    public void handleDataIntegrityViolationException(Exception exc) {
-        exc.printStackTrace();
-    }
 }

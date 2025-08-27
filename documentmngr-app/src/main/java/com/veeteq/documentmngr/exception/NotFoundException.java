@@ -1,29 +1,21 @@
 package com.veeteq.documentmngr.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.zalando.problem.AbstractThrowableProblem;
 
-@ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Value not found")
-public class NotFoundException extends RuntimeException {
+import static org.zalando.problem.Status.NOT_FOUND;
+
+public class NotFoundException extends AbstractThrowableProblem {
 
     public NotFoundException() {
-        super();
+        super(null, "Resource not found", NOT_FOUND);
     }
 
     public NotFoundException(String message) {
-        super(message);
+        super(null, message, NOT_FOUND);
     }
 
-    public NotFoundException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public NotFoundException(Throwable cause) {
-        super(cause);
-    }
-
-    protected NotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
+    public NotFoundException(String message, String detail) {
+        super(null, message, NOT_FOUND, detail);
     }
 
 }

@@ -1,9 +1,11 @@
 package com.veeteq.documentmngr.service.jpa;
 
+import com.veeteq.documentmngr.exception.ConflictException;
 import com.veeteq.documentmngr.exception.NotFoundException;
 import com.veeteq.documentmngr.mapper.ItemMapper;
 import com.veeteq.documentmngr.model.Item;
 import com.veeteq.documentmngr.repository.CategoryRepository;
+import com.veeteq.documentmngr.repository.DocumentItemRepository;
 import com.veeteq.documentmngr.repository.ItemRepository;
 import com.veeteq.documentmngr.repository.UtilityRepository;
 import com.veeteq.documentmngr.rest.dto.ItemDto;
@@ -11,6 +13,7 @@ import com.veeteq.documentmngr.rest.dto.ItemRequestDto;
 import com.veeteq.documentmngr.rest.dto.ItemsResponseDto;
 import com.veeteq.documentmngr.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,19 +27,20 @@ public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
     private final CategoryRepository categoryRepository;
-    private final UtilityRepository utilityRepository;
+    private final DocumentItemRepository documentItemRepository;
     private final ItemMapper itemMapper;
 
     @Autowired
-    public ItemServiceImpl(ItemRepository itemRepository, CategoryRepository categoryRepository, UtilityRepository utilityRepository, ItemMapper itemMapper) {
+    public ItemServiceImpl(ItemRepository itemRepository, CategoryRepository categoryRepository, DocumentItemRepository documentItemRepository, ItemMapper itemMapper) {
         this.itemRepository = itemRepository;
         this.categoryRepository = categoryRepository;
-        this.utilityRepository = utilityRepository;
+        this.documentItemRepository = documentItemRepository;
         this.itemMapper = itemMapper;
     }
 
     @Override
     public List<ItemDto> getItems() {
+        //if (1==1) throw new DataIntegrityViolationException("Bla");
         var result = itemRepository.findAll();
         return result.stream().map(itemMapper::toDto).collect(Collectors.toList());
     }
@@ -90,7 +94,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public void deleteById(Long id) {
-        itemRepository.findById(id).ifPresentOrElse(itemRepository::delete, () -> {
+        itemRepository.findById(id).ifPresentOrElse(item -> {
+            if (documentItemRepository.countByExpense_Item(item) > 0) {
+                throw new ConflictException("Item is referenced by Document items");
+            }
+            itemRepository.delete(item);
+        }, () -> {
             throw new NotFoundException("Item not found");
         });
     }

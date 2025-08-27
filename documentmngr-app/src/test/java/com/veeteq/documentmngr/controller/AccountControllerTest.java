@@ -155,4 +155,18 @@ public class AccountControllerTest extends BaseTest {
                 .andExpect(openApi().isValid(apiSpecification));
     }
 
+    @Order(value = 9)
+    @DisplayName("Test Create Account - Bad Request")
+    @Test
+    void testCreateAccount_BadRequest() throws Exception {
+        AccountDto dto = new AccountDto()
+                .accountName(null)
+                .accountDescription("Invalid account created to test the POST operation on controller")
+                .accountCurrency("EUR")
+                .accountImageUrl("abc");
+        mockMvc.perform(post(AccountController.BASE_URL.concat("/v1/accounts"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
+    }
 }

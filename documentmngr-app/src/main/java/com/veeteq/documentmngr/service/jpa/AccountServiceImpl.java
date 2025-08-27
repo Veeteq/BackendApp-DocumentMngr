@@ -45,7 +45,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public AccountDto getAccountById(Long id) {
-        var result = accountRepository.findById(id).map(accountMapper::toDto).orElseThrow(NotFoundException::new);
+        var result = accountRepository.findById(id)
+                .map(accountMapper::toDto)
+                .orElseThrow(() -> new NotFoundException("Account not found"));
         return result;
     }
 
@@ -65,7 +67,7 @@ public class AccountServiceImpl implements AccountService {
                     var updated = accountMapper.updateWith(dto, account);
                     var savedAccount = accountRepository.save(updated);
                     return accountMapper.toDto(savedAccount);
-                }).orElseThrow(NotFoundException::new);
+                }).orElseThrow(() -> new NotFoundException("Account not found"));
     }
 
     @Override
