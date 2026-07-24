@@ -3,6 +3,9 @@ package com.veeteq.documentmngr.rest.api;
 import com.veeteq.documentmngr.rest.dto.AccountDto;
 import com.veeteq.documentmngr.rest.dto.AccountsResponseDto;
 import com.veeteq.documentmngr.service.AccountService;
+
+import jakarta.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 import static com.veeteq.documentmngr.rest.api.AccountController.BASE_URL;
 
@@ -22,23 +26,12 @@ import static com.veeteq.documentmngr.rest.api.AccountController.BASE_URL;
 @CrossOrigin(origins = {"http://localhost:4200", "*"})
 public class AccountController implements AccountApi {
     public static final String BASE_URL = "/api";
+    private static final Logger LOGGER = LoggerFactory.getLogger(AccountController.class.getSimpleName());
 
     private final AccountService accountService;
-    private final Logger LOGGER = LoggerFactory.getLogger(AccountController.class);
 
     public AccountController(AccountService accountService) {
         this.accountService = accountService;
-    }
-
-    @Override
-    public ResponseEntity<AccountsResponseDto> listAccounts(Integer pageNumber, Integer pageSize, String orderBy, String orderDirection) {
-        LOGGER.info("Request received to list all accounts");
-
-        var direction = Sort.Direction.fromString(orderDirection);
-        var sort = Sort.by(direction, orderBy);
-        var pageRequest = PageRequest.of(pageNumber, pageSize, sort);
-        var result = accountService.getAccounts(pageRequest);
-        return ResponseEntity.ok(result);
     }
 
     @Override
@@ -46,7 +39,6 @@ public class AccountController implements AccountApi {
         LOGGER.info("Request received to create new account");
 
         var savedAccount = accountService.saveAccount(dto);
-
         var uriComponents = UriComponentsBuilder.fromPath(BASE_URL.concat("/v1/accounts".concat("/{account_id}")))
                 .buildAndExpand(savedAccount.getAccountId());
         URI uri = URI.create(uriComponents.getPath());
@@ -64,8 +56,19 @@ public class AccountController implements AccountApi {
                 .body(accountDto);
     }
 
-    @Override
-    public ResponseEntity<AccountDto> updateAccount(Long id, AccountDto dto) {
+	@Override
+	public ResponseEntity<AccountsResponseDto> listAccounts(@Valid Integer pageNumber, @Valid Integer pageSize, @Valid String orderBy, @Valid String orderDirection) {
+        LOGGER.info("Request received to list all accounts");
+
+        var direction = Sort.Direction.fromString(orderDirection);
+        var sort = Sort.by(direction, orderBy);
+        var pageRequest = PageRequest.of(pageNumber, pageSize, sort);
+        var result = accountService.getAccounts(pageRequest);
+        return ResponseEntity.ok(result);
+	}
+
+	@Override
+	public ResponseEntity<AccountDto> updateAccount(Long id, @Valid AccountDto dto) {
         LOGGER.info("Request received to update account: {}. Account Id: {}", dto, id);
 
         var updated = accountService.updateAccount(id, dto);

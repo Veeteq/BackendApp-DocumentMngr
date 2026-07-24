@@ -1,16 +1,15 @@
 package com.veeteq.documentmngr.rest.api;
 
-import com.veeteq.documentmngr.rest.dto.ItemDto;
 import com.veeteq.documentmngr.rest.dto.ItemRequestDto;
 import com.veeteq.documentmngr.rest.dto.ItemsResponseDto;
 import com.veeteq.documentmngr.service.ItemService;
+import com.veeteq.documentmngr.rest.dto.ItemDto;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -53,7 +52,6 @@ public class ItemController implements ItemApi {
         LOGGER.info("Request to search for accounts starting with name: {}", name);
 
         var response = itemService.searchItemsByName(name);
-
         return ResponseEntity
                 .ok()
                 .body(response);
@@ -79,7 +77,6 @@ public class ItemController implements ItemApi {
                 //.headers(headers)
                 .body(itemDto);
     }
-
 
     @Override
     public ResponseEntity<ItemDto> updateItem(Long id, ItemRequestDto dto) {

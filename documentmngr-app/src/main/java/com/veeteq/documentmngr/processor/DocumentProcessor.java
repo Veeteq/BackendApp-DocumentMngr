@@ -1,6 +1,5 @@
 package com.veeteq.documentmngr.processor;
 
-import com.veeteq.documentmngr.model.Account;
 import com.veeteq.documentmngr.model.Document;
 import com.veeteq.documentmngr.rest.dto.DocumentRequestDto;
 

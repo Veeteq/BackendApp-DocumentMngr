@@ -1,9 +1,17 @@
 package com.veeteq.documentmngr.mapper;
 
-import com.veeteq.documentmngr.model.*;
+import com.veeteq.documentmngr.model.Document;
+import com.veeteq.documentmngr.model.DocumentItemType;
+import com.veeteq.documentmngr.model.DocumentType;
+import com.veeteq.documentmngr.model.Item;
 import com.veeteq.documentmngr.repository.AccountRepository;
-import com.veeteq.documentmngr.rest.dto.*;
+import com.veeteq.documentmngr.rest.dto.DocumentItemRequestDto;
 import com.veeteq.documentmngr.rest.dto.DocumentItemRequestDto.ItemTypeEnum;
+import com.veeteq.documentmngr.rest.dto.DocumentRequestDto;
+import com.veeteq.documentmngr.rest.dto.DocumentResponseDto;
+import com.veeteq.documentmngr.rest.dto.DocumentTypeDto;
+import com.veeteq.documentmngr.rest.dto.PaymentDto;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,7 +20,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -46,7 +53,7 @@ class DocumentMapperTest {
         assertEquals(document.getAccount().getId(), dto.getAccount().getAccountId());
         assertEquals(document.getAccount().getName(), dto.getAccount().getAccountName());
 
-        assertEquals(18, dto.getClass().getDeclaredFields().length);
+        assertEquals(17, dto.getClass().getDeclaredFields().length);
     }
 
     @Test
@@ -65,9 +72,9 @@ class DocumentMapperTest {
         assertEquals(dto.getDocumentDescription(), document.getDocumentDescription());
         assertEquals(dto.getInvoiceNumber(), document.getInvoiceNumber());
         assertEquals(dto.getCounterpartyId(), document.getCounterpartyId());
-        assertEquals(dto.getPaymentMethod(), document.getPaymentMethod().name());
-        assertEquals(dto.getCurrencyCode(), document.getCurrency().getCurrencyCode());
-        assertEquals(dto.getExchangeRate(), document.getExchangeRate());
+        assertEquals(dto.getPayment().getPaymentMethod(), document.getPaymentMethod().name());
+        assertEquals(dto.getPayment().getCurrencyCode(), document.getCurrency().getCurrencyCode());
+        assertEquals(dto.getPayment().getExchangeRate(), document.getExchangeRate());
 
         assertNotNull(document.getAccount());
         assertEquals(dto.getAccountId(), document.getAccount().getId());
@@ -98,8 +105,8 @@ class DocumentMapperTest {
     void toTransferEntity() {
         // Given
         var transferDto = createTransferRequestDto();
-        Account sourceAccount = accountRepository.findById(transferDto.getAccountId()).orElseThrow();
-        Account targetAccount = accountRepository.findById(transferDto.getTargetAccountId()).orElseThrow();
+        var sourceAccount = accountRepository.findById(transferDto.getAccountId()).orElseThrow();
+        var targetAccount = accountRepository.findById(transferDto.getTargetAccountId()).orElseThrow();
         Item trnasferItem = null;
         // When
         Document document = documentMapper.toEntity(transferDto, sourceAccount, targetAccount, trnasferItem);
@@ -117,7 +124,7 @@ class DocumentMapperTest {
     void testUpdateDocument() {
         Document entity = createDocument();
         var dto = createDocumentPutRequestDto();
-        Account account = accountRepository.findById(dto.getAccountId()).orElseThrow();
+        var account = accountRepository.findById(dto.getAccountId()).orElseThrow();
         var updated = documentMapper.updateWith(entity, dto, account);
 
         //then
@@ -128,9 +135,9 @@ class DocumentMapperTest {
         assertEquals(dto.getDocumentDescription(), updated.getDocumentDescription());
         assertEquals(dto.getInvoiceNumber(), updated.getInvoiceNumber());
         assertEquals(dto.getCounterpartyId(), updated.getCounterpartyId());
-        assertEquals(dto.getPaymentMethod(), updated.getPaymentMethod().name());
-        assertEquals(dto.getCurrencyCode(), updated.getCurrency().getCurrencyCode());
-        assertEquals(dto.getExchangeRate(), updated.getExchangeRate());
+        assertEquals(dto.getPayment().getPaymentMethod(), updated.getPaymentMethod().name());
+        assertEquals(dto.getPayment().getCurrencyCode(), updated.getCurrency().getCurrencyCode());
+        assertEquals(dto.getPayment().getExchangeRate(), updated.getExchangeRate());
 
         assertNotNull(updated.getAccount());
         assertEquals(dto.getAccountId(), updated.getAccount().getId());
@@ -179,11 +186,12 @@ class DocumentMapperTest {
                 .accountId(6L)
                 .documentDescription("Home electricity; January invoice")
                 .documentType(DocumentTypeDto.INVOICE)
-                .currencyCode("EUR")
-                .exchangeRate(BigDecimal.valueOf(1.1))
+                .payment(new PaymentDto()
+                        .paymentMethod("EFT")
+                        .currencyCode("EUR")
+                        .exchangeRate(BigDecimal.valueOf(1.1)))
                 .documentDate(LocalDate.of(2025, Month.JANUARY, 3))
                 .invoiceNumber("EL/2025/JAN/13579")
-                .paymentMethod("EFT")
                 .documentItems(List.of(new DocumentItemRequestDto()
                         .itemType(ItemTypeEnum.EXP)
                         .itemId(5L)
@@ -198,12 +206,13 @@ class DocumentMapperTest {
         var dto = new DocumentRequestDto()
                 .documentDate(LocalDate.of(2025, Month.JANUARY, 23))
                 .documentType(DocumentTypeDto.TRANSFER)
-                .paymentMethod("EFT")
+                .payment(new PaymentDto()
+                        .paymentMethod("EFT")
+                        .currencyCode("EUR")
+                        .exchangeRate(BigDecimal.valueOf(1.1)))
                 .accountId(6L)
                 .targetAccountId(7L)
-                .transferAmount(BigDecimal.valueOf(99.99))
-                .currencyCode("EUR")
-                .exchangeRate(BigDecimal.valueOf(1.1));
+                .transferAmount(BigDecimal.valueOf(99.99));
         return dto;
     }
 
@@ -213,11 +222,12 @@ class DocumentMapperTest {
                 .accountId(6L)
                 .documentDescription("Home electricity; January invoice")
                 .documentType(DocumentTypeDto.INVOICE)
-                .currencyCode("EUR")
-                .exchangeRate(BigDecimal.valueOf(1.1))
+                .payment(new PaymentDto()
+                        .paymentMethod("EFT")
+                        .currencyCode("EUR")
+                        .exchangeRate(BigDecimal.valueOf(1.1)))
                 .documentDate(LocalDate.of(2025, Month.JANUARY, 3))
                 .invoiceNumber("EL/2025/JAN/13579")
-                .paymentMethod("EFT")
                 .documentItems(List.of(new DocumentItemRequestDto()
                         .seqId(BigDecimal.valueOf(1))
                         .itemType(DocumentItemRequestDto.ItemTypeEnum.EXP)
