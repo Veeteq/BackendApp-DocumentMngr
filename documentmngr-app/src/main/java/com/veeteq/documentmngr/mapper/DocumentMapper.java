@@ -3,11 +3,9 @@ package com.veeteq.documentmngr.mapper;
 import com.veeteq.documentmngr.model.Account;
 import com.veeteq.documentmngr.model.Document;
 import com.veeteq.documentmngr.model.Item;
-import com.veeteq.documentmngr.repository.AccountRepository;
 import com.veeteq.documentmngr.rest.dto.DocumentRequestDto;
 import com.veeteq.documentmngr.rest.dto.DocumentResponseDto;
 import org.mapstruct.*;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Mapper(componentModel = "spring", uses = {AccountMapper.class, DocumentItemMapper.class})
 @DecoratedWith(DocumentMapperDecorator.class)
@@ -45,6 +43,7 @@ public interface DocumentMapper {
     @Mapping(target = "withTransferAmount",      source = "dto.transferAmount")
     @Mapping(target = "withTargetAccount",       ignore = true)
     @Mapping(target = "withTransferItem",        ignore = true)
+    @Mapping(target = "withVersion",             ignore = true)
     Document toEntity(DocumentRequestDto dto, Account account);
 
     @Mapping(target = "withDocumentDate",        source = "dto.documentDate")
@@ -61,10 +60,13 @@ public interface DocumentMapper {
     @Mapping(target = "withDocumentDescription", ignore = true)
     @Mapping(target = "withInvoiceNumber",       ignore = true)
     @Mapping(target = "withCounterpartyId",      ignore = true)
+    @Mapping(target = "withVersion",             ignore = true)
     Document toEntity(DocumentRequestDto dto, Account sourceAccount, Account targetAccount, Item transferItem);
 
+    @Mapping(target = "documentItems", ignore = true)
     Document updateWith(@MappingTarget Document document, DocumentRequestDto dto, Account account);
 
+    @Mapping(target = "documentItems", ignore = true)
     Document updateWith(@MappingTarget Document document, DocumentRequestDto dto, Account sourceAccount, Account targetAccount, Item transferItem);
 
 

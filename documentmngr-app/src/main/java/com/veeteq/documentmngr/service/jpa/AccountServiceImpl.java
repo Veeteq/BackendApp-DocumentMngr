@@ -4,7 +4,6 @@ import com.veeteq.documentmngr.exception.ConflictException;
 import com.veeteq.documentmngr.exception.NotFoundException;
 import com.veeteq.documentmngr.mapper.AccountMapper;
 import com.veeteq.documentmngr.repository.DocumentRepository;
-import com.veeteq.documentmngr.repository.UtilityRepository;
 import com.veeteq.documentmngr.rest.dto.AccountDto;
 import com.veeteq.documentmngr.repository.AccountRepository;
 import com.veeteq.documentmngr.rest.dto.AccountsResponseDto;
@@ -19,13 +18,11 @@ import java.util.List;
 public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
-    private final UtilityRepository utilityRepository;
     private final DocumentRepository documentRepository;
     private final AccountMapper accountMapper;
 
-    public AccountServiceImpl(AccountRepository accountRepository, UtilityRepository utilityRepository, DocumentRepository documentRepository, AccountMapper accountMapper) {
+    public AccountServiceImpl(AccountRepository accountRepository, DocumentRepository documentRepository, AccountMapper accountMapper) {
         this.accountRepository = accountRepository;
-        this.utilityRepository = utilityRepository;
         this.documentRepository = documentRepository;
         this.accountMapper = accountMapper;
     }

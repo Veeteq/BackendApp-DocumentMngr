@@ -1,12 +1,14 @@
 package com.veeteq.documentmngr.service;
 
 import com.veeteq.documentmngr.DocumentMngrApp;
+import com.veeteq.documentmngr.model.Account;
 import com.veeteq.documentmngr.repository.AccountRepository;
 import com.veeteq.documentmngr.rest.dto.AccountDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
@@ -16,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(classes = DocumentMngrApp.class)
+@ActiveProfiles("test")
 public class AccountServiceTest {
 
     @Autowired
@@ -36,13 +39,14 @@ public class AccountServiceTest {
     @Test
     void getAccountById() {
         var savedAccountDto = accountService.getAccountById(5L);
+        var expectedAccount = accountRepository.findById(5L).orElseThrow();
 
         assertNotNull(savedAccountDto);
-        assertEquals(5L, savedAccountDto.getAccountId());
-        assertEquals("EFG", savedAccountDto.getAccountName());
-        assertEquals("EFG Description", savedAccountDto.getAccountDescription());
-        assertEquals("GBP", savedAccountDto.getAccountCurrency());
-        assertEquals("https://image.com/logo.png", savedAccountDto.getAccountImageUrl());
+        assertEquals(expectedAccount.getId(), savedAccountDto.getAccountId());
+        assertEquals(expectedAccount.getName(), savedAccountDto.getAccountName());
+        assertEquals(expectedAccount.getDescription(), savedAccountDto.getAccountDescription());
+        assertEquals(expectedAccount.getCurrency().getCurrencyCode(), savedAccountDto.getAccountCurrency());
+        assertEquals(expectedAccount.getImageUrl(), savedAccountDto.getAccountImageUrl());
     }
 
     @DisplayName("Test Save Account - With Id")
@@ -59,6 +63,8 @@ public class AccountServiceTest {
         assertEquals(dto.getAccountDescription(), entity.getDescription());
         assertEquals(dto.getAccountCurrency(), entity.getCurrency().getCurrencyCode());
         assertEquals(dto.getAccountImageUrl(), entity.getImageUrl());
+
+        accountRepository.delete(entity);
     }
 
     @DisplayName("Test Save Account - No Id")
@@ -75,6 +81,22 @@ public class AccountServiceTest {
         assertEquals(dto.getAccountDescription(), entity.getDescription());
         assertEquals(dto.getAccountCurrency(), entity.getCurrency().getCurrencyCode());
         assertEquals(dto.getAccountImageUrl(), entity.getImageUrl());
+
+        accountRepository.delete(entity);
+    }
+
+    @DisplayName("Test Update Account")
+    @Test
+    void updateAccount() {
+        var account = accountRepository.findById(7L).orElseThrow();
+
+        var updatedAccount = Account.updater(account)
+                .withName("Updated Account Name")
+                .build();
+        var saved = accountRepository.save(updatedAccount);
+        System.out.println(saved.getId());
+        System.out.println(saved.getName());
+        System.out.println(saved.getDescription());
     }
 
     private AccountDto createAccountDto_WithId() {

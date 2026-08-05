@@ -27,8 +27,8 @@ import static com.veeteq.documentmngr.rest.api.DocumentController.BASE_URL;
 @CrossOrigin(origins = {"http://localhost:4200", "*"})
 public class DocumentController implements DocumentApi {
     public static final String BASE_URL = "/api";
-    private final static Logger LOGGER = LoggerFactory.getLogger(DocumentController.class);
-	private final static String TRANSACTION_ID = "TransactionId";
+    private static final Logger LOGGER = LoggerFactory.getLogger(DocumentController.class);
+    private static final String TRANSACTION_ID = "Transaction-Id";
 
     private final DocumentService documentService;
 
@@ -49,6 +49,7 @@ public class DocumentController implements DocumentApi {
                 .buildAndExpand(document.getDocumentId())// Replace the path variable with the document ID
                 .toUri();
 
+        //Copy request headers to response
         var headers = new HttpHeaders();
         headers.set(TRANSACTION_ID, transactionId.toString());
 

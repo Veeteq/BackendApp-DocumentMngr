@@ -5,6 +5,7 @@ import com.veeteq.documentmngr.model.Account;
 import com.veeteq.documentmngr.model.Document;
 import com.veeteq.documentmngr.model.Item;
 import com.veeteq.documentmngr.repository.AccountRepository;
+import com.veeteq.documentmngr.repository.CategoryRepository;
 import com.veeteq.documentmngr.repository.DocumentRepository;
 import com.veeteq.documentmngr.repository.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,17 +13,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.zalando.logbook.Logbook;
+import org.zalando.logbook.servlet.LogbookFilter;
 
 public class BaseTest {
 
     @Autowired
-    private ItemRepository itemRepository;
+    protected AccountRepository accountRepository;
 
     @Autowired
-    private AccountRepository accountRepository;
+    protected DocumentRepository documentRepository;
 
     @Autowired
-    private DocumentRepository documentRepository;
+    protected ItemRepository itemRepository;
+
+    @Autowired
+    protected CategoryRepository categoryRepository;
 
     @Autowired
     protected ObjectMapper objectMapper;
@@ -38,9 +44,11 @@ public class BaseTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+        mockMvc = MockMvcBuilders.webAppContextSetup(wac)
+                .addFilters(new LogbookFilter(Logbook.create()))
+                .build();
         item = itemRepository.findById(3L).get();
         account = accountRepository.findById(1L).get();
-        document = documentRepository.findById(2L).get();
+        document = documentRepository.findById(1L).get();
     }
 }
