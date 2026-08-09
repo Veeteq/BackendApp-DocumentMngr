@@ -1,0 +1,11 @@
+.git
+.gitignore
+.github
+.idea
+.settings
+
+**/target
+
+*.log
+
+README.md
