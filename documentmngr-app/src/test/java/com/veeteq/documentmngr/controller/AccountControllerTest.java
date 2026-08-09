@@ -12,10 +12,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Currency;
+import java.util.UUID;
 
 import static com.atlassian.oai.validator.mockmvc.OpenApiValidationMatchers.openApi;
-import static com.veeteq.documentmngr.config.ApiConstants.ACCOUNTS_URL;
-import static com.veeteq.documentmngr.config.ApiConstants.LOCATION;
+import static com.veeteq.documentmngr.config.ApiConstants.*;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -33,8 +33,12 @@ public class AccountControllerTest extends BaseTest {
     @DisplayName("Test List Accounts")
     @Test
     void testListAccounts() throws Exception {
+        var transactionId = UUID.randomUUID().toString();
         mockMvc.perform(get(ACCOUNTS_URL)
-                        .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
+                        .header(TRANSACTION_ID, transactionId))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(openApi().isValid(apiSpecification))
                 .andExpect(jsonPath("$.pageSize").value(25))
@@ -48,8 +52,11 @@ public class AccountControllerTest extends BaseTest {
     @DisplayName("Test Get Account By Id")
     @Test
     void testGetAccountById_WhenAccountExist() throws Exception {
+        var transactionId = UUID.randomUUID().toString();
         mockMvc.perform(get(ACCOUNTS_URL.concat("/{accountId}"), account.getId())
-                        .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
+                        .header(TRANSACTION_ID, transactionId))
                 .andExpect(status().isOk())
                 .andExpect(openApi().isValid(apiSpecification))
                 .andExpect(jsonPath("$.accountId").value(account.getId()));
@@ -59,8 +66,11 @@ public class AccountControllerTest extends BaseTest {
     @DisplayName("Test Get Account By Id - When Account Does Not Exist")
     @Test
     void testGetAccountById_WhenAccountDoesNotExists() throws Exception {
+        var transactionId = UUID.randomUUID().toString();
         mockMvc.perform(get(AccountController.BASE_URL.concat("/v1/accounts/{accountId}"), 7593)
-                        .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
+                        .header(TRANSACTION_ID, transactionId))
                 .andExpect(status().isNotFound())
                 .andExpect(openApi().isValid(apiSpecification));
     }
@@ -69,14 +79,17 @@ public class AccountControllerTest extends BaseTest {
     @DisplayName("Test Create Account")
     @Test
     void testCreateAccount() throws Exception {
+        var transactionId = UUID.randomUUID().toString();
         var dto = new AccountDto()
                 .accountName("Test Account")
                 .accountDescription("Account created to test the POST operation on controller")
                 .accountCurrency("EUR")
                 .accountImageUrl("abc");
         mockMvc.perform(post(ACCOUNTS_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
+                        .header(TRANSACTION_ID, transactionId)
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(openApi().isValid(apiSpecification))
@@ -88,14 +101,17 @@ public class AccountControllerTest extends BaseTest {
     @DisplayName("Test Update Account")
     @Test
     void testUpdateAccount_Success() throws Exception {
+        var transactionId = UUID.randomUUID().toString();
         long accountIdToSearch = 3;
         AccountDto dto = new AccountDto()
                 .accountName("Updated Test Account #3")
                 .accountDescription("Test Account #3 with updated description")
                 .accountCurrency("NOK")
                 .accountImageUrl("http://images.com/account3.png");
-        mockMvc.perform(put(AccountController.BASE_URL.concat("/v1/accounts/{accountId}"), accountIdToSearch)
+        mockMvc.perform(put(ACCOUNTS_URL.concat("/{accountId}"), accountIdToSearch)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
+                        .header(TRANSACTION_ID, transactionId)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
                 .andExpect(openApi().isValid(apiSpecification))
@@ -111,6 +127,7 @@ public class AccountControllerTest extends BaseTest {
     @DisplayName("Test Update Account - When Account Does Not Exist")
     @Test
     void testUpdateAccount_WhenAccountDoesNotExist() throws Exception {
+        var transactionId = UUID.randomUUID().toString();
         long accountIdToSearch = 3456;
         AccountDto dto = new AccountDto()
                 .accountName("Updated Test Account #3456")
@@ -119,6 +136,8 @@ public class AccountControllerTest extends BaseTest {
                 .accountImageUrl("http://images.com/account3456.png");
         mockMvc.perform(put(AccountController.BASE_URL.concat("/v1/accounts/{accountId}"), accountIdToSearch)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
+                        .header(TRANSACTION_ID, transactionId)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isNotFound())
                 .andExpect(openApi().isValid(apiSpecification));
@@ -128,6 +147,7 @@ public class AccountControllerTest extends BaseTest {
     @DisplayName("Test Delete Account - When Account Exists")
     @Test
     void testDeleteAccount_WhenAccountExists() throws Exception {
+        var transactionId = UUID.randomUUID().toString();
         var account = Account.builder().withId(14L)
                 .withName("Test Account #14")
                 .withDescription("Test Account #14")
@@ -136,7 +156,9 @@ public class AccountControllerTest extends BaseTest {
                 .build();
         var entity = accountRepository.save(account);
 
-        mockMvc.perform(delete(AccountController.BASE_URL.concat("/v1/accounts/{accountId}"), entity.getId()))
+        mockMvc.perform(delete(AccountController.BASE_URL.concat("/v1/accounts/{accountId}"), entity.getId())
+                        .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
+                        .header(TRANSACTION_ID, transactionId))
                 .andExpect(status().isNoContent())
                 .andExpect(openApi().isValid(apiSpecification));
 
@@ -147,7 +169,10 @@ public class AccountControllerTest extends BaseTest {
     @DisplayName("Test Delete Account - When Account Does Not Exists")
     @Test
     void testDeleteAccount_WhenAccountDoesNotExist() throws Exception {
-        mockMvc.perform(delete(AccountController.BASE_URL.concat("/v1/accounts/{accountId}"), 9585))
+        var transactionId = UUID.randomUUID().toString();
+        mockMvc.perform(delete(AccountController.BASE_URL.concat("/v1/accounts/{accountId}"), 9585)
+                        .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
+                        .header(TRANSACTION_ID, transactionId))
                 .andExpect(status().isNotFound())
                 .andExpect(openApi().isValid(apiSpecification));
     }
@@ -156,9 +181,12 @@ public class AccountControllerTest extends BaseTest {
     @DisplayName("Test Delete Account - When Account Is Referenced By Document")
     @Test
     void testDeleteAccount_WhenReferencedByDocument() throws Exception {
+        var transactionId = UUID.randomUUID().toString();
         var entity = accountRepository.findById(3L).get();
 
-        mockMvc.perform(delete(AccountController.BASE_URL.concat("/v1/accounts/{accountId}"), entity.getId()))
+        mockMvc.perform(delete(AccountController.BASE_URL.concat("/v1/accounts/{accountId}"), entity.getId())
+                        .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
+                        .header(TRANSACTION_ID, transactionId))
                 .andExpect(status().isConflict())
                 .andExpect(openApi().isValid(apiSpecification));
     }
@@ -167,6 +195,7 @@ public class AccountControllerTest extends BaseTest {
     @DisplayName("Test Create Account - Bad Request")
     @Test
     void testCreateAccount_BadRequest() throws Exception {
+        var transactionId = UUID.randomUUID().toString();
         AccountDto dto = new AccountDto()
                 .accountName(null)
                 .accountDescription("Invalid account created to test the POST operation on controller")
@@ -174,6 +203,8 @@ public class AccountControllerTest extends BaseTest {
                 .accountImageUrl("abc");
         mockMvc.perform(post(AccountController.BASE_URL.concat("/v1/accounts"))
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
+                        .header(TRANSACTION_ID, transactionId)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());
     }

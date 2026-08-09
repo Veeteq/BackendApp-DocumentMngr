@@ -67,7 +67,8 @@
                         <configuration>
                             <skipValidateSpec>true</skipValidateSpec>
                             <inputSpec>https://veeteq.github.io/OpenAPI-DocumentMngr/openapi.yaml</inputSpec>
-                            <!--<inputSpec>http://127.0.0.1:8181/openapi.json</inputSpec>-->
+                            <!--<inputSpec>http://127.0.0.1:4000/_bundle/openapi/openapi.json</inputSpec>-->
+                            <!--<inputSpec>${openapi.inputSpec}</inputSpec>-->
                             <generatorName>spring</generatorName>
                             <library>spring-boot</library>
                             <apiPackage>${default.package}.rest.api</apiPackage>

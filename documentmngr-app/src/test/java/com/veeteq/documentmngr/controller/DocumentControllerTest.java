@@ -100,9 +100,9 @@ public class DocumentControllerTest extends BaseTest {
                 .invoiceNumber("EL/2025/01/ABCDE")
                 .accountId(6L)
                 .payment(new PaymentDto()
-                		.currencyCode("EUR")
-                		.exchangeRate(BigDecimal.valueOf(1.1))
-                		.paymentMethod("EFT"))
+                        .currencyCode("EUR")
+                        .exchangeRate(BigDecimal.valueOf(1.1))
+                        .paymentMethod("EFT"))
                 .documentDate(LocalDate.of(2025, Month.JANUARY, 3))
                 .invoiceNumber("EL/2025/JAN/13579")
                 .documentItems(List.of(new DocumentItemRequestDto()
@@ -144,16 +144,16 @@ public class DocumentControllerTest extends BaseTest {
                 .documentDate(LocalDate.of(2025, Month.JANUARY, 23));
         var json = objectMapper.writeValueAsString(dto);
 
-        var trnId = UUID.randomUUID().toString();
+        var transactionId = UUID.randomUUID().toString();
         mockMvc.perform(post(DocumentController.BASE_URL.concat("/v1/documents"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header(TRANSACTION_ID, trnId)
-                        .header("Accept-Language", "en-US")
+                        .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
+                        .header(TRANSACTION_ID, transactionId)
                         .content(json))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
                 .andExpect(header().exists(TRANSACTION_ID))
-                .andExpect(header().string(TRANSACTION_ID, trnId));
+                .andExpect(header().string(TRANSACTION_ID, transactionId));
     }
 
     @Transactional
@@ -185,17 +185,17 @@ public class DocumentControllerTest extends BaseTest {
                         .version(0)));
         var json = objectMapper.writeValueAsString(dto);
 
-        var trnId = UUID.randomUUID().toString();
+        var transactionId = UUID.randomUUID().toString();
         var docId = document.getId();
         mockMvc.perform(put(DocumentController.BASE_URL.concat("/v1/documents/{id}"), docId)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header(TRANSACTION_ID, trnId)
+                        .header(TRANSACTION_ID, transactionId)
                         .header("Accept-Language", "en-US")
                         .content(json))
                 .andExpect(status().isOk())
                 .andExpect(header().exists(TRANSACTION_ID))
-                .andExpect(header().string(TRANSACTION_ID, trnId))
+                .andExpect(header().string(TRANSACTION_ID, transactionId))
                 .andExpect(jsonPath("$.documentId", Long.class).value(docId.longValue()))
                 .andExpect(jsonPath("$.documentDate", equalTo("2025-01-23")))
                 .andExpect(jsonPath("$.documentType", equalTo("INVOICE")))
@@ -242,17 +242,17 @@ public class DocumentControllerTest extends BaseTest {
                 .version(document.getVersion());
         var json = objectMapper.writeValueAsString(dto);
 
-        var trnId = UUID.randomUUID().toString();
+        var transactionId = UUID.randomUUID().toString();
         var docId = document.getId();
         mockMvc.perform(put(DocumentController.BASE_URL.concat("/v1/documents/{id}"), docId)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header(TRANSACTION_ID, trnId)
+                        .header(TRANSACTION_ID, transactionId)
                         .header("Accept-Language", "en-US")
                         .content(json))
                 .andExpect(status().isOk())
                 .andExpect(header().exists(TRANSACTION_ID))
-                .andExpect(header().string(TRANSACTION_ID, trnId))
+                .andExpect(header().string(TRANSACTION_ID, transactionId))
                 .andExpect(jsonPath("$.documentId", Long.class).value(docId.longValue()))
                 .andExpect(jsonPath("$.documentDate", equalTo("2025-05-12")))
                 .andExpect(jsonPath("$.documentType", equalTo("TRANSFER")))

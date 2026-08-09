@@ -59,9 +59,9 @@ public class DocumentController implements DocumentApi {
                 .build();
     }
 
-	@Override
+    @Override
     @Transactional
-	public ResponseEntity<DocumentResponseDto> getDocumentById(UUID transactionId, Long id) {
+    public ResponseEntity<DocumentResponseDto> getDocumentById(UUID transactionId, Long id, String acceptLanguage) {
         LOGGER.info("Request to get single document by its id: {}.", id);
 
         var headers = new HttpHeaders();
@@ -76,8 +76,8 @@ public class DocumentController implements DocumentApi {
         return response;
     }
 
-	@Override
-	public ResponseEntity<DocumentsResponseDto> listDocuments(UUID transactionId, Integer pageNumber, Integer pageSize, String orderBy, String orderDirection, String acceptLanguage) {
+    @Override
+    public ResponseEntity<DocumentsResponseDto> listDocuments(UUID transactionId, String acceptLanguage, Integer pageNumber, Integer pageSize, String orderBy, String orderDirection) {
         LOGGER.info("Request received to list all documents. TransactionID: {}", transactionId);
 
         var direction = Sort.Direction.fromString(orderDirection);
@@ -95,7 +95,7 @@ public class DocumentController implements DocumentApi {
     }
 
     @Override
-    public ResponseEntity<DocumentResponseDto> updateDocument(UUID transactionId, Long id, DocumentRequestDto dto) {
+    public ResponseEntity<DocumentResponseDto> updateDocument(UUID transactionId, Long id, DocumentRequestDto dto, String acceptLanguage) {
         LOGGER.info("Request received to update document with ID: {}. TransactionID: {}", id, transactionId);
 
         var headers = new HttpHeaders();
@@ -113,7 +113,7 @@ public class DocumentController implements DocumentApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteDocument(Long id, UUID transactionId) {
+    public ResponseEntity<Void> deleteDocument(Long id, UUID transactionId, String acceptLanguage) {
         return ResponseEntity.noContent().build();
     }
 }
