@@ -4,29 +4,27 @@ import com.veeteq.documentmngr.mapper.DocumentMapper;
 import com.veeteq.documentmngr.model.DocumentType;
 import com.veeteq.documentmngr.processor.DocumentProcessor;
 import com.veeteq.documentmngr.processor.DocumentProcessorFactory;
-import com.veeteq.documentmngr.repository.AccountRepository;
 import com.veeteq.documentmngr.repository.DocumentItemRepository;
 import com.veeteq.documentmngr.repository.DocumentRepository;
 import com.veeteq.documentmngr.rest.dto.DocumentRequestDto;
 import com.veeteq.documentmngr.rest.dto.DocumentResponseDto;
+import com.veeteq.documentmngr.rest.dto.DocumentsResponseDto;
 import com.veeteq.documentmngr.service.DocumentService;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
 public class DocumentServiceImpl implements DocumentService {
 
-    private final AccountRepository accountRepository;
     private final DocumentProcessorFactory documentProcessorFactory;
     private final DocumentRepository documentRepository;
     private final DocumentItemRepository documentItemRepository;
     private final DocumentMapper documentMapper;
 
-    public DocumentServiceImpl(AccountRepository accountRepository, DocumentProcessorFactory documentProcessorFactory, DocumentRepository documentRepository, DocumentItemRepository documentItemRepository, DocumentMapper documentMapper) {
-        this.accountRepository = accountRepository;
+    public DocumentServiceImpl(DocumentProcessorFactory documentProcessorFactory, DocumentRepository documentRepository, DocumentItemRepository documentItemRepository, DocumentMapper documentMapper) {
         this.documentProcessorFactory = documentProcessorFactory;
         this.documentRepository = documentRepository;
         this.documentItemRepository = documentItemRepository;
@@ -52,9 +50,17 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     @Transactional
-    public List<DocumentResponseDto> listDocuments() {
-        var retVal = documentRepository.findAll().stream()
-                .map(documentMapper::toDto).toList();
+    public DocumentsResponseDto listDocuments(Pageable pageable) {
+        var page = documentRepository.findAll(pageable);
+        var dtos = page.getContent().stream()
+                .map(documentMapper::toDto)
+                .toList();
+        var retVal = new DocumentsResponseDto()
+                .data(dtos)
+                .currentPage(page.getNumber())
+                .pageSize(page.getSize())
+                .totalItems(page.getTotalElements())
+                .totalPages(page.getTotalPages());
         return retVal;
     }
 
@@ -77,18 +83,4 @@ public class DocumentServiceImpl implements DocumentService {
                 });
         return result;
     }
-
-/*
-    public DocDto update(Long id, DocDto dto) {
-        var updated = docRepository.findByIdWithLock(id)
-                .map(entity -> {
-                    entity.getDocItems().forEach(docItem -> docItemRepository.delete(docItem));
-                    return docMapper.updateWith(entity, dto);
-                })
-                .orElseThrow(() -> new EntityNotFoundException("Document not found"));
-
-        var saved = docRepository.save(updated);
-        return docMapper.toDto(saved);
-    }
- */
 }

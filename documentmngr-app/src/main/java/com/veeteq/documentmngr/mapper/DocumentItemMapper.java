@@ -19,16 +19,7 @@ public interface DocumentItemMapper {
     @Mapping(target = "itemComment",    source = "entity.financialRecord.comment")
     @Mapping(target = "version",        source = "entity.version")
     DocumentItemResponseDto toDto(DocumentItem entity);
-/*
-    @Mapping(target = "withId",               ignore = true)
-    @Mapping(target = "withDocument",         expression = "java(document)")
-    @Mapping(target = "withDocumentItemType", source = "dto.itemType")
-    @Mapping(target = "withItem",             expression  = "java(itemRepository.findById(dto.getItemId()).orElseThrow())")
-    @Mapping(target = "withItemQuantity",     source = "dto.itemQuantity")
-    @Mapping(target = "withItemPrice",        source = "dto.itemPrice")
-    @Mapping(target = "withItemComment",      source = "dto.itemDescription")
-    DocumentItem toEntity(DocumentItemRequestDto dto, Document document, @Autowired ItemRepository itemRepository);
-*/
+
     @Mapping(target = "withId",               source = "dto.seqId")
     @Mapping(target = "withDocument",         expression = "java(document)")
     @Mapping(target = "withDocumentItemType", source = "dto.itemType")

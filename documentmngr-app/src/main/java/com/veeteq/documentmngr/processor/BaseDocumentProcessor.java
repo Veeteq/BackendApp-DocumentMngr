@@ -1,12 +1,9 @@
 package com.veeteq.documentmngr.processor;
 
 import com.veeteq.documentmngr.mapper.DocumentMapper;
-import com.veeteq.documentmngr.model.Account;
 import com.veeteq.documentmngr.model.Document;
 import com.veeteq.documentmngr.model.DocumentType;
 import com.veeteq.documentmngr.repository.AccountRepository;
-import com.veeteq.documentmngr.repository.ItemRepository;
-import com.veeteq.documentmngr.repository.UtilityRepository;
 import com.veeteq.documentmngr.rest.dto.DocumentRequestDto;
 import com.veeteq.documentmngr.rest.dto.DocumentTypeDto;
 import org.springframework.stereotype.Service;
@@ -23,10 +20,10 @@ public class BaseDocumentProcessor implements DocumentProcessor {
     }
 
     @Override
-    public Document process(DocumentRequestDto documentDto) {
+    public Document process(DocumentRequestDto dto) {
         System.out.println("Processing using " + Type.BASE);
-        var account = accountRepository.findById(documentDto.getAccountId()).orElseThrow();
-        var document = documentMapper.toEntity(documentDto, account);
+        var account = accountRepository.findById(dto.getAccountId()).orElseThrow();
+        var document = documentMapper.toEntity(dto, account);
         return document;
     }
 

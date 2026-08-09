@@ -6,11 +6,14 @@ import com.veeteq.documentmngr.rest.dto.DocumentItemRequestDto;
 import com.veeteq.documentmngr.rest.dto.DocumentItemRequestDto.ItemTypeEnum;
 import com.veeteq.documentmngr.rest.dto.DocumentRequestDto;
 import com.veeteq.documentmngr.rest.dto.DocumentTypeDto;
+import com.veeteq.documentmngr.rest.dto.PaymentDto;
+
 import jakarta.transaction.Transactional;
-import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockCookie;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -19,11 +22,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
+import static com.veeteq.documentmngr.config.ApiConstants.*;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(classes = DocumentMngrApp.class)
+@ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DocumentControllerTest extends BaseTest {
 
@@ -31,14 +36,16 @@ public class DocumentControllerTest extends BaseTest {
     @Test
     @Order(1)
     void testListDocuments() throws Exception {
-        var trnId = UUID.randomUUID().toString();
-        mockMvc.perform(get(DocumentController.BASE_URL.concat("/v1/documents"))
+        var cookie = new MockCookie("cookieParam", "12345");
+        var transactionId = UUID.randomUUID().toString();
+        mockMvc.perform(get(DOCUMENTS_URL)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header("Transaction-Id", trnId)
-                        .header("Accept-Language", "en-US"))
+                        .cookie(cookie)
+                        .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
+                        .header(TRANSACTION_ID, transactionId))
                 .andExpect(status().isOk())
-                .andExpect(header().exists("Transaction-Id"))
-                .andExpect(header().string("Transaction-Id", trnId))
+                .andExpect(header().exists(TRANSACTION_ID))
+                .andExpect(header().string(TRANSACTION_ID, transactionId))
                 .andExpect(jsonPath("$.length()", greaterThan(0)));
     }
 
@@ -47,13 +54,14 @@ public class DocumentControllerTest extends BaseTest {
     @Test
     @Order(2)
     void testGetDocumentById() throws Exception {
-        var trnId = UUID.randomUUID().toString();
-        var result = mockMvc.perform(get(DocumentController.BASE_URL.concat("/v1/documents/{document_id}"), document.getId())
-                        .header("Transaction-Id", trnId)
-                        .accept(MediaType.APPLICATION_JSON))
+        var transactionId = UUID.randomUUID().toString();
+        mockMvc.perform(get(DocumentController.BASE_URL.concat("/v1/documents/{document_id}"), document.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(TRANSACTION_ID, transactionId))
                 .andExpect(status().isOk())
-                .andExpect(header().exists("Transaction-Id"))
-                .andExpect(header().string("Transaction-Id", trnId))
+                .andExpect(jsonPath("$.documentId").value(document.getId()))
+                .andExpect(header().exists(TRANSACTION_ID))
+                .andExpect(header().string(TRANSACTION_ID, transactionId))
                 .andExpect(jsonPath("$.documentId", Long.class).value(document.getId()))
                 .andExpect(jsonPath("$.documentDate", equalTo(document.getDocumentDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))))
                 .andExpect(jsonPath("$.documentType", equalTo(document.getDocumentType().name())))
@@ -89,12 +97,14 @@ public class DocumentControllerTest extends BaseTest {
                 .documentType(DocumentTypeDto.INVOICE)
                 .documentName("Home electricity")
                 .documentDescription("Home electricity; January invoice")
+                .invoiceNumber("EL/2025/01/ABCDE")
                 .accountId(6L)
-                .currencyCode("EUR")
-                .exchangeRate(BigDecimal.valueOf(1.1))
+                .payment(new PaymentDto()
+                        .currencyCode("EUR")
+                        .exchangeRate(BigDecimal.valueOf(1.1))
+                        .paymentMethod("EFT"))
                 .documentDate(LocalDate.of(2025, Month.JANUARY, 3))
                 .invoiceNumber("EL/2025/JAN/13579")
-                .paymentMethod("EFT")
                 .documentItems(List.of(new DocumentItemRequestDto()
                         .itemType(ItemTypeEnum.EXP)
                         .itemId(5L)
@@ -104,16 +114,18 @@ public class DocumentControllerTest extends BaseTest {
                         .itemDescription("Payment for: Home electricity")));
         var json = objectMapper.writeValueAsString(dto);
 
-        var trnId = UUID.randomUUID().toString();
+        var cookie = new MockCookie("cookieParam", "12345");
+        var transactionId = UUID.randomUUID().toString();
         mockMvc.perform(post(DocumentController.BASE_URL.concat("/v1/documents"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Transaction-Id", trnId)
-                        .header("Accept-Language", "en-US")
+                        .cookie(cookie)
+                        .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
+                        .header(TRANSACTION_ID, transactionId)
                         .content(json))
                 .andExpect(status().isCreated())
-                .andExpect(header().exists("Location"))
-                .andExpect(header().exists("Transaction-Id"))
-                .andExpect(header().string("Transaction-Id", trnId));
+                .andExpect(header().exists(LOCATION))
+                .andExpect(header().exists(TRANSACTION_ID))
+                .andExpect(header().string(TRANSACTION_ID, transactionId));
     }
 
     @DisplayName("Test Create Transfer Document")
@@ -122,25 +134,26 @@ public class DocumentControllerTest extends BaseTest {
     void testCreateTransferDocument() throws Exception {
         var dto = new DocumentRequestDto()
                 .documentType(DocumentTypeDto.TRANSFER)
-                .paymentMethod("EFT")
+                .payment(new PaymentDto()
+                        .paymentMethod("EFT")
+                        .currencyCode("EUR")
+                        .exchangeRate(BigDecimal.valueOf(1.1)))
                 .accountId(6L)
                 .targetAccountId(7L)
                 .transferAmount(BigDecimal.valueOf(99.99))
-                .currencyCode("EUR")
-                .exchangeRate(BigDecimal.valueOf(1.1))
                 .documentDate(LocalDate.of(2025, Month.JANUARY, 23));
         var json = objectMapper.writeValueAsString(dto);
 
-        var trnId = UUID.randomUUID().toString();
+        var transactionId = UUID.randomUUID().toString();
         mockMvc.perform(post(DocumentController.BASE_URL.concat("/v1/documents"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Transaction-Id", trnId)
-                        .header("Accept-Language", "en-US")
+                        .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
+                        .header(TRANSACTION_ID, transactionId)
                         .content(json))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
-                .andExpect(header().exists("Transaction-Id"))
-                .andExpect(header().string("Transaction-Id", trnId));
+                .andExpect(header().exists(TRANSACTION_ID))
+                .andExpect(header().string(TRANSACTION_ID, transactionId));
     }
 
     @Transactional
@@ -157,9 +170,10 @@ public class DocumentControllerTest extends BaseTest {
                 .documentDescription("Home electricity; January invoice updated")
                 .invoiceNumber("EL/2025/JAN/13579/UPDATED")
                 .accountId(4L)
-                .currencyCode("EUR")
-                .exchangeRate(BigDecimal.valueOf(1.1))
-                .paymentMethod("EFT")
+                .payment(new PaymentDto()
+                        .paymentMethod("EFT")
+                        .currencyCode("EUR")
+                        .exchangeRate(BigDecimal.valueOf(1.1)))
                 .version(document.getVersion())
                 .documentItems(List.of(new DocumentItemRequestDto()
                         .itemType(ItemTypeEnum.EXP)
@@ -171,17 +185,17 @@ public class DocumentControllerTest extends BaseTest {
                         .version(0)));
         var json = objectMapper.writeValueAsString(dto);
 
-        var trnId = UUID.randomUUID().toString();
+        var transactionId = UUID.randomUUID().toString();
         var docId = document.getId();
         mockMvc.perform(put(DocumentController.BASE_URL.concat("/v1/documents/{id}"), docId)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Transaction-Id", trnId)
+                        .header(TRANSACTION_ID, transactionId)
                         .header("Accept-Language", "en-US")
                         .content(json))
                 .andExpect(status().isOk())
-                .andExpect(header().exists("Transaction-Id"))
-                .andExpect(header().string("Transaction-Id", trnId))
+                .andExpect(header().exists(TRANSACTION_ID))
+                .andExpect(header().string(TRANSACTION_ID, transactionId))
                 .andExpect(jsonPath("$.documentId", Long.class).value(docId.longValue()))
                 .andExpect(jsonPath("$.documentDate", equalTo("2025-01-23")))
                 .andExpect(jsonPath("$.documentType", equalTo("INVOICE")))
@@ -221,23 +235,24 @@ public class DocumentControllerTest extends BaseTest {
                 .accountId(4L)
                 .targetAccountId(6L)
                 .transferAmount(BigDecimal.valueOf(1234.56))
-                .currencyCode("EUR")
-                .exchangeRate(BigDecimal.valueOf(1.16))
-                .paymentMethod("EFT")
+                .payment(new PaymentDto()
+                        .paymentMethod("EFT")
+                        .currencyCode("EUR")
+                        .exchangeRate(BigDecimal.valueOf(1.16)))
                 .version(document.getVersion());
         var json = objectMapper.writeValueAsString(dto);
 
-        var trnId = UUID.randomUUID().toString();
+        var transactionId = UUID.randomUUID().toString();
         var docId = document.getId();
         mockMvc.perform(put(DocumentController.BASE_URL.concat("/v1/documents/{id}"), docId)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Transaction-Id", trnId)
+                        .header(TRANSACTION_ID, transactionId)
                         .header("Accept-Language", "en-US")
                         .content(json))
                 .andExpect(status().isOk())
-                .andExpect(header().exists("Transaction-Id"))
-                .andExpect(header().string("Transaction-Id", trnId))
+                .andExpect(header().exists(TRANSACTION_ID))
+                .andExpect(header().string(TRANSACTION_ID, transactionId))
                 .andExpect(jsonPath("$.documentId", Long.class).value(docId.longValue()))
                 .andExpect(jsonPath("$.documentDate", equalTo("2025-05-12")))
                 .andExpect(jsonPath("$.documentType", equalTo("TRANSFER")))

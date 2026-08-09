@@ -53,9 +53,9 @@ public abstract class DocumentMapperDecorator implements DocumentMapper {
                 .withInvoiceNumber(dto.getInvoiceNumber())
                 .withAccount(account)
                 .withCounterpartyId(dto.getCounterpartyId())
-                .withPaymentMethod(dto.getPaymentMethod())
-                .withCurrencyCode(dto.getCurrencyCode())
-                .withExchangeRate(dto.getExchangeRate())
+                .withPaymentMethod(dto.getPayment().getPaymentMethod())
+                .withCurrencyCode(dto.getPayment().getCurrencyCode())
+                .withExchangeRate(dto.getPayment().getExchangeRate())
                 .withVersion(dto.getVersion())
                 .build();
         after(dto, document);
@@ -71,20 +71,13 @@ public abstract class DocumentMapperDecorator implements DocumentMapper {
                 .withTargetAccount(targetAccount)
                 .withTransferAmount(dto.getTransferAmount())
                 .withTransferItem(transferItem)
-                .withPaymentMethod(dto.getPaymentMethod())
-                .withCurrencyCode(dto.getCurrencyCode())
-                .withExchangeRate(dto.getExchangeRate())
+                .withPaymentMethod(dto.getPayment().getPaymentMethod())
+                .withCurrencyCode(dto.getPayment().getCurrencyCode())
+                .withExchangeRate(dto.getPayment().getExchangeRate())
                 .withVersion(dto.getVersion())
                 .build();
         after(dto, document);
         return document;
     }
-/*
-    @AfterMapping
-    public void after(DocumentRequestDto dto, @MappingTarget Document entity) {
-        dto.getDocumentItems().stream()
-                .map(itemDto -> documentItemMapper.toEntity(itemDto, entity, itemRepository))
-                .forEach(entity::addToDocumentItems);
-    }
-*/
+
 }

@@ -1,7 +1,6 @@
 package com.veeteq.documentmngr.controller;
 
 import com.veeteq.documentmngr.DocumentMngrApp;
-import com.veeteq.documentmngr.model.Category;
 import com.veeteq.documentmngr.model.Item;
 import com.veeteq.documentmngr.rest.api.ItemController;
 import com.veeteq.documentmngr.rest.dto.ItemRequestDto;
@@ -9,13 +8,17 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 
 import static com.atlassian.oai.validator.mockmvc.OpenApiValidationMatchers.openApi;
+import static com.veeteq.documentmngr.config.ApiConstants.ITEMS_URL;
+import static com.veeteq.documentmngr.config.ApiConstants.LOCATION;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(classes = DocumentMngrApp.class)
+@ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ItemControllerTest extends BaseTest {
 
@@ -26,7 +29,7 @@ public class ItemControllerTest extends BaseTest {
     @DisplayName("Test List Items")
     @Test
     void testListItems_Success() throws Exception {
-        mockMvc.perform(get(ItemController.BASE_URL.concat("/v1/items"))
+        mockMvc.perform(get(ITEMS_URL)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(openApi().isValid(apiSpecification))
@@ -41,7 +44,7 @@ public class ItemControllerTest extends BaseTest {
     @DisplayName("Test Get Item By Id")
     @Test
     void testGetItemById_Success() throws Exception {
-        mockMvc.perform(get(ItemController.BASE_URL.concat("/v1/items/{itemId}"), item.getId())
+        mockMvc.perform(get(ITEMS_URL.concat("/{itemId}"), item.getId())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(openApi().isValid(apiSpecification))
@@ -55,12 +58,11 @@ public class ItemControllerTest extends BaseTest {
         ItemRequestDto dto = new ItemRequestDto()
                 .itemName("Test Item")
                 .categoryId(1L);
-        mockMvc.perform(post(ItemController.BASE_URL.concat("/v1/items"))
+        mockMvc.perform(post(ITEMS_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
-                //.andExpect(openApi().isValid(apiSpecification))
-                .andExpect(header().exists("Location"));
+                .andExpect(header().exists(LOCATION));
     }
 
     @Order(value = 3)

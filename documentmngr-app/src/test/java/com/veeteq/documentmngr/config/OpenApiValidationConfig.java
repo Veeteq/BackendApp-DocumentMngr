@@ -16,9 +16,6 @@ import java.io.IOException;
 @Configuration
 public class OpenApiValidationConfig {
 
-    @Value("${open.api.spec.url}")
-    private String apiSpecification;
-
     @Bean
     public Filter validationFilter() {
         return new OpenApiValidationFilter(
@@ -28,17 +25,17 @@ public class OpenApiValidationConfig {
     }
 
     @Bean
-    public WebMvcConfigurer addOpenApiValidationInterceptor() throws IOException {
+    public WebMvcConfigurer addOpenApiValidationInterceptor(@Value("${open.api.spec.url}") final String apiSpecification) throws IOException {
         final OpenApiInteractionValidator validator = OpenApiInteractionValidator
                 .createForSpecificationUrl(apiSpecification)
                 .withLevelResolver(SpringMVCLevelResolverFactory.create())
                 .withBasePathOverride("/api")
                 .build();
-        final OpenApiValidationInterceptor interceptor = new OpenApiValidationInterceptor(validator);
+        final OpenApiValidationInterceptor openApiValidationInterceptor = new OpenApiValidationInterceptor(validator);
         return new WebMvcConfigurer() {
             @Override
             public void addInterceptors(final InterceptorRegistry registry) {
-                registry.addInterceptor(interceptor);
+                registry.addInterceptor(openApiValidationInterceptor);
             }
         };
     }

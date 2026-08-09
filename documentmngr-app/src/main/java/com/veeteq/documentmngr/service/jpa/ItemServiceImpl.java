@@ -4,21 +4,18 @@ import com.veeteq.documentmngr.exception.ConflictException;
 import com.veeteq.documentmngr.exception.NotFoundException;
 import com.veeteq.documentmngr.mapper.ItemMapper;
 import com.veeteq.documentmngr.model.Item;
-import com.veeteq.documentmngr.repository.CategoryRepository;
-import com.veeteq.documentmngr.repository.DocumentItemRepository;
-import com.veeteq.documentmngr.repository.ItemRepository;
-import com.veeteq.documentmngr.repository.UtilityRepository;
+import com.veeteq.documentmngr.repository.*;
 import com.veeteq.documentmngr.rest.dto.ItemDto;
 import com.veeteq.documentmngr.rest.dto.ItemRequestDto;
 import com.veeteq.documentmngr.rest.dto.ItemsResponseDto;
 import com.veeteq.documentmngr.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -40,7 +37,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> getItems() {
-        //if (1==1) throw new DataIntegrityViolationException("Bla");
         var result = itemRepository.findAll();
         return result.stream().map(itemMapper::toDto).collect(Collectors.toList());
     }

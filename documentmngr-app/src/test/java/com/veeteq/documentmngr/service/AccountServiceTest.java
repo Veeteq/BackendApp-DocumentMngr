@@ -8,6 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
@@ -17,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(classes = DocumentMngrApp.class)
+@ActiveProfiles("test")
 public class AccountServiceTest {
 
     @Autowired
@@ -37,13 +39,14 @@ public class AccountServiceTest {
     @Test
     void getAccountById() {
         var savedAccountDto = accountService.getAccountById(5L);
+        var expectedAccount = accountRepository.findById(5L).orElseThrow();
 
         assertNotNull(savedAccountDto);
-        assertEquals(5L, savedAccountDto.getAccountId());
-        assertEquals("EFG", savedAccountDto.getAccountName());
-        assertEquals("EFG Description", savedAccountDto.getAccountDescription());
-        assertEquals("GBP", savedAccountDto.getAccountCurrency());
-        assertEquals("https://image.com/efg.png", savedAccountDto.getAccountImageUrl());
+        assertEquals(expectedAccount.getId(), savedAccountDto.getAccountId());
+        assertEquals(expectedAccount.getName(), savedAccountDto.getAccountName());
+        assertEquals(expectedAccount.getDescription(), savedAccountDto.getAccountDescription());
+        assertEquals(expectedAccount.getCurrency().getCurrencyCode(), savedAccountDto.getAccountCurrency());
+        assertEquals(expectedAccount.getImageUrl(), savedAccountDto.getAccountImageUrl());
     }
 
     @DisplayName("Test Save Account - With Id")

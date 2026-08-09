@@ -1,5 +1,8 @@
 package com.veeteq.documentmngr.model.generator;
 
+import com.veeteq.documentmngr.repository.EntityIdMapping;
+import com.veeteq.documentmngr.repository.UtilityRepository;
+import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
 import org.hibernate.persister.entity.EntityPersister;
@@ -15,7 +18,8 @@ public class CustomIdGenerator implements IdentifierGenerator {
 
     @Override
     public Object generate(SharedSessionContractImplementor session, Object object) {
-        String activeProfile = applicationContext.getEnvironment().getActiveProfiles()[0]; // Get the first active profile
+        if (object == null) throw new HibernateException("Cannot generate ID for null entity");
+
         var className = object.getClass().getName();
 
         final EntityPersister persister = session.getEntityPersister(className, object);
@@ -24,7 +28,10 @@ public class CustomIdGenerator implements IdentifierGenerator {
             return identifier;
         }
 
-        return generateIdForEntity(session, persister.getEntityName());
+        var entityIdMapping = resolveEntityIdMapping(object);
+        var id = getUtilityRepository().getNextId(entityIdMapping);
+        return id;
+        //generateIdForEntity(session, persister.getEntityName());
     }
 
     @Override
@@ -37,4 +44,24 @@ public class CustomIdGenerator implements IdentifierGenerator {
         Long maxId = session.createQuery(query, Long.class).uniqueResult();
         return (maxId == null ? 1 : maxId + 1);
     }
+
+    private UtilityRepository getUtilityRepository() {
+        if (applicationContext == null) throw new HibernateException("Spring ApplicationContext is not available in CustomIdGenerator");
+        return applicationContext.getBean(UtilityRepository.class);
+    }
+
+    private EntityIdMapping resolveEntityIdMapping(Object object) {
+        return switch (object.getClass().getSimpleName()) {
+            case "Account" -> EntityIdMapping.ACCOUNT;
+            case "Category" -> EntityIdMapping.CATEGORY;
+            case "Document" -> EntityIdMapping.DOCUMENT;
+            case "Item" -> EntityIdMapping.ITEM;
+            case "Income" -> EntityIdMapping.INCOME;
+            case "Expense" -> EntityIdMapping.EXPENSE;
+            default -> throw new HibernateException(
+                    "No EntityIdMapping configured for entity: " + object.getClass().getName()
+            );
+        };
+    }
+
 }

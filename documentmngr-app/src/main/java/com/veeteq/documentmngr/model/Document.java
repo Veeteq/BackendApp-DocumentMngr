@@ -1,8 +1,8 @@
 package com.veeteq.documentmngr.model;
 
 import com.veeteq.documentmngr.model.generator.CustomId;
-import com.veeteq.documentmngr.poc.DocItem;
 import jakarta.persistence.*;
+import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -32,6 +32,7 @@ public class Document {
     private LocalDate documentDate;
 
     @Enumerated(EnumType.STRING)
+    @ColumnTransformer(read = "UPPER(docu_type_tx)") //, write = "LOWER(?)")
     @Column(name="docu_type_tx", nullable = false)
     private DocumentType documentType;
 
@@ -52,6 +53,7 @@ public class Document {
     private Long counterpartyId;
 
     @Enumerated(EnumType.STRING)
+    @ColumnTransformer(read = "UPPER(paym_meth_tx)")
     @Column(name = "paym_meth_tx", length = 15)
     private PaymentMethod paymentMethod;
 
@@ -346,7 +348,7 @@ public class Document {
         }
 
         private String createTransferDescription(BigDecimal transferAmount, Account sourceAccount, Account targetAccount) {
-            var messageFormat = new MessageFormat("Transfer of {0} {1} from {2} to {3} {4} {5}", new Locale("pl", "PL"));
+            var messageFormat = new MessageFormat("Transfer of {0} {1} from {2} to {3} {4} {5}", Locale.of("pl", "PL"));
 
             var targetAmount = calculateTargetAmount(transferAmount, entity.exchangeRate);
             var args = new Object[]{transferAmount, sourceAccount.getCurrency(), sourceAccount.getName(), targetAmount, entity.getCurrency(), targetAccount.getName()};

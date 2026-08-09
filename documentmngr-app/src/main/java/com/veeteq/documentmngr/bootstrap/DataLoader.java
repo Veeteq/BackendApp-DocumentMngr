@@ -2,7 +2,6 @@ package com.veeteq.documentmngr.bootstrap;
 
 import com.veeteq.documentmngr.model.*;
 import com.veeteq.documentmngr.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -25,7 +24,6 @@ public class DataLoader implements CommandLineRunner {
     private final DocumentRepository documentRepository;
     private final UtilityRepository utilityRepository;
 
-    @Autowired
     public DataLoader(AccountRepository accountRepository, ItemRepository itemRepository, DocumentRepository documentRepository, UtilityRepository utilityRepository) {
         this.accountRepository = accountRepository;
         this.itemRepository = itemRepository;
@@ -34,7 +32,7 @@ public class DataLoader implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         loadAccounts();
         loadItems();
         loadDocuments();

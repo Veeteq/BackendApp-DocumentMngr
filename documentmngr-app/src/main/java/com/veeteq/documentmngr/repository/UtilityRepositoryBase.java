@@ -2,11 +2,11 @@ package com.veeteq.documentmngr.repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
 @Repository
-@Profile({"test", "qa"})
+@Primary
 public class UtilityRepositoryBase implements UtilityRepository {
 
     @PersistenceContext
