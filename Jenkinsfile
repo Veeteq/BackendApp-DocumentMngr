@@ -32,20 +32,21 @@ pipeline {
             }
         }
 
+        stage('Verify Artifact') {
+            steps {
+                sh '''
+                    echo "Checking built artifact..."
+                    test -f ${JAR_PATH}
+                    ls -lh ${JAR_PATH}
+                '''
+            }
+        }
+
         stage('Docker Build') {
             steps {
                 sh '''
                     docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
                 '''
-            }
-        }
-
-        stage('Verify') {
-            steps {
-                sh 'pwd'
-                sh 'git log --oneline -1'
-                sh 'ls -la'
-                sh 'test -f pom.xml'
             }
         }
 
