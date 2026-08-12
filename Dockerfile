@@ -1,0 +1,42 @@
+# ============================================================
+# Build stage
+# ============================================================
+FROM maven:3.9.9-eclipse-temurin-21 AS build
+
+WORKDIR /app
+
+# ------------------------------------------------------------
+# 1. Copy Maven project descriptors
+# ------------------------------------------------------------
+COPY pom.xml .
+COPY openapi/pom.xml openapi/pom.xml
+COPY documentmngr-app/pom.xml documentmngr-app/pom.xml
+
+# ------------------------------------------------------------
+# 2. Download Maven dependencies
+# ------------------------------------------------------------
+RUN mvn dependency:go-offline -DskipTests
+
+# ------------------------------------------------------------
+# 3. Copy source code
+# ------------------------------------------------------------
+COPY openapi openapi
+COPY documentmngr-app documentmngr-app
+
+# ------------------------------------------------------------
+# 4. Build application
+# ------------------------------------------------------------
+RUN mvn package -DskipTests
+#RUN --mount=type=cache,target=/root/.m2 mvn package -DskipTests
+
+
+# ============================================================
+# Runtime stage
+# ============================================================
+FROM eclipse-temurin:21-jre
+
+WORKDIR /app
+
+COPY --from=build /app/documentmngr-app/target/documentmngr-app.jar app.jar
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
