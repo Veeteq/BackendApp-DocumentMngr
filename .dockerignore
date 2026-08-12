@@ -5,6 +5,7 @@
 .settings
 
 **/target
+!documentmngr-app/target/**
 
 *.log
 

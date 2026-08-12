@@ -6,6 +6,7 @@ pipeline {
     }
 
     environment {
+      JAR_PATH = 'documentmngr-app/target/documentmngr-app.jar'
       REPOSITORY_URL = 'ssh://root@192.168.56.104/root/git/bck-document-mngr.git'
       IMAGE_NAME = 'documentmngr-app'
       IMAGE_TAG = 'latest'
