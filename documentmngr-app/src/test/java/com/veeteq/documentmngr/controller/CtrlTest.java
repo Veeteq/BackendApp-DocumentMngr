@@ -7,6 +7,7 @@ import com.veeteq.documentmngr.rest.dto.DocumentItemRequestDto.ItemTypeEnum;
 import com.veeteq.documentmngr.service.DocumentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -27,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(DocumentController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class CtrlTest {
     private static final Long CREATED_DOCUMENT_ID = 12345L;
 
