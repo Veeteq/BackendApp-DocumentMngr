@@ -1,0 +1,16 @@
+.git
+.gitignore
+.github
+.idea
+.settings
+
+**/target
+!documentmngr-app/target/**
+
+*.log
+
+.mvn
+mvnw
+mvnw.cmd
+
+README.md
