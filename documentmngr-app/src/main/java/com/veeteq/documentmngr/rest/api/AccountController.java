@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 import static com.veeteq.documentmngr.rest.api.AccountController.BASE_URL;
@@ -69,7 +70,17 @@ public class AccountController implements AccountApi {
                 .body(result);
 	}
 
-	@Override
+    @Override
+    public ResponseEntity<List<AccountDto>> searchAccounts(String name, UUID transactionId, String acceptLanguage) {
+        LOGGER.info("Request received to search for accounts");
+
+        var result = accountService.searchAccounts(name);
+        return ResponseEntity.ok()
+                .header(TRANSACTION_ID, transactionId.toString())
+                .body(result);
+    }
+
+    @Override
 	public ResponseEntity<AccountDto> updateAccount(Long id, UUID transactionId, AccountDto dto, String acceptLanguage) {
         LOGGER.info("Request received to update account: {}. Account Id: {}", dto, id);
 

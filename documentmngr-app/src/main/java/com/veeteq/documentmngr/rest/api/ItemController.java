@@ -1,23 +1,23 @@
 package com.veeteq.documentmngr.rest.api;
 
-import com.veeteq.documentmngr.rest.dto.ItemRequestDto;
-import com.veeteq.documentmngr.rest.dto.ItemsResponseDto;
-import com.veeteq.documentmngr.service.ItemService;
-import com.veeteq.documentmngr.rest.dto.ItemDto;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
+import java.net.URI;
+import java.util.List;
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
-import java.util.List;
+import com.veeteq.documentmngr.rest.dto.ItemDto;
+import com.veeteq.documentmngr.rest.dto.ItemRequestDto;
+import com.veeteq.documentmngr.rest.dto.ItemsResponseDto;
+import com.veeteq.documentmngr.service.ItemService;
 
 @RestController
 @RequestMapping(path = ItemController.BASE_URL)
@@ -47,15 +47,15 @@ public class ItemController implements ItemApi {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping(path = "/items/search", produces = { "application/json" })
-    public ResponseEntity<List<ItemDto>> searchItemsByName(@NotNull @Parameter(name = "name", description = "Name to search for", in = ParameterIn.QUERY) @Valid @RequestParam(value = "name", required = true) String name) {
-        LOGGER.info("Request to search for accounts starting with name: {}", name);
-
-        var response = itemService.searchItemsByName(name);
+    @Override
+    public ResponseEntity<List<ItemDto>> searchItems(UUID transactionId, String name, String category, String acceptLanguage) {
+        LOGGER.info("Request to search for items starting with name: {}", name);
+        var response = itemService.searchItemsByNameOrCategory(name, category);
         return ResponseEntity
                 .ok()
                 .body(response);
     }
+
 
     @Override
     public ResponseEntity<Void> createItem(ItemRequestDto dto) {
