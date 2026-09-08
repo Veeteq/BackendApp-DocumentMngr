@@ -13,8 +13,6 @@ public interface ItemService {
 
     ItemsResponseDto getItems(Pageable pageable);
 
-    List<ItemDto> searchItemsByName(String pattern);
-
     ItemsResponseDto getItemsWithPattern(String pattern, Pageable pageable);
 
     ItemDto getItemById(Long id);
@@ -24,4 +22,6 @@ public interface ItemService {
     ItemDto updateItem(Long id, ItemRequestDto dto);
 
     void deleteById(Long id);
+
+    List<ItemDto> searchItemsByNameOrCategory(String name, String categoryName);
 }

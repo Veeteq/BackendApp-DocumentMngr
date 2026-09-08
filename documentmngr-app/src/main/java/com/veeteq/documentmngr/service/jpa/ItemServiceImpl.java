@@ -1,23 +1,30 @@
 package com.veeteq.documentmngr.service.jpa;
 
+import static com.veeteq.documentmngr.repository.ItemSpecifications.hasCategory;
+import static com.veeteq.documentmngr.repository.ItemSpecifications.nameContains;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
 import com.veeteq.documentmngr.exception.ConflictException;
 import com.veeteq.documentmngr.exception.NotFoundException;
 import com.veeteq.documentmngr.mapper.ItemMapper;
 import com.veeteq.documentmngr.model.Item;
-import com.veeteq.documentmngr.repository.*;
+import com.veeteq.documentmngr.repository.CategoryRepository;
+import com.veeteq.documentmngr.repository.DocumentItemRepository;
+import com.veeteq.documentmngr.repository.ItemRepository;
 import com.veeteq.documentmngr.rest.dto.ItemDto;
 import com.veeteq.documentmngr.rest.dto.ItemRequestDto;
 import com.veeteq.documentmngr.rest.dto.ItemsResponseDto;
 import com.veeteq.documentmngr.service.ItemService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 public class ItemServiceImpl implements ItemService {
@@ -48,8 +55,23 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> searchItemsByName(String pattern) {
-        List<Item> result = itemRepository.findByNameContainingIgnoreCase(pattern);
+    public List<ItemDto> searchItemsByNameOrCategory(String name, String categoryName) {
+        if (!StringUtils.hasText(name) && !StringUtils.hasText(categoryName)) throw new IllegalArgumentException("At least one search parameter is required");
+
+        Specification<Item> specification = Specification.unrestricted();
+        if (StringUtils.hasText(name)) {
+            specification = specification.and(nameContains(name));
+        }
+
+        if (StringUtils.hasText(categoryName)) {
+            var category = categoryRepository
+                    .findByNameIgnoreCase(categoryName)
+                    .orElseThrow(() -> new NotFoundException("Category '%s' not found".formatted(categoryName)
+                    ));
+            specification = specification.and(hasCategory(category.getId()));
+        }
+
+        List<Item> result = itemRepository.findAll(specification);
 
         return StreamSupport.stream(result.spliterator(), false)
                 .map(itemMapper::toDto)
