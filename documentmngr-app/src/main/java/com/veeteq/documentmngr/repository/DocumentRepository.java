@@ -13,18 +13,18 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
     long countByAccount(Account account);
 
     @Query("""
-    SELECT DISTINCT d.name
+    SELECT DISTINCT d.documentName
       FROM Document d
-     WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :pattern, '%'))
+     WHERE LOWER(d.documentName) LIKE LOWER(CONCAT('%', :pattern, '%'))
     """)
     Set<String> findDistinctNames(@Param("pattern") String pattern);
 
     @Query("""
-    SELECT DISTINCT d.comment
+    SELECT DISTINCT e.comment
       FROM Expense e
-     WHERE LOWER(i.comment) LIKE LOWER(CONCAT('%', :pattern, '%'))
+     WHERE LOWER(e.comment) LIKE LOWER(CONCAT('%', :pattern, '%'))
      UNION
-     SELECT DISTINCT i.comment
+    SELECT DISTINCT i.comment
       FROM Income i
      WHERE LOWER(i.comment) LIKE LOWER(CONCAT('%', :pattern, '%'))
     """)
