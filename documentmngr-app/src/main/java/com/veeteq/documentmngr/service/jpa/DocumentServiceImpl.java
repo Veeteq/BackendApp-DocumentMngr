@@ -15,10 +15,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class DocumentServiceImpl implements DocumentService {
-
     private final DocumentProcessorFactory documentProcessorFactory;
     private final DocumentRepository documentRepository;
     private final DocumentItemRepository documentItemRepository;
@@ -83,4 +83,10 @@ public class DocumentServiceImpl implements DocumentService {
                 });
         return result;
     }
+
+    @Override
+    public Set<String> searchDocuments(String property, String pattern, Boolean distinct) {
+        return documentRepository.findDistinctNames(pattern);
+    }
+
 }
