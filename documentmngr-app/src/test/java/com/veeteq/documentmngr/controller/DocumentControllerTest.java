@@ -25,6 +25,7 @@ import java.util.UUID;
 import static com.veeteq.documentmngr.config.ApiConstants.*;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(classes = DocumentMngrApp.class)
@@ -55,7 +56,7 @@ public class DocumentControllerTest extends BaseTest {
     @Order(2)
     void testGetDocumentById() throws Exception {
         var transactionId = UUID.randomUUID().toString();
-        mockMvc.perform(get(DocumentController.BASE_URL.concat("/v1/documents/{document_id}"), document.getId())
+        mockMvc.perform(get(DOCUMENTS_URL.concat("/{document_id}"), document.getId())
                         .accept(MediaType.APPLICATION_JSON)
                         .header(TRANSACTION_ID, transactionId))
                 .andExpect(status().isOk())
@@ -116,7 +117,7 @@ public class DocumentControllerTest extends BaseTest {
 
         var cookie = new MockCookie("cookieParam", "12345");
         var transactionId = UUID.randomUUID().toString();
-        mockMvc.perform(post(DocumentController.BASE_URL.concat("/v1/documents"))
+        mockMvc.perform(post(DOCUMENTS_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .cookie(cookie)
                         .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
@@ -145,7 +146,7 @@ public class DocumentControllerTest extends BaseTest {
         var json = objectMapper.writeValueAsString(dto);
 
         var transactionId = UUID.randomUUID().toString();
-        mockMvc.perform(post(DocumentController.BASE_URL.concat("/v1/documents"))
+        mockMvc.perform(post(DOCUMENTS_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
                         .header(TRANSACTION_ID, transactionId)
@@ -187,7 +188,7 @@ public class DocumentControllerTest extends BaseTest {
 
         var transactionId = UUID.randomUUID().toString();
         var docId = document.getId();
-        mockMvc.perform(put(DocumentController.BASE_URL.concat("/v1/documents/{id}"), docId)
+        mockMvc.perform(put(DOCUMENTS_URL.concat("/{id}"), docId)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header(TRANSACTION_ID, transactionId)
@@ -244,7 +245,7 @@ public class DocumentControllerTest extends BaseTest {
 
         var transactionId = UUID.randomUUID().toString();
         var docId = document.getId();
-        mockMvc.perform(put(DocumentController.BASE_URL.concat("/v1/documents/{id}"), docId)
+        mockMvc.perform(put(DOCUMENTS_URL.concat("/{id}"), docId)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header(TRANSACTION_ID, transactionId)
@@ -296,4 +297,21 @@ public class DocumentControllerTest extends BaseTest {
                 .andExpect(jsonPath("$.documentItems[1].item.itemCategory.categoryId", equalTo(5)))
                 .andExpect(jsonPath("$.documentItems[1].item.itemCategory.categoryName", equalTo("CAT_05")));
     }
+
+    @DisplayName("Test List Unique Document Names")
+    @Test
+    @Order(7)
+    void shouldReturnSearchResults() throws Exception {
+        var transactionId = UUID.randomUUID();
+        mockMvc.perform(get(DOCUMENTS_URL.concat("/search"))
+                        .param("property", "documentName")
+                        .param("pattern", "insurance")
+                        .param("distinct", "true")
+                        .header("Transaction-Id", transactionId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(header().string("Transaction-Id", transactionId.toString()))
+                .andExpect(jsonPath("$[0]").exists());
+    }
+
 }

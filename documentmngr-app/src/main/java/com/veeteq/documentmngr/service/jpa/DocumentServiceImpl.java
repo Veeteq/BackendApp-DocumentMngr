@@ -14,8 +14,10 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 @Service
 public class DocumentServiceImpl implements DocumentService {
@@ -86,7 +88,15 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public Set<String> searchDocuments(String property, String pattern, Boolean distinct) {
-        return documentRepository.findDistinctNames(pattern);
+        Map<String, Function<String, Set<String>>> map = Map.of(
+                "documentItemComment", p -> documentRepository.findDistinctComments(p),
+                "documentName",        p -> documentRepository.findDistinctNames(p)
+        );
+        var func = map.get(property);
+        if (func == null) throw new IllegalArgumentException("Unsupported document search property: " + property);
+
+        var result = func.apply(pattern);
+        return result;
     }
 
 }

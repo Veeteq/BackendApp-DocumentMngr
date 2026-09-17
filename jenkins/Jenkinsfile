@@ -2,6 +2,8 @@ pipeline {
     agent any
 
     environment {
+      SPRING_PROFILES_ACTIVE = "dev"
+      DB_CREDENTIALS = credentials('budget-db')
       JAR_PATH = 'documentmngr-app/target/documentmngr-app.jar'
       REPOSITORY_URL = 'ssh://root@192.168.56.104/root/git/bck-document-mngr.git'
       IMAGE_NAME = 'documentmngr-app'
@@ -19,6 +21,11 @@ pipeline {
         stage('Debug') {
             steps {
                 echo "Building branch: ${params.BRANCH}"
+                echo "DB_HOST=$DB_HOST"
+                echo "DB_PORT=$DB_PORT"
+                echo "DB_NAME=$DB_NAME"
+                echo "DB_USER=$DB_CREDENTIALS_USR"
+                echo "NETWORK_NAME=$NETWORK_NAME"
             }
         }
 
@@ -55,12 +62,22 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sh 'docker network create backend-network'
+                sh '''
+                    docker network inspect ${NETWORK_NAME} > /dev/null 2>&1 || \
+                    docker network create ${NETWORK_NAME}
+                '''
                 sh 'docker rm -f ${CONTAINER_NAME} || true'
                 sh '''
                     docker run -d \
                     -p ${HOST_PORT}:${CONTAINER_PORT} \
-                    --network backend-network \
+                    --network ${NETWORK_NAME} \
+                    -e SERVER_PORT=${CONTAINER_PORT} \
+                    -e SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE} \
+                    -e DB_HOST=${DB_HOST} \
+                    -e DB_PORT=${DB_PORT} \
+                    -e DB_NAME=${DB_NAME} \
+                    -e DB_USER=${DB_CREDENTIALS_USR} \
+                    -e DB_PASSWORD=${DB_CREDENTIALS_PSW} \
                     --name ${CONTAINER_NAME} ${IMAGE_NAME}:${IMAGE_TAG}
                 '''
                 sh 'docker logs --tail 30 ${CONTAINER_NAME}'
@@ -87,6 +104,12 @@ pipeline {
                     docker image prune -f
                 '''
             }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.veeteq.documentmngr.repository;
 
-import com.veeteq.documentmngr.model.Category;
 import com.veeteq.documentmngr.model.Item;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
