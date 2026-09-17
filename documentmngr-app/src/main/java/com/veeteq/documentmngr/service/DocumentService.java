@@ -6,6 +6,7 @@ import com.veeteq.documentmngr.rest.dto.DocumentsResponseDto;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
+import java.util.Set;
 
 public interface DocumentService {
 
@@ -16,4 +17,6 @@ public interface DocumentService {
     DocumentsResponseDto listDocuments(Pageable pageable);
 
     Optional<DocumentResponseDto> updateDocument(Long id, DocumentRequestDto dto);
+
+    Set<String> searchDocuments(String property, String pattern, Boolean distinct);
 }
