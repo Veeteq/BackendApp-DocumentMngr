@@ -1,7 +1,6 @@
 package com.veeteq.documentmngr.controller;
 
 import com.veeteq.documentmngr.DocumentMngrApp;
-import com.veeteq.documentmngr.rest.api.DocumentController;
 import com.veeteq.documentmngr.rest.dto.DocumentItemRequestDto;
 import com.veeteq.documentmngr.rest.dto.DocumentItemRequestDto.ItemTypeEnum;
 import com.veeteq.documentmngr.rest.dto.DocumentRequestDto;
