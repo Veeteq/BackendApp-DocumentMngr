@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.veeteq.documentmngr.rest.api.DocumentController.BASE_URL;
@@ -96,10 +98,15 @@ public class DocumentController implements DocumentApi {
     }
 
     @Override
-    public ResponseEntity<List<String>> searchDocuments(String property, String pattern, UUID transactionId, Boolean distinct, String acceptLanguage) {
-        LOGGER.info("Request received to list {} document with pattern: {}. TransactionID: {}", property, pattern);
+    public ResponseEntity<Set<String>> searchDocuments(String property, String pattern, UUID transactionId, Boolean distinct, String acceptLanguage) {
+        LOGGER.info("Request received to list {} document with pattern: {}. TransactionID: {}", property, pattern, transactionId);
+
         var result = documentService.searchDocuments(property, pattern, distinct);
-        return null;
+
+        return ResponseEntity
+                .ok()
+                .headers(h -> h.set(TRANSACTION_ID, transactionId.toString()))
+                .body(result);
     }
 
     @Override
