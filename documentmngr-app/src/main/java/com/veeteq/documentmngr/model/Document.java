@@ -164,18 +164,18 @@ public class Document {
                 .map(item -> {
                     if (item.getFinancialRecord() instanceof Expense expense) {
                     	System.out.println("expense id: " + expense.getId());
-                        var a = expense.getPrice()
+                        var totalAmount = expense.getPrice()
                                 .multiply(expense.getCount())
                                 .setScale(2, RoundingMode.HALF_UP)
                                 .negate();
-                        return a;
+                        return totalAmount;
                     } else if (item.getFinancialRecord() instanceof Income income) {
                     	System.out.println("income id: " + income.getId());
                     	var incomeCount = income.getCount() != null ? income.getCount() : BigDecimal.ONE;
-                        var b =  income.getPrice()
+                        var totalAmount =  income.getPrice()
                                 .multiply(incomeCount)
                                 .setScale(2, RoundingMode.HALF_UP);
-                        return b;
+                        return totalAmount;
                     }
                     return BigDecimal.ZERO;
                 })
