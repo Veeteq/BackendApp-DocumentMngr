@@ -1,0 +1,55 @@
+server:
+  address: 0.0.0.0
+  port: ${SERVER_PORT:8181}
+
+spring:
+  application:
+    name: document-mngr
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:test}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${AUTH_JWKS_URI:http://localhost:8282/.well-known/jwks.json}
+  springdoc:
+    swagger-ui:
+      path: /swagger-ui.html
+    api-docs:
+      path: /v3/api-docs
+      enabled: true
+
+# Actuator
+management:
+  endpoint:
+    health:
+      show-details: always
+    shutdown:
+      enabled: true
+  endpoints:
+    shutdown:
+      enabled: true
+    web:
+      exposure:
+        include: health,info
+        #include=*
+  info:
+    web:
+      enabled: true
+    env:
+      enabled: true
+  security:
+    enabled: false
+
+logging:
+  level:
+    org.zalando.logbook.Logbook: TRACE
+
+addressbook:
+  api:
+    url: http://localhost:8383/api
+
+open:
+  api:
+    spec:
+      url: https://veeteq.github.io/OpenAPI-DocumentMngr/openapi.yaml

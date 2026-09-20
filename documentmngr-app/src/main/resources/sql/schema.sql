@@ -122,7 +122,7 @@ alter table incomes add constraint fk_incomes_item_id foreign key(item_id) refer
 create table documents (
   docu_id bigint not null,
   docu_dt date not null,
-  docu_type_tx varchar(10) not null,
+  docu_type_tx varchar(14) not null,
   docu_name_tx varchar(30) not null,
   docu_desc_tx varchar(255),
   paym_meth_tx varchar(15) not null,

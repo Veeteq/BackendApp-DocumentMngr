@@ -40,7 +40,7 @@ public class BaseDocumentProcessor implements DocumentProcessor {
         var baseDocumentType = document.getDocumentType();
         var targetDocumentType = documentDto.getDocumentType();
 
-        if (baseDocumentType.equals(DocumentType.TRANSFER) && !targetDocumentType.equals(DocumentTypeDto.TRANSFER)) {
+        if (baseDocumentType.equals(DocumentType.MONEYTRANSFER) && !targetDocumentType.equals(DocumentTypeDto.TRANSFER)) {
             throw new IllegalArgumentException("Cannot update TRANSFER Document to other document type");
         }
     }

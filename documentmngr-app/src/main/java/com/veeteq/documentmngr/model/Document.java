@@ -146,7 +146,7 @@ public class Document {
     }
 
     public Account getTargetAccount() {
-        if (this.documentType.equals(DocumentType.TRANSFER)) {
+        if (this.documentType.equals(DocumentType.MONEYTRANSFER)) {
             return this.getDocumentItems().stream()
                     .filter(di -> di.getType().equals(DocumentItemType.INC))
                     .findFirst()
@@ -163,14 +163,17 @@ public class Document {
         return documentItems.stream()
                 .map(item -> {
                     if (item.getFinancialRecord() instanceof Expense expense) {
+                    	System.out.println("expense id: " + expense.getId());
                         var a = expense.getPrice()
                                 .multiply(expense.getCount())
                                 .setScale(2, RoundingMode.HALF_UP)
                                 .negate();
                         return a;
                     } else if (item.getFinancialRecord() instanceof Income income) {
+                    	System.out.println("income id: " + income.getId());
+                    	var incomeCount = income.getCount() != null ? income.getCount() : BigDecimal.ONE;
                         var b =  income.getPrice()
-                                .multiply(income.getCount())
+                                .multiply(incomeCount)
                                 .setScale(2, RoundingMode.HALF_UP);
                         return b;
                     }
@@ -292,8 +295,8 @@ public class Document {
         }
 
         public Document build() {
-            if (entity.documentType == DocumentType.TRANSFER) {
-                entity.documentName = DocumentType.TRANSFER.name();
+            if (entity.documentType == DocumentType.MONEYTRANSFER) {
+                entity.documentName = DocumentType.MONEYTRANSFER.name();
                 entity.documentDescription = createTransferDescription(transferAmount, entity.account, targetAccount);
                 return buildTransfer();
             }
