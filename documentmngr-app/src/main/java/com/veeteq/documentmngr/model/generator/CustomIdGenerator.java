@@ -12,8 +12,9 @@ import org.springframework.context.ApplicationContext;
 import java.util.Objects;
 
 public class CustomIdGenerator implements IdentifierGenerator {
-
-    @Autowired
+    private static final long serialVersionUID = 1L;
+    
+	@Autowired
     private ApplicationContext applicationContext;
 
     @Override
@@ -58,9 +59,7 @@ public class CustomIdGenerator implements IdentifierGenerator {
             case "Item" -> EntityIdMapping.ITEM;
             case "Income" -> EntityIdMapping.INCOME;
             case "Expense" -> EntityIdMapping.EXPENSE;
-            default -> throw new HibernateException(
-                    "No EntityIdMapping configured for entity: " + object.getClass().getName()
-            );
+            default -> throw new HibernateException("No EntityIdMapping configured for entity: " + object.getClass().getName());
         };
     }
 

@@ -6,12 +6,12 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.stream.Stream;
 
 public enum PaymentMethod {
+    ATMDEPOSIT("ATM Deposit"),
+    ATMWITHDRAWAL("ATM Withdrawal"),
+    BANKTRANSFER("Bank transfer"),
     CASH("Cash"),
-    CREDIT_CARD("Credit card"),
-    DEBIT_CARD("Debit card"),
-    EFT("Money transfer"),
-    ATM_WITHDRAWAL("ATM Withdrawal"),
-    ATM_DEPOSIT("ATM Deposit");
+    CREDITCARD("Credit card"),
+    DEBITCARD("Debit card");
 
     private final String value;
 
