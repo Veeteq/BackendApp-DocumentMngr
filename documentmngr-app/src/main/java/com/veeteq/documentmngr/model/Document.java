@@ -146,7 +146,7 @@ public class Document {
     }
 
     public Account getTargetAccount() {
-        if (this.documentType.equals(DocumentType.MONEYTRANSFER)) {
+        if (this.documentType.equals(DocumentType.TRANSFER)) {
             return this.getDocumentItems().stream()
                     .filter(di -> di.getType().equals(DocumentItemType.INC))
                     .findFirst()
@@ -295,8 +295,8 @@ public class Document {
         }
 
         public Document build() {
-            if (entity.documentType == DocumentType.MONEYTRANSFER) {
-                entity.documentName = DocumentType.MONEYTRANSFER.name();
+            if (entity.documentType == DocumentType.TRANSFER) {
+                entity.documentName = DocumentType.TRANSFER.name();
                 entity.documentDescription = createTransferDescription(transferAmount, entity.account, targetAccount);
                 return buildTransfer();
             }

@@ -72,7 +72,4 @@ public interface DocumentMapper {
     @Mapping(target = "documentItems", ignore = true)
     Document updateWith(@MappingTarget Document document, DocumentRequestDto dto, Account sourceAccount, Account targetAccount, Item transferItem);
 
-    @ValueMapping(source = "TRANSFER", target = "MONEYTRANSFER")
-    DocumentType toEntity(DocumentTypeDto documentTypeDto);
-
 }

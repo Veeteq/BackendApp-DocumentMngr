@@ -118,7 +118,7 @@ public class DataLoader implements CommandLineRunner {
     private Document createTransfer() {
         var document = Document.builder()
                 .withDocumentDate(LocalDate.now().minusDays(1))
-                .withDocumentType(DocumentType.MONEYTRANSFER)
+                .withDocumentType(DocumentType.TRANSFER)
                 .withPaymentMethod(PaymentMethod.BANKTRANSFER)
                 .withAccount(accountRepository.findById(4L).orElseThrow())
                 .withTargetAccount(accountRepository.findById(5L).orElseThrow())

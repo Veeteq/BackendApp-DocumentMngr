@@ -235,7 +235,7 @@ class DocumentMapperTest {
 
     private PaymentDto paymentDto() {
         return new PaymentDto()
-                .paymentMethod("EFT")
+                .paymentMethod("BANKTRANSFER")
                 .currencyCode("EUR")
                 .exchangeRate(BigDecimal.valueOf(1.1));
     }

@@ -1,9 +1,9 @@
-#!/bin/bash 
+#!/bin/bash
 
-set -euo pipefail 
+set -euo pipefail
 
-# ------------------------------------------------------------ 
-# Configuration 
+# ------------------------------------------------------------
+# Configuration
 # ------------------------------------------------------------
 
 AUTH_JWKS_URI=http://authorization-app:8080/.well-known/jwks.json
@@ -20,69 +20,69 @@ CONTAINER_PORT=8080
 
 ENV_FILE=".env"
 
-# ------------------------------------------------------------ 
-# Helper functions 
-# ------------------------------------------------------------ 
+# ------------------------------------------------------------
+# Helper functions
+# ------------------------------------------------------------
 fail() {
- echo "ERROR: $1" >&2 exit 1 
-} 
- 
+ echo "ERROR: $1" >&2 exit 1
+}
+
 require_command() {
- command -v "$1" >/dev/null 2>&1 || fail "Required command '$1' was not found." 
-} 
+ command -v "$1" >/dev/null 2>&1 || fail "Required command '$1' was not found."
+}
 
 require_variable() {
- local variable_name="$1" 
- if [[ -z "${!variable_name:-}" ]]; then 
-   fail "Required variable '$variable_name' is not set." 
- fi 
-} 
+ local variable_name="$1"
+ if [[ -z "${!variable_name:-}" ]]; then
+   fail "Required variable '$variable_name' is not set."
+ fi
+}
 
-# ------------------------------------------------------------ 
-# Prerequisites 
-# ------------------------------------------------------------ 
-echo "Checking prerequisites..." 
-require_command docker 
+# ------------------------------------------------------------
+# Prerequisites
+# ------------------------------------------------------------
+echo "Checking prerequisites..."
+require_command docker
 
-docker info >/dev/null 2>&1 || fail "Docker Desktop is not running." 
+docker info >/dev/null 2>&1 || fail "Docker Desktop is not running."
 [[ -f "${ENV_FILE}" ]] || fail "Environment file '${ENV_FILE}' does not exist."
 
-# ------------------------------------------------------------ 
-# Load environment 
-# ------------------------------------------------------------ 
+# ------------------------------------------------------------
+# Load environment
+# ------------------------------------------------------------
 echo "Loading database configuration from ${ENV_FILE}"
- 
-set -a 
-source "${ENV_FILE}" 
+
+set -a
+source "${ENV_FILE}"
 set +a
- 
-require_variable SPRING_PROFILES_ACTIVE 
-require_variable DB_HOST 
-require_variable DB_PORT 
-require_variable DB_NAME 
-require_variable DB_USER 
+
+require_variable SPRING_PROFILES_ACTIVE
+require_variable DB_HOST
+require_variable DB_PORT
+require_variable DB_NAME
+require_variable DB_USER
 require_variable DB_PASSWORD
 
-# ------------------------------------------------------------ 
-# Configuration summary 
-# ------------------------------------------------------------ 
-echo 
-echo "Deployment configuration:" 
-echo " Application : ${APP_NAME}" 
-echo " Image : ${IMAGE_NAME}:${IMAGE_TAG}" 
-echo " Network : ${NETWORK_NAME}" 
-echo " Host port : ${HOST_PORT}" 
-echo " Container : ${CONTAINER_PORT}" 
-echo " Profile : ${SPRING_PROFILES_ACTIVE}" 
-echo " DB host : ${DB_HOST}" 
-echo " DB port : ${DB_PORT}" 
-echo " DB name : ${DB_NAME}" 
-echo " DB user : ${DB_USER}" 
-echo " DB password : ********" 
+# ------------------------------------------------------------
+# Configuration summary
+# ------------------------------------------------------------
+echo
+echo "Deployment configuration:"
+echo " Application : ${APP_NAME}"
+echo " Image : ${IMAGE_NAME}:${IMAGE_TAG}"
+echo " Network : ${NETWORK_NAME}"
+echo " Host port : ${HOST_PORT}"
+echo " Container : ${CONTAINER_PORT}"
+echo " Profile : ${SPRING_PROFILES_ACTIVE}"
+echo " DB host : ${DB_HOST}"
+echo " DB port : ${DB_PORT}"
+echo " DB name : ${DB_NAME}"
+echo " DB user : ${DB_USER}"
+echo " DB password : ********"
 echo
 
-# ------------------------------------------------------------ 
-# Docker network 
+# ------------------------------------------------------------
+# Docker network
 # ------------------------------------------------------------
 echo "Configuring app network"
 if ! docker network inspect "${NETWORK_NAME}" >/dev/null 2>&1; then
@@ -92,8 +92,8 @@ else
   echo "Docker network '${NETWORK_NAME}' already exists."
 fi
 
-# ------------------------------------------------------------ 
-# Build Docker image 
+# ------------------------------------------------------------
+# Build Docker image
 # ------------------------------------------------------------
 # echo "Building Docker image: ${IMAGE_NAME}"
 
@@ -102,15 +102,15 @@ docker build \
   -t "${IMAGE_NAME}" \
   -f Dockerfile.local .
 
-# ------------------------------------------------------------ 
-# Stop/remove previous container 
+# ------------------------------------------------------------
+# Stop/remove previous container
 # ------------------------------------------------------------
 echo "Stopping old container if exists"
 
 docker rm -f "${APP_NAME}" 2>/dev/null || true
 
-# ------------------------------------------------------------ 
-# Start application 
+# ------------------------------------------------------------
+# Start application
 # ------------------------------------------------------------
 echo "Starting container: ${APP_NAME}"
 
@@ -128,35 +128,35 @@ docker run -d \
   -e AUTH_JWKS_URI="${AUTH_JWKS_URI}" \
   ${IMAGE_NAME}:${IMAGE_TAG}
 
-# ------------------------------------------------------------ 
-# Wait for container 
+# ------------------------------------------------------------
+# Wait for container
 # ------------------------------------------------------------
 echo "Waiting for application to start..."
 HEALTH_URL="http://${HOST_NAME}:${HOST_PORT}/actuator/health"
-MAX_ATTEMPTS=30 
+MAX_ATTEMPTS=30
 SLEEP_SECONDS=2
 
 for ((i=1; i<=MAX_ATTEMPTS; i++)); do
   echo "Health check attempt ${i}/${MAX_ATTEMPTS}"
 
   if curl --silent --fail "${HEALTH_URL}" 2>/dev/null | grep -q '"status":"UP"'; then
-    echo 
-    echo "Application is UP." 
-    echo "Health check: ${HEALTH_URL}" 
-    echo 
-    exit 0  
+    echo
+    echo "Application is UP."
+    echo "Health check: ${HEALTH_URL}"
+    echo
+    exit 0
   fi
 
   sleep "${SLEEP_SECONDS}"
 done
 
-# ------------------------------------------------------------ 
-# Startup failure 
-# ------------------------------------------------------------ 
-echo 
-echo "ERROR: Application did not become healthy." 
-echo 
-echo "Container status:" docker ps -a --filter "name=${APP_NAME}" 
-echo 
-echo "Last container logs:" docker logs --tail 100 "${APP_NAME}" 
+# ------------------------------------------------------------
+# Startup failure
+# ------------------------------------------------------------
+echo
+echo "ERROR: Application did not become healthy."
+echo
+echo "Container status:" docker ps -a --filter "name=${APP_NAME}"
+echo
+echo "Last container logs:" docker logs --tail 100 "${APP_NAME}"
 exit 1
