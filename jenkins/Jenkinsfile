@@ -11,6 +11,7 @@ pipeline {
       CONTAINER_NAME = 'documentmngr-app'
       HOST_PORT = '8081'
       CONTAINER_PORT = '8080'
+      AUTH_JWKS_URI = 'http://authorization-app:8080/.well-known/jwks.json'
     }
 
     parameters {
@@ -26,6 +27,7 @@ pipeline {
                 echo "DB_NAME=$DB_NAME"
                 echo "DB_USER=$DB_CREDENTIALS_USR"
                 echo "NETWORK_NAME=$NETWORK_NAME"
+                echo "AUTH_JWKS_URI=${AUTH_JWKS_URI}"
             }
         }
 
@@ -78,6 +80,7 @@ pipeline {
                     -e DB_NAME=${DB_NAME} \
                     -e DB_USER=${DB_CREDENTIALS_USR} \
                     -e DB_PASSWORD=${DB_CREDENTIALS_PSW} \
+                    -e AUTH_JWKS_URI="${AUTH_JWKS_URI}" \
                     --name ${CONTAINER_NAME} ${IMAGE_NAME}:${IMAGE_TAG}
                 '''
                 sh 'docker logs --tail 30 ${CONTAINER_NAME}'

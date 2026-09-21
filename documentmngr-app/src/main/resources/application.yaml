@@ -47,7 +47,7 @@ logging:
 
 addressbook:
   api:
-    url: http://localhost:8383/api
+    url: ${ADDRESSBOOK_API_URL:http://localhost:8383/api}
 
 open:
   api:
