@@ -1,23 +1,23 @@
 package com.veeteq.documentmngr.repository.idgenerator;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.springframework.context.annotation.Profile;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
 
 @Component
 @Profile({"qa", "dev"})
 public class PostgressEntityIdProvider implements EntityIdProvider {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    private final JdbcTemplate jdbcTemplate;
+
+    public PostgressEntityIdProvider(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     @Override
     public Long getNextId(EntityIdMapping mapping) {
         var sql = "select nextval('" + mapping.getSequenceName() + "')";
-        var result = (BigDecimal) entityManager.createNativeQuery(sql).getSingleResult();
-        return result.longValue();
+        var result = jdbcTemplate.queryForObject(sql, Long.class);
+        return result;
     }
 }

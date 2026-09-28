@@ -1,25 +1,22 @@
 package com.veeteq.documentmngr.repository.idgenerator;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.springframework.context.annotation.Profile;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
 
 @Component
 @Profile({"prod"})
 public class OracleEntityIdProvider implements EntityIdProvider {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    private final JdbcTemplate jdbcTemplate;
+
+    public OracleEntityIdProvider(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     @Override
     public Long getNextId(EntityIdMapping mapping) {
-        var sql = "select generate_id(:entity) from dual";
-        var result = (BigDecimal) entityManager.createNativeQuery(sql)
-                .setParameter(mapping.name(), 1L)
-                .getSingleResult();
-        return result.longValue();
+        var sql = "select generate_id(?) from dual";
+        return jdbcTemplate.queryForObject(sql, Long.class, mapping.name());
     }
 }
