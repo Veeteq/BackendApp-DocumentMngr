@@ -9,12 +9,12 @@ import org.hibernate.persister.entity.EntityPersister;
 
 import java.util.Objects;
 
-public class CustomizedIdGenerator implements IdentifierGenerator {
+public class CustomIdGenerator implements IdentifierGenerator {
     private static final long serialVersionUID = 1L;
 
     private final EntityIdProvider entityIdProvider;
 
-    public CustomizedIdGenerator(EntityIdProvider entityIdProvider) {
+    public CustomIdGenerator(EntityIdProvider entityIdProvider) {
         this.entityIdProvider = entityIdProvider;
     }
 
@@ -31,6 +31,11 @@ public class CustomizedIdGenerator implements IdentifierGenerator {
 
         var mapping = resolveEntityIdMapping(object);
         return entityIdProvider.getNextId(mapping);
+    }
+
+    @Override
+    public boolean allowAssignedIdentifiers() {
+        return true;
     }
 
     private EntityIdMapping resolveEntityIdMapping(Object object) {
