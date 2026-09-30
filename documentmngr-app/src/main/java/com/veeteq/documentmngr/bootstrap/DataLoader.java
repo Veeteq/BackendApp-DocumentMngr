@@ -2,6 +2,8 @@ package com.veeteq.documentmngr.bootstrap;
 
 import com.veeteq.documentmngr.model.*;
 import com.veeteq.documentmngr.repository.*;
+import com.veeteq.documentmngr.repository.idgenerator.EntityIdMapping;
+import com.veeteq.documentmngr.repository.idgenerator.EntityIdProvider;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -13,7 +15,7 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Map;
 
-import static com.veeteq.documentmngr.repository.EntityIdMapping.*;
+import static com.veeteq.documentmngr.repository.idgenerator.EntityIdMapping.*;
 
 @Component
 @Profile("test")
@@ -22,13 +24,13 @@ public class DataLoader implements CommandLineRunner {
     private final AccountRepository accountRepository;
     private final ItemRepository itemRepository;
     private final DocumentRepository documentRepository;
-    private final UtilityRepository utilityRepository;
+    private final EntityIdProvider entityIdProvider;
 
-    public DataLoader(AccountRepository accountRepository, ItemRepository itemRepository, DocumentRepository documentRepository, UtilityRepository utilityRepository) {
+    public DataLoader(AccountRepository accountRepository, ItemRepository itemRepository, DocumentRepository documentRepository, EntityIdProvider entityIdProvider) {
         this.accountRepository = accountRepository;
         this.itemRepository = itemRepository;
         this.documentRepository = documentRepository;
-        this.utilityRepository = utilityRepository;
+        this.entityIdProvider = entityIdProvider;
     }
 
     @Override
@@ -130,7 +132,8 @@ public class DataLoader implements CommandLineRunner {
         return document;
     }
 
-    private Long nextId(EntityIdMapping mapping) {
-        return utilityRepository.getNextId(mapping);
+    private Long nextId(EntityIdMapping entityIdMapping) {
+        var id = entityIdProvider.getNextId(entityIdMapping);
+        return id;
     }
 }
