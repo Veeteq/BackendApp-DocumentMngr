@@ -2,8 +2,10 @@ package com.veeteq.documentmngr.model;
 
 import com.veeteq.documentmngr.model.generator.CustomId;
 import jakarta.persistence.*;
+import org.hibernate.annotations.ColumnTransformer;
 
 import java.util.Currency;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -26,6 +28,17 @@ public class Account {
     @Column(name = "user_curr_cd")
     private Currency currency;
 
+    @Enumerated(EnumType.STRING)
+    @ColumnTransformer(read = "UPPER(user_paym_meth_tx)")
+    @Column(name = "user_paym_meth_tx", length = 15)
+    private PaymentMethod defaultPaymentMethod;
+
+    @ElementCollection
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "user_payment_methods", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "paym_meth_tx", length = 15)
+    private Set<PaymentMethod> allowedPaymentMethods;
+
     public Long getId() {
         return id;
     }
@@ -44,6 +57,14 @@ public class Account {
 
     public Currency getCurrency() {
         return currency;
+    }
+
+    public PaymentMethod getDefaultPaymentMethod() {
+        return defaultPaymentMethod;
+    }
+
+    public Set<PaymentMethod> getAllowedPaymentMethods() {
+        return allowedPaymentMethods;
     }
 
     public static Builder builder() {
@@ -87,6 +108,16 @@ public class Account {
 
         public Builder withImageUrl(String imageUrl) {
             entity.imageUrl = imageUrl;
+            return this;
+        }
+
+        public Builder withDefaultPaymentMethod(String paymentMethod) {
+            entity.defaultPaymentMethod = PaymentMethod.valueOf(paymentMethod);
+            return this;
+        }
+
+        public Builder withDefaultPaymentMethod(PaymentMethod paymentMethod) {
+            entity.defaultPaymentMethod = paymentMethod;
             return this;
         }
 

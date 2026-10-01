@@ -1,6 +1,7 @@
 package com.veeteq.documentmngr.mapper;
 
 import com.veeteq.documentmngr.model.Account;
+import com.veeteq.documentmngr.model.PaymentMethod;
 import com.veeteq.documentmngr.rest.dto.AccountDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,7 @@ class AccountMapperTest {
                 .withDescription("Test Account Description")
                 .withCurrency(Currency.getInstance("PLN"))
                 .withImageUrl("https://image.com/logo.png")
+                .withDefaultPaymentMethod("DEBITCARD")
                 .build();
 
         // Act
@@ -36,7 +38,7 @@ class AccountMapperTest {
         assertEquals(account.getCurrency().getCurrencyCode(), accountDto.getAccountCurrency());
         assertEquals(account.getImageUrl(),    accountDto.getAccountImageUrl());
 
-        assertEquals(5, accountDto.getClass().getDeclaredFields().length);
+        assertEquals(6, accountDto.getClass().getDeclaredFields().length);
     }
 
     @DisplayName("Test mapping from AccountDto to Account entity")
@@ -49,6 +51,7 @@ class AccountMapperTest {
         accountDto.setAccountDescription("New account description request");
         accountDto.setAccountCurrency("CZK");
         accountDto.setAccountImageUrl("https://image.com/logo.png");
+        accountDto.setDefaultPaymentMethod("DEBITCARD");
 
         // When
         Account account = accountMapper.toEntity(accountDto);
@@ -59,8 +62,9 @@ class AccountMapperTest {
         assertEquals(accountDto.getAccountDescription(), account.getDescription());
         assertEquals(accountDto.getAccountCurrency(),    account.getCurrency().getCurrencyCode());
         assertEquals(accountDto.getAccountImageUrl(),    account.getImageUrl());
+        assertEquals(accountDto.getDefaultPaymentMethod(), account.getDefaultPaymentMethod().name());
 
-        assertEquals(5, account.getClass().getDeclaredFields().length);
+        assertEquals(7, account.getClass().getDeclaredFields().length);
     }
 
 }
