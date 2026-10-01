@@ -62,11 +62,19 @@ create table users (
   user_name_tx varchar(30),
   user_desc_tx varchar(60),
   user_curr_cd varchar(3),
-  user_imag_tx varchar(50)
+  user_imag_tx varchar(50),
+  user_paym_meth_tx varchar(15)
 );
 create unique index pk_users on users(user_id);
 alter table users add constraint pk_users primary key (user_id);
 create sequence user_seq start with 1 increment by 1;
+
+create table user_payment_methods (
+  user_id bigint not null,
+  paym_meth_tx varchar(15) not null
+);
+create index idx_user_payment_methods on user_payment_methods(user_id);
+alter table user_payment_methods add constraint fk_user_payment_methods_user_id foreign key(user_id) references users (user_id);
 
 create table categories (
   cate_id bigint not null,

@@ -43,16 +43,16 @@ public class DataLoader implements CommandLineRunner {
     @Transactional
     private void loadAccounts() {
         var list = List.of(
-                Account.builder().withId(nextId(ACCOUNT)).withName("ABC").withDescription("ABC Description").withCurrency(Currency.getInstance("PLN")).withImageUrl("https://image.com/abc.png").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("BCD").withDescription("BCD Description").withCurrency(Currency.getInstance("EUR")).withImageUrl("https://image.com/bcd.png").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("CDE").withDescription("CDE Description").withCurrency(Currency.getInstance("CZK")).withImageUrl("https://image.com/cde.png").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("DEF").withDescription("DEF Description").withCurrency(Currency.getInstance("USD")).withImageUrl("https://image.com/def.png").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("EFG").withDescription("EFG Description").withCurrency(Currency.getInstance("GBP")).withImageUrl("https://image.com/efg.png").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("FGH").withDescription("FGH Description").withCurrency(Currency.getInstance("HRK")).withImageUrl("https://image.com/fgh.png").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("GHI").withDescription("GHI Description").withCurrency(Currency.getInstance("HUF")).withImageUrl("https://image.com/ghi.png").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("HIJ").withDescription("HIJ Description").withCurrency(Currency.getInstance("BAM")).withImageUrl("https://image.com/hij.png").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("IJK").withDescription("IJK Description").withCurrency(Currency.getInstance("RON")).withImageUrl("https://image.com/ijk.png").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("JKL").withDescription("JKL Description").withCurrency(Currency.getInstance("CAD")).withImageUrl("https://image.com/jkl.png").build()
+                Account.builder().withId(nextId(ACCOUNT)).withName("ABC").withDescription("ABC Description").withCurrency(Currency.getInstance("PLN")).withImageUrl("https://image.com/abc.png").withDefaultPaymentMethod(PaymentMethod.CASH).build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("BCD").withDescription("BCD Description").withCurrency(Currency.getInstance("EUR")).withImageUrl("https://image.com/bcd.png").withDefaultPaymentMethod(PaymentMethod.CREDITCARD).build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("CDE").withDescription("CDE Description").withCurrency(Currency.getInstance("CZK")).withImageUrl("https://image.com/cde.png").withDefaultPaymentMethod(PaymentMethod.DEBITCARD).build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("DEF").withDescription("DEF Description").withCurrency(Currency.getInstance("USD")).withImageUrl("https://image.com/def.png").withDefaultPaymentMethod(PaymentMethod.BANKTRANSFER).build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("EFG").withDescription("EFG Description").withCurrency(Currency.getInstance("GBP")).withImageUrl("https://image.com/efg.png").withDefaultPaymentMethod(PaymentMethod.CASH).build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("FGH").withDescription("FGH Description").withCurrency(Currency.getInstance("HRK")).withImageUrl("https://image.com/fgh.png").withDefaultPaymentMethod(PaymentMethod.CREDITCARD).build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("GHI").withDescription("GHI Description").withCurrency(Currency.getInstance("HUF")).withImageUrl("https://image.com/ghi.png").withDefaultPaymentMethod(PaymentMethod.DEBITCARD).build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("HIJ").withDescription("HIJ Description").withCurrency(Currency.getInstance("BAM")).withImageUrl("https://image.com/hij.png").withDefaultPaymentMethod(PaymentMethod.BANKTRANSFER).build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("IJK").withDescription("IJK Description").withCurrency(Currency.getInstance("RON")).withImageUrl("https://image.com/ijk.png").withDefaultPaymentMethod(PaymentMethod.CASH).build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("JKL").withDescription("JKL Description").withCurrency(Currency.getInstance("CAD")).withImageUrl("https://image.com/jkl.png").withDefaultPaymentMethod(PaymentMethod.BANKTRANSFER).build()
         );
         accountRepository.saveAll(list);
     }
