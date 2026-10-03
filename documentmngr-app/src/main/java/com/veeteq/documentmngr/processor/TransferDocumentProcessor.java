@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service(value = DocumentProcessor.Type.TRANSFER)
 public class TransferDocumentProcessor extends BaseDocumentProcessor {
-    private final static long TRANSFER_ITEM_ID = 10;
+
     private final ItemRepository itemRepository;
     private final DocumentProperties documentProperties;
 
