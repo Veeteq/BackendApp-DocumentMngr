@@ -125,7 +125,7 @@ public class DataLoader implements CommandLineRunner {
                 .withAccount(accountRepository.findById(4L).orElseThrow())
                 .withTargetAccount(accountRepository.findById(5L).orElseThrow())
                 .withCurrencyCode(Currency.getInstance("PLN").getCurrencyCode())
-                .withExchangeRate(BigDecimal.ONE)
+                .withExchangeRate(BigDecimal.TEN)
                 .withTransferAmount(BigDecimal.valueOf(99.99))
                 .withTransferItem(itemRepository.findById(10L).orElseThrow())
                 .build();
