@@ -1,5 +1,6 @@
 package com.veeteq.documentmngr.processor;
 
+import com.veeteq.documentmngr.config.DocumentProperties;
 import com.veeteq.documentmngr.mapper.DocumentMapper;
 import com.veeteq.documentmngr.model.Document;
 import com.veeteq.documentmngr.repository.AccountRepository;
@@ -11,10 +12,12 @@ import org.springframework.stereotype.Service;
 public class TransferDocumentProcessor extends BaseDocumentProcessor {
     private final static long TRANSFER_ITEM_ID = 10;
     private final ItemRepository itemRepository;
+    private final DocumentProperties documentProperties;
 
-    public TransferDocumentProcessor(AccountRepository accountRepository, DocumentMapper documentMapper, ItemRepository itemRepository) {
+    public TransferDocumentProcessor(AccountRepository accountRepository, DocumentMapper documentMapper, ItemRepository itemRepository, DocumentProperties documentProperties) {
         super(accountRepository, documentMapper);
         this.itemRepository = itemRepository;
+        this.documentProperties = documentProperties;
     }
 
     @Override
@@ -23,7 +26,7 @@ public class TransferDocumentProcessor extends BaseDocumentProcessor {
 
         var sourceAccount = accountRepository.findById(documentDto.getAccountId()).orElseThrow();
         var targetAccount = accountRepository.findById(documentDto.getTargetAccountId()).orElseThrow();
-        var transferItem = itemRepository.findById(TRANSFER_ITEM_ID).orElseThrow();
+        var transferItem = itemRepository.findById(documentProperties.transferItemId()).orElseThrow();
         var document = documentMapper.toEntity(documentDto, sourceAccount, targetAccount, transferItem);
         return document;
     }
@@ -34,7 +37,7 @@ public class TransferDocumentProcessor extends BaseDocumentProcessor {
 
         var sourceAccount = accountRepository.findById(documentDto.getAccountId()).orElseThrow();
         var targetAccount = accountRepository.findById(documentDto.getTargetAccountId()).orElseThrow();
-        var transferItem = itemRepository.findById(TRANSFER_ITEM_ID).orElseThrow();
+        var transferItem = itemRepository.findById(documentProperties.transferItemId()).orElseThrow();
         var updated = documentMapper.updateWith(document, documentDto, sourceAccount, targetAccount, transferItem);
         return updated;
     }

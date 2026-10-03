@@ -45,11 +45,11 @@ logging:
   level:
     org.zalando.logbook.Logbook: TRACE
 
-addressbook:
-  api:
-    url: ${ADDRESSBOOK_API_URL:http://localhost:8383/api}
-
 open:
   api:
     spec:
       url: https://veeteq.github.io/OpenAPI-DocumentMngr/openapi.yaml
+
+document:
+  transfer-item-id: 10
+  addressbook-api-url: ${ADDRESSBOOK_API_URL:http://localhost:8383}

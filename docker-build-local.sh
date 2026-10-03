@@ -7,6 +7,7 @@ set -euo pipefail
 # ------------------------------------------------------------
 
 AUTH_JWKS_URI=http://authorization-app:8080/.well-known/jwks.json
+ADDRESSBOOK_API_URL=http://addressbook-app:8080
 
 APP_NAME=documentmngr-app
 IMAGE_NAME=documentmngr-app
@@ -126,6 +127,7 @@ docker run -d \
   -e DB_USER=${DB_USER} \
   -e DB_PASSWORD=${DB_PASSWORD} \
   -e AUTH_JWKS_URI="${AUTH_JWKS_URI}" \
+  -e ADDRESSBOOK_API_URL="${ADDRESSBOOK_API_URL}" \
   ${IMAGE_NAME}:${IMAGE_TAG}
 
 # ------------------------------------------------------------

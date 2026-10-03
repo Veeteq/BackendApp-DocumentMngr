@@ -1,6 +1,6 @@
 package com.veeteq.documentmngr.service.jpa;
 
-import com.veeteq.documentmngr.mapper.DocumentMapper;
+import com.veeteq.documentmngr.mapper.DocumentResponseFactory;
 import com.veeteq.documentmngr.model.DocumentType;
 import com.veeteq.documentmngr.processor.DocumentProcessor;
 import com.veeteq.documentmngr.processor.DocumentProcessorFactory;
@@ -14,7 +14,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 
 @Service
@@ -22,13 +24,13 @@ public class DocumentServiceImpl implements DocumentService {
     private final DocumentProcessorFactory documentProcessorFactory;
     private final DocumentRepository documentRepository;
     private final DocumentItemRepository documentItemRepository;
-    private final DocumentMapper documentMapper;
+    private final DocumentResponseFactory documentResponseFactory;
 
-    public DocumentServiceImpl(DocumentProcessorFactory documentProcessorFactory, DocumentRepository documentRepository, DocumentItemRepository documentItemRepository, DocumentMapper documentMapper) {
+    public DocumentServiceImpl(DocumentProcessorFactory documentProcessorFactory, DocumentRepository documentRepository, DocumentItemRepository documentItemRepository, DocumentResponseFactory documentResponseFactory) {
         this.documentProcessorFactory = documentProcessorFactory;
         this.documentRepository = documentRepository;
         this.documentItemRepository = documentItemRepository;
-        this.documentMapper = documentMapper;
+        this.documentResponseFactory = documentResponseFactory;
     }
 
     @Override
@@ -38,13 +40,14 @@ public class DocumentServiceImpl implements DocumentService {
         DocumentProcessor processor = documentProcessorFactory.get(documentType.getProcessorType());
         var document = processor.process(documentDto);
         var savedDocument = documentRepository.save(document);
-        return documentMapper.toDto(savedDocument);
+
+        return documentResponseFactory.create(savedDocument);
     }
 
     @Override
     public Optional<DocumentResponseDto> getDocumentById(Long id) {
         var result = documentRepository.findById(id);
-        var response = result.map(documentMapper::toDto);
+        var response = result.map(documentResponseFactory::create);
         return response;
     }
 
@@ -53,7 +56,7 @@ public class DocumentServiceImpl implements DocumentService {
     public DocumentsResponseDto listDocuments(Pageable pageable) {
         var page = documentRepository.findAll(pageable);
         var dtos = page.getContent().stream()
-                .map(documentMapper::toDto)
+                .map(documentResponseFactory::create)
                 .toList();
         var retVal = new DocumentsResponseDto()
                 .data(dtos)
@@ -79,7 +82,7 @@ public class DocumentServiceImpl implements DocumentService {
                     var updated = processor.process(document, dto);
                     var savedDocument = documentRepository.save(updated);
 
-                    return documentMapper.toDto(savedDocument);
+                    return documentResponseFactory.create(savedDocument);
                 });
         return result;
     }
