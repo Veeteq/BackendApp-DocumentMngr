@@ -26,7 +26,7 @@ public class TransferDocumentProcessor extends BaseDocumentProcessor {
 
         var sourceAccount = accountRepository.findById(documentDto.getAccountId()).orElseThrow();
         var targetAccount = accountRepository.findById(documentDto.getTargetAccountId()).orElseThrow();
-        var transferItem = itemRepository.findById(documentProperties.getTransferItemId()).orElseThrow();
+        var transferItem = itemRepository.findById(documentProperties.transferItemId()).orElseThrow();
         var document = documentMapper.toEntity(documentDto, sourceAccount, targetAccount, transferItem);
         return document;
     }
@@ -37,7 +37,7 @@ public class TransferDocumentProcessor extends BaseDocumentProcessor {
 
         var sourceAccount = accountRepository.findById(documentDto.getAccountId()).orElseThrow();
         var targetAccount = accountRepository.findById(documentDto.getTargetAccountId()).orElseThrow();
-        var transferItem = itemRepository.findById(documentProperties.getTransferItemId()).orElseThrow();
+        var transferItem = itemRepository.findById(documentProperties.transferItemId()).orElseThrow();
         var updated = documentMapper.updateWith(document, documentDto, sourceAccount, targetAccount, transferItem);
         return updated;
     }

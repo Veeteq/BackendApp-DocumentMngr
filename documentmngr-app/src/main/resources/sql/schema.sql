@@ -1,62 +1,3 @@
-create table docs (
-  doc_id bigint not null,
-  param_1 varchar(10) not null,
-  param_2 varchar(30),
-  created timestamp,
-  updated timestamp,
-  version integer
-);
-create unique index pk_docs on docs(doc_id);
-alter table docs add constraint pk_docs primary key (doc_id);
-create sequence doc_seq start with 1 increment by 1 nocache;
-
-create table docitems (
-  doc_id bigint not null,
-  seq_nm bigint not null,
-  type varchar(30),
-  left_id bigint,
-  right_id bigint,
-  created timestamp,
-  updated timestamp,
-  version integer
-);
-create unique index pk_docitems on docitems(doc_id, seq_nm);
-alter table docitems add constraint pk_docitems primary key (doc_id, seq_nm);
-
-create table doc_left (
-  id bigint not null,
-  data varchar(50),
-  created timestamp,
-  updated timestamp,
-  version integer
-);
-create sequence left_seq start with 1 increment by 1 nocache;
-
-create table doc_right (
-  id bigint not null,
-  data varchar(50),
-  created timestamp,
-  updated timestamp,
-  version integer
-);
-create sequence right_seq start with 1 increment by 1 nocache;
-
-create or replace view v_docs as
-select d.doc_id,
-       d.param_1,
-       d.param_2,
-       di.seq_nm,
-       di.type,
-       --di.tag,
-       d.created as d_created,
-       d.updated as d_updated,
-       d.version as d_version,
-       di.created as di_created,
-       di.updated as di_updated,
-       di.version as di_version
-  from docs d left join docitems di
-    on d.doc_id = di.doc_id;
-
 create table users (
   user_id bigint not null,
   user_name_tx varchar(30),
@@ -161,3 +102,19 @@ create table document_items (
 create unique index docu_item_pk on document_items(docu_id, sequ_nm);
 alter table document_items add constraint pk_document_items primary key (docu_id, sequ_nm);
 alter table document_items add constraint fk_document_items_docu_id foreign key(docu_id) references documents (docu_id);
+
+create or replace view v_docs as
+select d.docu_id,
+       d.docu_name_tx,
+       d.docu_type_tx,
+       di.sequ_nm,
+       di.docu_item_type_tx,
+       --di.tag,
+       d.crea_dt as d_created,
+       d.updt_dt as d_updated,
+       d.vers_nm as d_version,
+       di.crea_dt as di_created,
+       di.updt_dt as di_updated,
+       di.vers_nm as di_version
+  from documents d left join document_items di
+    on d.docu_id = di.docu_id;

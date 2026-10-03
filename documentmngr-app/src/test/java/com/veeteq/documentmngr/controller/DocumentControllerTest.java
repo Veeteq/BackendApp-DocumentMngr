@@ -150,6 +150,7 @@ public class DocumentControllerTest extends BaseTest {
                         .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
                         .header(TRANSACTION_ID, transactionId)
                         .content(json))
+                .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
                 .andExpect(header().exists(TRANSACTION_ID))

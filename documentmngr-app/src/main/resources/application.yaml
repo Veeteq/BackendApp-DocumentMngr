@@ -45,10 +45,6 @@ logging:
   level:
     org.zalando.logbook.Logbook: TRACE
 
-addressbook:
-  api:
-    url: ${ADDRESSBOOK_API_URL:http://localhost:8383/api}
-
 open:
   api:
     spec:
@@ -56,3 +52,4 @@ open:
 
 document:
   transfer-item-id: 10
+  addressbook-api-url: ${ADDRESSBOOK_API_URL:http://localhost:8383}
