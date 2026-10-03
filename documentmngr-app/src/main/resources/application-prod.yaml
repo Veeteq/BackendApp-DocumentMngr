@@ -24,3 +24,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+document:
+  transfer-item-id: 513
