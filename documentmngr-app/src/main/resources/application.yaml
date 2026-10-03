@@ -53,3 +53,6 @@ open:
   api:
     spec:
       url: https://veeteq.github.io/OpenAPI-DocumentMngr/openapi.yaml
+
+document:
+  transfer-item-id: 10
