@@ -28,6 +28,7 @@ pipeline {
                 echo "DB_USER=$DB_CREDENTIALS_USR"
                 echo "NETWORK_NAME=$NETWORK_NAME"
                 echo "AUTH_JWKS_URI=${AUTH_JWKS_URI}"
+                echo "ADDRESSBOOK_API_URL=${ADDRESSBOOK_API_URL}"
             }
         }
 
@@ -81,6 +82,7 @@ pipeline {
                     -e DB_USER=${DB_CREDENTIALS_USR} \
                     -e DB_PASSWORD=${DB_CREDENTIALS_PSW} \
                     -e AUTH_JWKS_URI="${AUTH_JWKS_URI}" \
+                    -e ADDRESSBOOK_API_URL="${ADDRESSBOOK_API_URL}" \
                     --name ${CONTAINER_NAME} ${IMAGE_NAME}:${IMAGE_TAG}
                 '''
                 sh 'docker logs --tail 30 ${CONTAINER_NAME}'
