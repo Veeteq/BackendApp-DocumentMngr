@@ -53,3 +53,9 @@ open:
 document:
   transfer-item-id: 10
   addressbook-api-url: ${ADDRESSBOOK_API_URL:http://localhost:8383}
+
+application:
+  cors:
+    allowed-origins:
+      - http://localhost:4201
+      - http://192.168.56.104:4201
