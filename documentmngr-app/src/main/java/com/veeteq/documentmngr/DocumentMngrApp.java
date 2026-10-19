@@ -1,5 +1,6 @@
 package com.veeteq.documentmngr;
 
+import com.veeteq.documentmngr.config.CorsProperties;
 import com.veeteq.documentmngr.config.DocumentProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestClient;
 
 @SpringBootApplication
-@EnableConfigurationProperties(DocumentProperties.class)
+@EnableConfigurationProperties({DocumentProperties.class, CorsProperties.class})
 public class DocumentMngrApp {
 
     public static void main(String[] args) {
