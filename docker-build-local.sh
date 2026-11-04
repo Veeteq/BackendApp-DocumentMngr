@@ -18,6 +18,9 @@ else
   echo "Docker network '${NETWORK_NAME}' already exists."
 fi
 
+# ------------------------------------------------------------
+# Build Docker image
+# ------------------------------------------------------------
 echo "Building Docker image: ${IMAGE_NAME}"
 
 docker build \
