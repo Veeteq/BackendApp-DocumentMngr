@@ -96,7 +96,7 @@ fi
 # ------------------------------------------------------------
 # Build Docker image
 # ------------------------------------------------------------
-# echo "Building Docker image: ${IMAGE_NAME}"
+echo "Building Docker image: ${IMAGE_NAME}"
 
 docker build \
   --progress=plain \
