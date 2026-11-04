@@ -19,4 +19,6 @@ public interface AccountService {
     AccountDto updateAccount(Long id, AccountDto dto);
 
     void deleteById(Long id);
+
+    List<AccountDto> searchAccounts(String name);
 }

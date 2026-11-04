@@ -12,11 +12,12 @@ import java.util.Currency;
 @Mapper(componentModel = "spring")
 public interface AccountMapper {
 
-    @Mapping(target = "withId",          source = "accountId")
-    @Mapping(target = "withName",        source = "accountName")
-    @Mapping(target = "withCurrency",    source = "accountCurrency")
-    @Mapping(target = "withDescription", source = "accountDescription")
-    @Mapping(target = "withImageUrl",    source = "accountImageUrl")
+    @Mapping(target = "withId",                   source = "accountId")
+    @Mapping(target = "withName",                 source = "accountName")
+    @Mapping(target = "withCurrency",             source = "accountCurrency")
+    @Mapping(target = "withDescription",          source = "accountDescription")
+    @Mapping(target = "withImageUrl",             source = "accountImageUrl")
+    @Mapping(target = "withDefaultPaymentMethod", source = "defaultPaymentMethod")
     Account toEntity(AccountDto dto);
 
     @Mapping(target = "accountId",          source = "id")
@@ -24,6 +25,7 @@ public interface AccountMapper {
     @Mapping(target = "accountDescription", source = "description")
     @Mapping(target = "accountCurrency",    source = "currency")
     @Mapping(target = "accountImageUrl",    source = "imageUrl")
+    @Mapping(target = "defaultPaymentMethod", source = "defaultPaymentMethod")
     AccountDto toDto(Account entity);
 
     @Mapping(target = "pageSize",    source = "size")

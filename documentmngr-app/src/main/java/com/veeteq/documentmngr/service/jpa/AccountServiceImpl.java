@@ -79,4 +79,14 @@ public class AccountServiceImpl implements AccountService {
         });
     }
 
+    @Override
+    public List<AccountDto> searchAccounts(String pattern) {
+
+        return accountRepository
+                .findByNameStartsWithIgnoreCase(pattern)
+                .stream()
+                .map(accountMapper::toDto)
+                .toList();
+    }
+
 }

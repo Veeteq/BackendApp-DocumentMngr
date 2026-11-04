@@ -2,6 +2,8 @@ package com.veeteq.documentmngr.bootstrap;
 
 import com.veeteq.documentmngr.model.*;
 import com.veeteq.documentmngr.repository.*;
+import com.veeteq.documentmngr.repository.idgenerator.EntityIdMapping;
+import com.veeteq.documentmngr.repository.idgenerator.EntityIdProvider;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -13,7 +15,7 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Map;
 
-import static com.veeteq.documentmngr.repository.EntityIdMapping.*;
+import static com.veeteq.documentmngr.repository.idgenerator.EntityIdMapping.*;
 
 @Component
 @Profile("test")
@@ -22,13 +24,13 @@ public class DataLoader implements CommandLineRunner {
     private final AccountRepository accountRepository;
     private final ItemRepository itemRepository;
     private final DocumentRepository documentRepository;
-    private final UtilityRepository utilityRepository;
+    private final EntityIdProvider entityIdProvider;
 
-    public DataLoader(AccountRepository accountRepository, ItemRepository itemRepository, DocumentRepository documentRepository, UtilityRepository utilityRepository) {
+    public DataLoader(AccountRepository accountRepository, ItemRepository itemRepository, DocumentRepository documentRepository, EntityIdProvider entityIdProvider) {
         this.accountRepository = accountRepository;
         this.itemRepository = itemRepository;
         this.documentRepository = documentRepository;
-        this.utilityRepository = utilityRepository;
+        this.entityIdProvider = entityIdProvider;
     }
 
     @Override
@@ -41,16 +43,16 @@ public class DataLoader implements CommandLineRunner {
     @Transactional
     private void loadAccounts() {
         var list = List.of(
-                Account.builder().withId(nextId(ACCOUNT)).withName("ABC").withDescription("ABC Description").withCurrency(Currency.getInstance("PLN")).withImageUrl("https://image.com/abc.png").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("BCD").withDescription("BCD Description").withCurrency(Currency.getInstance("EUR")).withImageUrl("https://image.com/bcd.png").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("CDE").withDescription("CDE Description").withCurrency(Currency.getInstance("CZK")).withImageUrl("https://image.com/cde.png").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("DEF").withDescription("DEF Description").withCurrency(Currency.getInstance("USD")).withImageUrl("https://image.com/def.png").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("EFG").withDescription("EFG Description").withCurrency(Currency.getInstance("GBP")).withImageUrl("https://image.com/efg.png").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("FGH").withDescription("FGH Description").withCurrency(Currency.getInstance("HRK")).withImageUrl("https://image.com/fgh.png").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("GHI").withDescription("GHI Description").withCurrency(Currency.getInstance("HUF")).withImageUrl("https://image.com/ghi.png").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("HIJ").withDescription("HIJ Description").withCurrency(Currency.getInstance("BAM")).withImageUrl("https://image.com/hij.png").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("IJK").withDescription("IJK Description").withCurrency(Currency.getInstance("RON")).withImageUrl("https://image.com/ijk.png").build(),
-                Account.builder().withId(nextId(ACCOUNT)).withName("JKL").withDescription("JKL Description").withCurrency(Currency.getInstance("CAD")).withImageUrl("https://image.com/jkl.png").build()
+                Account.builder().withId(nextId(ACCOUNT)).withName("ABC").withDescription("ABC Description").withCurrency(Currency.getInstance("PLN")).withImageUrl("https://image.com/abc.png").withDefaultPaymentMethod(PaymentMethod.CASH).build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("BCD").withDescription("BCD Description").withCurrency(Currency.getInstance("EUR")).withImageUrl("https://image.com/bcd.png").withDefaultPaymentMethod(PaymentMethod.CREDITCARD).build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("CDE").withDescription("CDE Description").withCurrency(Currency.getInstance("CZK")).withImageUrl("https://image.com/cde.png").withDefaultPaymentMethod(PaymentMethod.DEBITCARD).build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("DEF").withDescription("DEF Description").withCurrency(Currency.getInstance("USD")).withImageUrl("https://image.com/def.png").withDefaultPaymentMethod(PaymentMethod.BANKTRANSFER).build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("EFG").withDescription("EFG Description").withCurrency(Currency.getInstance("GBP")).withImageUrl("https://image.com/efg.png").withDefaultPaymentMethod(PaymentMethod.CASH).build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("FGH").withDescription("FGH Description").withCurrency(Currency.getInstance("HRK")).withImageUrl("https://image.com/fgh.png").withDefaultPaymentMethod(PaymentMethod.CREDITCARD).build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("GHI").withDescription("GHI Description").withCurrency(Currency.getInstance("HUF")).withImageUrl("https://image.com/ghi.png").withDefaultPaymentMethod(PaymentMethod.DEBITCARD).build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("HIJ").withDescription("HIJ Description").withCurrency(Currency.getInstance("BAM")).withImageUrl("https://image.com/hij.png").withDefaultPaymentMethod(PaymentMethod.BANKTRANSFER).build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("IJK").withDescription("IJK Description").withCurrency(Currency.getInstance("RON")).withImageUrl("https://image.com/ijk.png").withDefaultPaymentMethod(PaymentMethod.CASH).build(),
+                Account.builder().withId(nextId(ACCOUNT)).withName("JKL").withDescription("JKL Description").withCurrency(Currency.getInstance("CAD")).withImageUrl("https://image.com/jkl.png").withDefaultPaymentMethod(PaymentMethod.BANKTRANSFER).build()
         );
         accountRepository.saveAll(list);
     }
@@ -96,7 +98,7 @@ public class DataLoader implements CommandLineRunner {
                 .withDocumentName("Car insurance")
                 .withDocumentDescription("January invoice for Car Insurance, 1st installment")
                 .withInvoiceNumber("CAR/INS/2025/17900")
-                .withPaymentMethod(PaymentMethod.EFT)
+                .withPaymentMethod(PaymentMethod.BANKTRANSFER)
                 .withAccount(accRef)
                 .withCurrencyCode(Currency.getInstance("PLN").getCurrencyCode())
                 .withExchangeRate(BigDecimal.ONE)
@@ -119,18 +121,19 @@ public class DataLoader implements CommandLineRunner {
         var document = Document.builder()
                 .withDocumentDate(LocalDate.now().minusDays(1))
                 .withDocumentType(DocumentType.TRANSFER)
-                .withPaymentMethod(PaymentMethod.EFT)
+                .withPaymentMethod(PaymentMethod.BANKTRANSFER)
                 .withAccount(accountRepository.findById(4L).orElseThrow())
                 .withTargetAccount(accountRepository.findById(5L).orElseThrow())
                 .withCurrencyCode(Currency.getInstance("PLN").getCurrencyCode())
-                .withExchangeRate(BigDecimal.ONE)
+                .withExchangeRate(BigDecimal.TEN)
                 .withTransferAmount(BigDecimal.valueOf(99.99))
                 .withTransferItem(itemRepository.findById(10L).orElseThrow())
                 .build();
         return document;
     }
 
-    private Long nextId(EntityIdMapping mapping) {
-        return utilityRepository.getNextId(mapping);
+    private Long nextId(EntityIdMapping entityIdMapping) {
+        var id = entityIdProvider.getNextId(entityIdMapping);
+        return id;
     }
 }

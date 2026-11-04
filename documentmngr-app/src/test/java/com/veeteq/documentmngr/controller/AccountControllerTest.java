@@ -173,6 +173,7 @@ public class AccountControllerTest extends BaseTest {
         mockMvc.perform(delete(AccountController.BASE_URL.concat("/v1/accounts/{accountId}"), 9585)
                         .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
                         .header(TRANSACTION_ID, transactionId))
+                .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(openApi().isValid(apiSpecification));
     }

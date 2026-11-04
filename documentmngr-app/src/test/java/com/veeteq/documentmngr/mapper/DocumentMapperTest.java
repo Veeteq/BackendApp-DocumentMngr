@@ -14,6 +14,9 @@ import com.veeteq.documentmngr.rest.dto.DocumentTypeDto;
 import com.veeteq.documentmngr.rest.dto.PaymentDto;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -180,6 +183,40 @@ class DocumentMapperTest {
         assertEquals(15, updated.getClass().getDeclaredFields().length);
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"INVOICE", "BILL", "NOTE"})
+    void shouldMapAllDocumentTypes(String documentTypeDto) {
+        var documentType = DocumentTypeDto.valueOf(documentTypeDto);
+        var dto = createDocumentRequestDto().documentType(documentType);
+        var account = accountRepository.findById(dto.getAccountId()).orElseThrow();
+        var entity = documentMapper.toEntity(dto, account);
+
+        assertEquals(documentTypeDto, entity.getDocumentType().name());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "ATMDEPOSIT",
+            "ATMWITHDRAWAL",
+            "BANKTRANSFER",
+            "CASH",
+            "CREDITCARD",
+            "DEBITCARD"
+    })
+    void shouldMapAllPaymentMethods(String paymentMethod) {
+        var dto = createDocumentRequestDto();
+        var payment = new PaymentDto()
+                .paymentMethod(paymentMethod)
+                .currencyCode("EUR")
+                .exchangeRate(BigDecimal.ONE);
+        dto.setPayment(payment);
+
+        var account = accountRepository.findById(dto.getAccountId()).orElseThrow();
+        var entity = documentMapper.toEntity(dto, account);
+
+        assertEquals(paymentMethod, entity.getPaymentMethod().name());
+    }
+
     private Document createDocument() {
         var document = Document.builder()
                 .withDocumentDate(LocalDate.of(2025, Month.JANUARY, 31))
@@ -235,7 +272,7 @@ class DocumentMapperTest {
 
     private PaymentDto paymentDto() {
         return new PaymentDto()
-                .paymentMethod("EFT")
+                .paymentMethod("BANKTRANSFER")
                 .currencyCode("EUR")
                 .exchangeRate(BigDecimal.valueOf(1.1));
     }

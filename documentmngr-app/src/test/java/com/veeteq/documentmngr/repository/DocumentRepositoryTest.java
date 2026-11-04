@@ -34,4 +34,42 @@ public class DocumentRepositoryTest {
         var count = documentRepository.countByAccount(account);
         assertEquals(1, count);
     }
+
+    @DisplayName("Find distinct document names by pattern")
+    @Test
+    void testFindDistinctNames() {
+        var result = documentRepository.findDistinctNames("home");
+        assertTrue(result.stream().allMatch(name -> name.toLowerCase().contains("home")));
+    }
+
+    @DisplayName("Find distinct document names case insensitive")
+    @Test
+    void testFindDistinctNamesCaseInsensitive() {
+        var lowerCaseResult = documentRepository.findDistinctNames("home");
+        var upperCaseResult = documentRepository.findDistinctNames("HOME");
+        assertEquals(lowerCaseResult, upperCaseResult);
+    }
+
+    @DisplayName("Find distinct document comments by pattern")
+    @Test
+    void testFindDistinctComments() {
+        var result = documentRepository.findDistinctComments("payment");
+        assertTrue(result.stream().allMatch(comment -> comment.toLowerCase().contains("payment")));
+    }
+
+    @DisplayName("Find distinct document comments case insensitive")
+    @Test
+    void testFindDistinctCommentsCaseInsensitive() {
+        var lowerCaseResult = documentRepository.findDistinctComments("payment");
+        var upperCaseResult = documentRepository.findDistinctComments("PAYMENT");
+        assertEquals(lowerCaseResult, upperCaseResult);
+    }
+
+    @DisplayName("Find distinct document names returns no duplicates")
+    @Test
+    void testFindDistinctNamesReturnsDistinctValues() {
+        var result = documentRepository.findDistinctNames("");
+        assertEquals(result.size(), result.stream().distinct().count());
+    }
+
 }

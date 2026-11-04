@@ -10,12 +10,10 @@ import com.veeteq.documentmngr.repository.DocumentRepository;
 import com.veeteq.documentmngr.repository.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
-import org.zalando.logbook.Logbook;
-import org.zalando.logbook.servlet.LogbookFilter;
 
+@AutoConfigureMockMvc(addFilters = false)
 public class BaseTest {
 
     @Autowired
@@ -34,8 +32,6 @@ public class BaseTest {
     protected ObjectMapper objectMapper;
 
     @Autowired
-    private WebApplicationContext wac;
-
     protected MockMvc mockMvc;
 
     protected Item item;
@@ -44,9 +40,6 @@ public class BaseTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac)
-                .addFilters(new LogbookFilter(Logbook.create()))
-                .build();
         item = itemRepository.findById(3L).get();
         account = accountRepository.findById(1L).get();
         document = documentRepository.findById(1L).get();

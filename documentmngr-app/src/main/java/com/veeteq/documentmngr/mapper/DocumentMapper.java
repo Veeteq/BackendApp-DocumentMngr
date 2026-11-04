@@ -2,9 +2,12 @@ package com.veeteq.documentmngr.mapper;
 
 import com.veeteq.documentmngr.model.Account;
 import com.veeteq.documentmngr.model.Document;
+import com.veeteq.documentmngr.model.DocumentType;
 import com.veeteq.documentmngr.model.Item;
 import com.veeteq.documentmngr.rest.dto.DocumentRequestDto;
 import com.veeteq.documentmngr.rest.dto.DocumentResponseDto;
+import com.veeteq.documentmngr.rest.dto.DocumentTypeDto;
+
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", uses = {AccountMapper.class, DocumentItemMapper.class})
@@ -55,9 +58,9 @@ public interface DocumentMapper {
     @Mapping(target = "withExchangeRate",        source = "dto.payment.exchangeRate")
     @Mapping(target = "withTransferAmount",      source = "dto.transferAmount")
     @Mapping(target = "withTransferItem",        expression = "java(transferItem)")
+    @Mapping(target = "withDocumentDescription", source = "dto.documentDescription")
     @Mapping(target = "withId",                  ignore = true)
     @Mapping(target = "withDocumentName",        ignore = true)
-    @Mapping(target = "withDocumentDescription", ignore = true)
     @Mapping(target = "withInvoiceNumber",       ignore = true)
     @Mapping(target = "withCounterpartyId",      ignore = true)
     @Mapping(target = "withVersion",             ignore = true)
@@ -68,6 +71,5 @@ public interface DocumentMapper {
 
     @Mapping(target = "documentItems", ignore = true)
     Document updateWith(@MappingTarget Document document, DocumentRequestDto dto, Account sourceAccount, Account targetAccount, Item transferItem);
-
 
 }

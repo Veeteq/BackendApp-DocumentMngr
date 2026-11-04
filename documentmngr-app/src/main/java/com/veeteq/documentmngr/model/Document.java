@@ -163,16 +163,19 @@ public class Document {
         return documentItems.stream()
                 .map(item -> {
                     if (item.getFinancialRecord() instanceof Expense expense) {
-                        var a = expense.getPrice()
+                    	System.out.println("expense id: " + expense.getId());
+                        var totalAmount = expense.getPrice()
                                 .multiply(expense.getCount())
                                 .setScale(2, RoundingMode.HALF_UP)
                                 .negate();
-                        return a;
+                        return totalAmount;
                     } else if (item.getFinancialRecord() instanceof Income income) {
-                        var b =  income.getPrice()
-                                .multiply(income.getCount())
+                    	System.out.println("income id: " + income.getId());
+                    	var incomeCount = income.getCount() != null ? income.getCount() : BigDecimal.ONE;
+                        var totalAmount =  income.getPrice()
+                                .multiply(incomeCount)
                                 .setScale(2, RoundingMode.HALF_UP);
-                        return b;
+                        return totalAmount;
                     }
                     return BigDecimal.ZERO;
                 })
@@ -294,7 +297,7 @@ public class Document {
         public Document build() {
             if (entity.documentType == DocumentType.TRANSFER) {
                 entity.documentName = DocumentType.TRANSFER.name();
-                entity.documentDescription = createTransferDescription(transferAmount, entity.account, targetAccount);
+                entity.documentDescription = createTransferDescription(transferAmount, entity.account, targetAccount, entity.documentDescription);
                 return buildTransfer();
             }
             entity.version = 0;
@@ -347,14 +350,14 @@ public class Document {
             return a.setScale(2, RoundingMode.HALF_UP);
         }
 
-        private String createTransferDescription(BigDecimal transferAmount, Account sourceAccount, Account targetAccount) {
-            var messageFormat = new MessageFormat("Transfer of {0} {1} from {2} to {3} {4} {5}", Locale.of("pl", "PL"));
+        private String createTransferDescription(BigDecimal transferAmount, Account sourceAccount, Account targetAccount, String documentDescription) {
+            var messageFormat = new MessageFormat("Transfer of {0} {1} from {2} to {3} {4} {5} {6}", Locale.of("pl", "PL"));
 
             var targetAmount = calculateTargetAmount(transferAmount, entity.exchangeRate);
-            var args = new Object[]{transferAmount, sourceAccount.getCurrency(), sourceAccount.getName(), targetAmount, entity.getCurrency(), targetAccount.getName()};
+            var description = documentDescription != null ? "\n".concat(documentDescription) : null;
+            var args = new Object[]{transferAmount, sourceAccount.getCurrency(), sourceAccount.getName(), targetAmount, entity.getCurrency(), targetAccount.getName(), description};
             return messageFormat.format(args);
         }
-
     }
 
 }
