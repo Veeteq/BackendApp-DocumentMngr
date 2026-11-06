@@ -4,7 +4,6 @@ import com.veeteq.documentmngr.mapper.DocumentResponseFactory;
 import com.veeteq.documentmngr.model.DocumentType;
 import com.veeteq.documentmngr.processor.DocumentProcessor;
 import com.veeteq.documentmngr.processor.DocumentProcessorFactory;
-import com.veeteq.documentmngr.repository.DocumentItemRepository;
 import com.veeteq.documentmngr.repository.DocumentRepository;
 import com.veeteq.documentmngr.rest.dto.DocumentRequestDto;
 import com.veeteq.documentmngr.rest.dto.DocumentResponseDto;
@@ -23,13 +22,11 @@ import java.util.function.Function;
 public class DocumentServiceImpl implements DocumentService {
     private final DocumentProcessorFactory documentProcessorFactory;
     private final DocumentRepository documentRepository;
-    private final DocumentItemRepository documentItemRepository;
     private final DocumentResponseFactory documentResponseFactory;
 
-    public DocumentServiceImpl(DocumentProcessorFactory documentProcessorFactory, DocumentRepository documentRepository, DocumentItemRepository documentItemRepository, DocumentResponseFactory documentResponseFactory) {
+    public DocumentServiceImpl(DocumentProcessorFactory documentProcessorFactory, DocumentRepository documentRepository, DocumentResponseFactory documentResponseFactory) {
         this.documentProcessorFactory = documentProcessorFactory;
         this.documentRepository = documentRepository;
-        this.documentItemRepository = documentItemRepository;
         this.documentResponseFactory = documentResponseFactory;
     }
 
@@ -74,15 +71,17 @@ public class DocumentServiceImpl implements DocumentService {
         var result = documentRepository.findById(id)
                 .map(document -> {
                     document.clearDocumentItems();
-                    document.getDocumentItems().forEach(documentItemRepository::delete);
+
+                    // Important: execute orphan removals before reusing sequence numbers
+                    documentRepository.flush();
 
                     var documentType = DocumentType.findByValue(dto.getDocumentType().getValue());
-                    DocumentProcessor processor = documentProcessorFactory.get(documentType.getProcessorType());
+                    var processor = documentProcessorFactory.get(documentType.getProcessorType());
 
                     var updated = processor.process(document, dto);
-                    var savedDocument = documentRepository.save(updated);
+                    if (updated != document) throw new IllegalStateException("Document processor returned a different Document instance during update");
 
-                    return documentResponseFactory.create(savedDocument);
+                    return documentResponseFactory.create(updated);
                 });
         return result;
     }

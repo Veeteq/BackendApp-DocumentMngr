@@ -4,18 +4,12 @@ import com.veeteq.documentmngr.model.Document;
 import com.veeteq.documentmngr.model.DocumentItemType;
 import com.veeteq.documentmngr.model.DocumentType;
 import com.veeteq.documentmngr.model.Item;
+import com.veeteq.documentmngr.processor.TransferData;
 import com.veeteq.documentmngr.repository.AccountRepository;
 import com.veeteq.documentmngr.repository.ItemRepository;
-import com.veeteq.documentmngr.rest.dto.DocumentItemRequestDto;
-import com.veeteq.documentmngr.rest.dto.DocumentItemRequestDto.ItemTypeEnum;
-import com.veeteq.documentmngr.rest.dto.DocumentRequestDto;
-import com.veeteq.documentmngr.rest.dto.DocumentResponseDto;
-import com.veeteq.documentmngr.rest.dto.DocumentTypeDto;
-import com.veeteq.documentmngr.rest.dto.PaymentDto;
-
+import com.veeteq.documentmngr.rest.dto.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +19,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -118,11 +113,17 @@ class DocumentMapperTest {
         // Given
         var transferDto = createTransferRequestDto();
         var sourceAccount = accountRepository.findById(transferDto.getAccountId()).orElseThrow();
-        var targetAccount = accountRepository.findById(transferDto.getTargetAccountId()).orElseThrow();
+        var targetAccount = accountRepository.findById(transferDto.getTransfer().getTargetAccountId()).orElseThrow();
         Item transferItem = null;
 
+        var transferData = new TransferData();
+        transferData.setSourceAccount(sourceAccount);
+        transferData.setTargetAccount(targetAccount);
+        transferData.setTransferItem(transferItem);
+        transferData.setTransferAmount(transferDto.getTransfer().getTransferAmount());
+
         // When
-        Document document = documentMapper.toEntity(transferDto, sourceAccount, targetAccount, transferItem);
+        Document document = documentMapper.toEntity(transferDto, transferData);
 
         // Then
         assertEquals(transferDto.getDocumentDate(),        document.getDocumentDate());
@@ -252,8 +253,9 @@ class DocumentMapperTest {
                 .documentType(DocumentTypeDto.TRANSFER)
                 .payment(paymentDto())
                 .accountId(6L)
-                .targetAccountId(7L)
-                .transferAmount(BigDecimal.valueOf(99.99));
+                .transfer(new TransferRequestDto()
+                        .targetAccountId(7L)
+                        .transferAmount(BigDecimal.valueOf(99.99)));
         return dto;
     }
 
@@ -279,7 +281,7 @@ class DocumentMapperTest {
 
     private DocumentItemRequestDto expenseDocumentItemRequestDto() {
         return new DocumentItemRequestDto()
-                .itemType(ItemTypeEnum.EXP)
+                .itemType(DocumentItemTypeDto.EXP)
                 .itemId(5L)
                 .itemName("Item_05")
                 .itemQuantity(BigDecimal.ONE)

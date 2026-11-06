@@ -6,5 +6,6 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "document")
 public record DocumentProperties(
         long transferItemId,
+        long provisionItemId,
         String addressbookApiUrl) {}
 

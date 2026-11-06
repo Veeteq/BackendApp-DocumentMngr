@@ -51,6 +51,7 @@ open:
       url: https://veeteq.github.io/OpenAPI-DocumentMngr/openapi.yaml
 
 document:
+  provision-item-id: 9
   transfer-item-id: 10
   addressbook-api-url: ${ADDRESSBOOK_API_URL:http://localhost:8383}
 

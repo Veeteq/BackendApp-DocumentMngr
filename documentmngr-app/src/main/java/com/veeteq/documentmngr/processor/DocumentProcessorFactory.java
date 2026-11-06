@@ -30,10 +30,8 @@ public class DocumentProcessorFactory {
      * @return FileParser
      */
     public DocumentProcessor get(String fileType) {
-        DocumentProcessor fileParser = documentProcessors.get(fileType);
-        if (Objects.isNull(documentProcessors)) {
-            throw new IllegalArgumentException("Unsupported document type");
-        }
-        return fileParser;
+        var processor = documentProcessors.get(fileType);
+        if (processor == null) throw new IllegalArgumentException("Unsupported document processor: " + fileType);
+        return processor;
     }
 }

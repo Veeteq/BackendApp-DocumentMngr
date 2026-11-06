@@ -13,10 +13,7 @@ import java.math.RoundingMode;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Currency;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 @Entity
 @Table(name = "documents", uniqueConstraints = @UniqueConstraint(columnNames = "docu_id"))
@@ -32,7 +29,7 @@ public class Document {
     private LocalDate documentDate;
 
     @Enumerated(EnumType.STRING)
-    @ColumnTransformer(read = "UPPER(docu_type_tx)") //, write = "LOWER(?)")
+    @ColumnTransformer(read = "UPPER(docu_type_tx)")
     @Column(name="docu_type_tx", nullable = false)
     private DocumentType documentType;
 
@@ -64,6 +61,7 @@ public class Document {
     private BigDecimal exchangeRate;
 
     @OneToMany(mappedBy = "document", fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST}, orphanRemoval = true, targetEntity = DocumentItem.class)
+    @OrderBy("id.sequenceNumber ASC")
     private final List<DocumentItem> documentItems = new LinkedList<>();
 
     @CreationTimestamp
@@ -184,10 +182,50 @@ public class Document {
     }
 
     public void clearDocumentItems() {
-        for (var documentItem : this.documentItems) {
-            documentItem.setDocument(null);
-        }
         this.documentItems.clear();
+    }
+
+    public Expense getTransferExpense() {
+        if (!documentType.equals(DocumentType.TRANSFER)) return null;
+
+        return documentItems.stream()
+                .filter(item -> item.getType() == DocumentItemType.EXP)
+                .map(DocumentItem::getExpense)
+                //TODO: Consider adding this level of protection later
+                //TODO: introduce TransferResolver or something similar
+                //.filter(expense -> expense.getItem().equals(transferItem))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElseThrow();
+    }
+
+    public Income getTransferIncome() {
+        if (!documentType.equals(DocumentType.TRANSFER)) return null;
+
+        return documentItems.stream()
+                .filter(item -> item.getType() == DocumentItemType.INC)
+                .map(DocumentItem::getIncome)
+                .filter(Objects::nonNull)
+                //.filter(expense -> expense.getItem().equals(transferItem))
+                .findFirst()
+                .orElseThrow();
+    }
+
+
+    public BigDecimal getTransferSourceAmount() {
+        var expense = getTransferExpense();
+        var count = expense.getCount() != null ? expense.getCount() : BigDecimal.ONE;
+        return expense.getPrice()
+                .multiply(count)
+                .setScale(2, RoundingMode.HALF_UP);
+    }
+
+    public BigDecimal getTransferTargetAmount() {
+        var income = getTransferIncome();
+        var count = income.getCount() != null ? income.getCount() : BigDecimal.ONE;
+        return income.getPrice()
+                .multiply(count)
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
     public static Builder builder() {
@@ -198,6 +236,7 @@ public class Document {
         return new Builder(document);
     }
 
+    /* ----------BUILDER ---------------- */
     public static class Builder {
         private final Document entity;
 
@@ -295,12 +334,14 @@ public class Document {
         }
 
         public Document build() {
+            if (version != null) {
+                entity.version = version;
+            }
             if (entity.documentType == DocumentType.TRANSFER) {
                 entity.documentName = DocumentType.TRANSFER.name();
                 entity.documentDescription = createTransferDescription(transferAmount, entity.account, targetAccount, entity.documentDescription);
                 return buildTransfer();
             }
-            entity.version = 0;
             return entity;
         }
 
@@ -315,7 +356,6 @@ public class Document {
                     .withPrice(this.transferAmount)
                     .withCount(BigDecimal.ONE) // Quantity is always 1
                     .withComment(entity.account.getName() + " -> " + this.targetAccount.getName())
-                    .withVersion(version)
                     .build();
 
             // Create the INCOME record for the target account
@@ -326,20 +366,17 @@ public class Document {
                     .withPrice(targetAmount)
                     .withCount(BigDecimal.ONE) // Quantity is always 1
                     .withComment(entity.account.getName() + " -> " + this.targetAccount.getName())
-                    .withVersion(version)
                     .build();
 
             // Add the expense and income to the document items
             DocumentItem expenseItem = new DocumentItem();
             expenseItem.setType(DocumentItemType.EXP);
             expenseItem.setFinancialRecord(expense);
-            expenseItem.setVersion(version);
             entity.addToDocumentItems(expenseItem);
 
             DocumentItem incomeItem = new DocumentItem();
             incomeItem.setType(DocumentItemType.INC);
             incomeItem.setFinancialRecord(income);
-            incomeItem.setVersion(version);
             entity.addToDocumentItems(incomeItem);
 
             return entity;

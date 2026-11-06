@@ -7,12 +7,17 @@ import com.veeteq.documentmngr.rest.dto.DocumentItemRequestDto;
 import com.veeteq.documentmngr.rest.dto.DocumentItemResponseDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Comparator;
+import java.util.List;
 
 @Mapper(componentModel = "spring", uses = {ItemMapper.class})
 public interface DocumentItemMapper {
 
-    @Mapping(target = "documentItemId", source = "entity.financialRecord.id")
+    @Mapping(target = "documentItemId", source = "entity.id.sequenceNumber")
+    @Mapping(target = "itemType",       source = "entity.type")
     @Mapping(target = "item",           source = "entity.financialRecord.item")
     @Mapping(target = "itemQuantity",   source = "entity.financialRecord.count")
     @Mapping(target = "itemPrice",      source = "entity.financialRecord.price")
@@ -27,6 +32,15 @@ public interface DocumentItemMapper {
     @Mapping(target = "withItemQuantity",     source = "dto.itemQuantity")
     @Mapping(target = "withItemPrice",        source = "dto.itemPrice")
     @Mapping(target = "withItemComment",      source = "dto.itemDescription")
-    @Mapping(target = "withVersion",          source = "dto.version")
+    @Mapping(target = "withVersion",          ignore = true)
     DocumentItem toEntity(DocumentItemRequestDto dto, Document document, @Autowired ItemRepository itemRepository);
+
+    @Named("sortedDocumentItems")
+    default List<DocumentItemResponseDto> toSortedDtoList(List<DocumentItem> items) {
+        if (items == null || items.isEmpty()) return List.of();
+        return items.stream()
+                .sorted(Comparator.comparingInt((DocumentItem di) -> di.getId().getSequenceNumber()))
+                .map(this::toDto)
+                .toList();
+    }
 }
