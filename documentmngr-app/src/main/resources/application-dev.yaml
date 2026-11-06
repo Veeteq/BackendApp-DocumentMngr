@@ -21,4 +21,5 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
 document:
+  provision-item-id: 514
   transfer-item-id: 513

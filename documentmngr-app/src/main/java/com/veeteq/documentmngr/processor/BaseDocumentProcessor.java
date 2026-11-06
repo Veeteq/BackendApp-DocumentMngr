@@ -22,6 +22,8 @@ public class BaseDocumentProcessor implements DocumentProcessor {
     @Override
     public Document process(DocumentRequestDto dto) {
         System.out.println("Processing using " + Type.BASE);
+        validateRequest(dto);
+
         var account = accountRepository.findById(dto.getAccountId()).orElseThrow();
         var document = documentMapper.toEntity(dto, account);
         return document;
@@ -36,7 +38,12 @@ public class BaseDocumentProcessor implements DocumentProcessor {
         return updated;
     }
 
+    protected void validateRequest(DocumentRequestDto documentDto) {
+    }
+
     protected void validateRequest(Document document, DocumentRequestDto documentDto) {
+        validateRequest(documentDto);
+
         var baseDocumentType = document.getDocumentType();
         var targetDocumentType = documentDto.getDocumentType();
 

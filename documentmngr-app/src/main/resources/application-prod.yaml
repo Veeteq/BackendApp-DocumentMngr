@@ -26,4 +26,5 @@ spring:
         format_sql: true
 
 document:
+  provision-item-id: 514
   transfer-item-id: 513

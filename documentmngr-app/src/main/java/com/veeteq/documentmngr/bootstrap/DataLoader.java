@@ -118,13 +118,16 @@ public class DataLoader implements CommandLineRunner {
 
     @Transactional
     private Document createTransfer() {
+        var sourceAccount = accountRepository.findById(4L).orElseThrow();
+        var targetAccount = accountRepository.findById(5L).orElseThrow();
+
         var document = Document.builder()
                 .withDocumentDate(LocalDate.now().minusDays(1))
                 .withDocumentType(DocumentType.TRANSFER)
                 .withPaymentMethod(PaymentMethod.BANKTRANSFER)
-                .withAccount(accountRepository.findById(4L).orElseThrow())
-                .withTargetAccount(accountRepository.findById(5L).orElseThrow())
-                .withCurrencyCode(Currency.getInstance("PLN").getCurrencyCode())
+                .withAccount(sourceAccount)
+                .withTargetAccount(targetAccount)
+                .withCurrencyCode(targetAccount.getCurrency().getCurrencyCode())
                 .withExchangeRate(BigDecimal.TEN)
                 .withTransferAmount(BigDecimal.valueOf(99.99))
                 .withTransferItem(itemRepository.findById(10L).orElseThrow())

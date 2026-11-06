@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.veeteq.documentmngr.config.TestSecurityProblemSupportConfig;
 import com.veeteq.documentmngr.exception.ExceptionHandling;
 import com.veeteq.documentmngr.rest.api.DocumentController;
-import com.veeteq.documentmngr.rest.api.ItemController;
 import com.veeteq.documentmngr.rest.dto.*;
 import com.veeteq.documentmngr.service.DocumentService;
 import org.junit.jupiter.api.*;
@@ -163,7 +162,7 @@ public class DocumentSecurityTest {
                 .exchangeRate(BigDecimal.ONE);
 
         var documentItemRequestDto = new DocumentItemRequestDto()
-                .itemType(DocumentItemRequestDto.ItemTypeEnum.EXP)
+                .itemType(DocumentItemTypeDto.EXP)
                 .itemId(98765L)
                 .itemQuantity(new BigDecimal("10.5"))
                 .itemPrice(new BigDecimal("99.99"));

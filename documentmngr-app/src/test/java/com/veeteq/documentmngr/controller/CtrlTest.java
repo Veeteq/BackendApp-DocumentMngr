@@ -3,7 +3,7 @@ package com.veeteq.documentmngr.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.veeteq.documentmngr.rest.api.DocumentController;
 import com.veeteq.documentmngr.rest.dto.*;
-import com.veeteq.documentmngr.rest.dto.DocumentItemRequestDto.ItemTypeEnum;
+import com.veeteq.documentmngr.rest.dto.DocumentItemRequestDto;
 import com.veeteq.documentmngr.service.DocumentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,7 +116,7 @@ class CtrlTest {
                 .paymentMethod("Credit Card")
                 .exchangeRate(BigDecimal.ONE);
         var documentItemRequestDto = new DocumentItemRequestDto()
-                .itemType(ItemTypeEnum.EXP)
+                .itemType(DocumentItemTypeDto.EXP)
                 .itemId(98765L)
                 .itemQuantity(new BigDecimal("10.5"))
                 .itemPrice(new BigDecimal("99.99"));

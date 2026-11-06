@@ -19,7 +19,7 @@ public class DocumentItem {
     private DocumentItemType type;
 
     @MapsId("id")
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "docu_id", nullable = false)
     private Document document;
 

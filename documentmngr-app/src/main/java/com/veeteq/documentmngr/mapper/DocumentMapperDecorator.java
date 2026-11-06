@@ -4,6 +4,7 @@ import com.veeteq.documentmngr.model.Account;
 import com.veeteq.documentmngr.model.Document;
 import com.veeteq.documentmngr.model.DocumentType;
 import com.veeteq.documentmngr.model.Item;
+import com.veeteq.documentmngr.processor.TransferData;
 import com.veeteq.documentmngr.repository.ItemRepository;
 import com.veeteq.documentmngr.rest.dto.DocumentRequestDto;
 import com.veeteq.documentmngr.rest.dto.DocumentResponseDto;
@@ -11,6 +12,8 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.MappingTarget;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+
+import java.util.Comparator;
 
 public abstract class DocumentMapperDecorator implements DocumentMapper {
 
@@ -38,6 +41,8 @@ public abstract class DocumentMapperDecorator implements DocumentMapper {
 
     @AfterMapping
     public void after(DocumentRequestDto dto, @MappingTarget Document entity) {
+        if (dto.getDocumentItems() == null) return;
+
         dto.getDocumentItems().stream()
                 .map(itemDto -> documentItemMapper.toEntity(itemDto, entity, itemRepository))
                 .forEach(entity::addToDocumentItems);
@@ -63,14 +68,14 @@ public abstract class DocumentMapperDecorator implements DocumentMapper {
     }
 
     @Override
-    public Document updateWith(Document entity, DocumentRequestDto dto, Account sourceAccount, Account targetAccount, Item transferItem) {
+    public Document updateWith(Document entity, DocumentRequestDto dto, TransferData transferData) {
         var document = Document.builder(entity)
                 .withDocumentDate(dto.getDocumentDate())
                 .withDocumentType(DocumentType.valueOf(dto.getDocumentType().name()))
-                .withAccount(sourceAccount)
-                .withTargetAccount(targetAccount)
-                .withTransferAmount(dto.getTransferAmount())
-                .withTransferItem(transferItem)
+                .withAccount(transferData.getSourceAccount())
+                .withTargetAccount(transferData.getTargetAccount())
+                .withTransferAmount(transferData.getTransferAmount())
+                .withTransferItem(transferData.getTransferItem())
                 .withPaymentMethod(dto.getPayment().getPaymentMethod())
                 .withCurrencyCode(dto.getPayment().getCurrencyCode())
                 .withExchangeRate(dto.getPayment().getExchangeRate())
