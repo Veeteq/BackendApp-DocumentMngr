@@ -10,6 +10,7 @@ import com.veeteq.documentmngr.rest.dto.TransferRequestDto;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 @Service(value = DocumentProcessor.Type.TRANSFER)
 public class TransferDocumentProcessor extends BaseDocumentProcessor {
@@ -48,6 +49,15 @@ public class TransferDocumentProcessor extends BaseDocumentProcessor {
 
         var transferRequest = documentDto.getTransfer();
         if (transferRequest == null) throw new IllegalArgumentException("Transfer data is required for Transfer documents");
+
+        if (documentDto.getDocumentItems() != null && !documentDto.getDocumentItems().isEmpty()) throw new IllegalArgumentException("Document items must not be provided for Transfer documents");
+        if (documentDto.getCounterpartyId() != null) throw new IllegalArgumentException("Counterparty must not be provided for Transfer documents");
+        if (Objects.equals(documentDto.getAccountId(), transferRequest.getTargetAccountId())) throw new IllegalArgumentException("Source and target accounts must be different");
+    }
+
+    @Override
+    protected void validateRequest(Document document, DocumentRequestDto documentDto) {
+        super.validateRequest(document, documentDto);
     }
 
     private TransferData prepareTransferData(DocumentRequestDto documentDto) {
