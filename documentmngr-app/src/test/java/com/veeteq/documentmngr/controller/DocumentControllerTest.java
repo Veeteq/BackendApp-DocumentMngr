@@ -1,6 +1,7 @@
 package com.veeteq.documentmngr.controller;
 
 import com.veeteq.documentmngr.DocumentMngrApp;
+import com.veeteq.documentmngr.integration.addressbook.AddressBookClient;
 import com.veeteq.documentmngr.rest.dto.*;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
@@ -8,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockCookie;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -15,10 +17,13 @@ import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.veeteq.documentmngr.config.ApiConstants.*;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -27,6 +32,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DocumentControllerTest extends BaseTest {
+
+    @MockitoBean
+    AddressBookClient addressBookClient;
 
     @DisplayName("Test List Documents")
     @Test
@@ -151,12 +159,16 @@ public class DocumentControllerTest extends BaseTest {
     @Test
     @Order(4)
     void testCreateDocument() throws Exception {
+        when(addressBookClient
+                .getContact(anyLong()))
+                .thenReturn(Optional.of(new CounterpartyDto().counterpartyId(1L).counterpartyName("ACME Corporation")));
         var dto = new DocumentRequestDto()
                 .documentType(DocumentTypeDto.INVOICE)
                 .documentName("Home electricity")
                 .documentDescription("Home electricity; January invoice")
                 .invoiceNumber("EL/2025/01/ABCDE")
                 .accountId(6L)
+                .counterpartyId(1L)
                 .payment(new PaymentDto()
                         .currencyCode("EUR")
                         .exchangeRate(BigDecimal.valueOf(1.1))
@@ -230,6 +242,7 @@ public class DocumentControllerTest extends BaseTest {
                 .documentDescription("Home electricity; January invoice updated")
                 .invoiceNumber("EL/2025/JAN/13579/UPDATED")
                 .accountId(4L)
+                .counterpartyId(1L)
                 .payment(new PaymentDto()
                         .paymentMethod("BANKTRANSFER")
                         .currencyCode("EUR")
@@ -389,4 +402,42 @@ public class DocumentControllerTest extends BaseTest {
                 .andExpect(jsonPath("$[0]").exists());
     }
 
+    @DisplayName("Test Invalid Document throws exception")
+    @Test
+    @Order(9)
+    void shouldReturnBadRequestForInvalidDocument() throws Exception {
+        var dto = new DocumentRequestDto()
+                .documentDate(LocalDate.of(2025, Month.JANUARY, 23))
+                .documentType(DocumentTypeDto.INVOICE)
+                .documentName("Home electricity updated")
+                .documentDescription("Home electricity; January invoice updated")
+                .invoiceNumber("EL/2025/JAN/13579/UPDATED")
+                .accountId(4L)
+                .counterpartyId(null)
+                .payment(new PaymentDto()
+                        .paymentMethod("BANKTRANSFER")
+                        .currencyCode("EUR")
+                        .exchangeRate(BigDecimal.valueOf(1.1)))
+                .version(document.getVersion())
+                .documentItems(List.of(new DocumentItemRequestDto()
+                        .itemType(DocumentItemTypeDto.EXP)
+                        .itemId(5L)
+                        .itemName("Item_05")
+                        .itemQuantity(BigDecimal.TWO)
+                        .itemPrice(BigDecimal.valueOf(199.99))
+                        .itemDescription("Payment for: Home electricity")
+                        .version(0)));
+
+        mockMvc.perform(post(DOCUMENTS_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(TRANSACTION_ID, UUID.randomUUID())
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(
+                        MediaType.APPLICATION_PROBLEM_JSON
+                ))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.title").value("Bad Request"))
+                .andExpect(jsonPath("$.detail").value("Counterparty is required for Bill and Invoice documents"));
+    }
 }

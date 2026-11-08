@@ -34,7 +34,7 @@ public class DocumentServiceImpl implements DocumentService {
     @Transactional
     public DocumentResponseDto createDocument(DocumentRequestDto documentDto) {
         var documentType = DocumentType.findByValue(documentDto.getDocumentType().getValue());
-        DocumentProcessor processor = documentProcessorFactory.get(documentType.getProcessorType());
+        var processor = documentProcessorFactory.get(documentType.getProcessorType());
         var document = processor.process(documentDto);
         var savedDocument = documentRepository.save(document);
 

@@ -5,5 +5,5 @@ import org.zalando.problem.spring.web.advice.ProblemHandling;
 import org.zalando.problem.spring.web.advice.security.SecurityAdviceTrait;
 
 @ControllerAdvice
-public class ExceptionHandling implements ProblemHandling, SecurityAdviceTrait {
+public class ExceptionHandling implements ProblemHandling, SecurityAdviceTrait, IllegalArgumentAdviceTrait {
 }
