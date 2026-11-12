@@ -13,6 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 import static com.atlassian.oai.validator.mockmvc.OpenApiValidationMatchers.openApi;
 import static com.veeteq.documentmngr.config.ApiConstants.ITEMS_URL;
 import static com.veeteq.documentmngr.config.ApiConstants.LOCATION;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -114,7 +115,7 @@ public class ItemControllerTest extends BaseTest {
                 .andExpect(status().isNoContent())
                 .andExpect(openApi().isValid(apiSpecification));
 
-        assert itemRepository.findById(entity.getId()).isEmpty();
+        assertThat(itemRepository.findById(entity.getId())).isEmpty();
     }
 
     @Order(value = 6)

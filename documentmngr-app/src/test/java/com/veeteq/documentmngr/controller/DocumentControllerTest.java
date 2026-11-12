@@ -2,9 +2,14 @@ package com.veeteq.documentmngr.controller;
 
 import com.veeteq.documentmngr.DocumentMngrApp;
 import com.veeteq.documentmngr.integration.addressbook.AddressBookClient;
+import com.veeteq.documentmngr.model.Document;
+import com.veeteq.documentmngr.model.DocumentItem;
+import com.veeteq.documentmngr.model.DocumentItemType;
+import com.veeteq.documentmngr.model.DocumentType;
 import com.veeteq.documentmngr.rest.dto.*;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockCookie;
@@ -15,13 +20,13 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
+import static com.atlassian.oai.validator.mockmvc.OpenApiValidationMatchers.openApi;
 import static com.veeteq.documentmngr.config.ApiConstants.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -32,6 +37,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DocumentControllerTest extends BaseTest {
+
+    @Value("${open.api.spec.url}")
+    private String apiSpecification;
 
     @MockitoBean
     AddressBookClient addressBookClient;
@@ -298,10 +306,6 @@ public class DocumentControllerTest extends BaseTest {
                 .andExpect(jsonPath("$.documentItems[0].item.itemCategory.categoryName", equalTo("CAT_05")))
 
                 .andExpect(jsonPath("$.transferDetails").doesNotExist());
-
-        documentRepository.findAll().forEach(d -> {
-            System.out.println(d.getId());
-        });
     }
 
     @DisplayName("Test Update Transfer Document")
@@ -380,10 +384,6 @@ public class DocumentControllerTest extends BaseTest {
                 .andExpect(jsonPath("$.documentItems[1].item.itemName", equalTo("Item_10")))
                 .andExpect(jsonPath("$.documentItems[1].item.itemCategory.categoryId", equalTo(5)))
                 .andExpect(jsonPath("$.documentItems[1].item.itemCategory.categoryName", equalTo("CAT_05")));
-
-        documentRepository.findAll().forEach(d -> {
-            System.out.println(d.getId());
-        });
     }
 
     @DisplayName("Test List Unique Document Names")
@@ -391,7 +391,7 @@ public class DocumentControllerTest extends BaseTest {
     @Order(8)
     void shouldReturnSearchResults() throws Exception {
         var transactionId = UUID.randomUUID();
-        mockMvc.perform(get(DOCUMENTS_URL.concat("/search"))
+        mockMvc.perform(get(DOCUMENTS_URL.concat("/metadata"))
                         .param("property", "documentName")
                         .param("pattern", "insurance")
                         .param("distinct", "true")
@@ -433,11 +433,156 @@ public class DocumentControllerTest extends BaseTest {
                         .header(TRANSACTION_ID, UUID.randomUUID())
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().contentTypeCompatibleWith(
-                        MediaType.APPLICATION_PROBLEM_JSON
-                ))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.title").value("Bad Request"))
                 .andExpect(jsonPath("$.detail").value("Counterparty is required for Bill and Invoice documents"));
     }
+
+    @Order(value = 10)
+    @DisplayName("Test Delete Document - When Document Exists")
+    @Test
+    void testDeleteDocument_WhenDocumentExists() throws Exception {
+        var transactionId = UUID.randomUUID().toString();
+        var document = Document.builder()
+                .withDocumentDate(LocalDate.now())
+                .withDocumentType(DocumentType.BILL)
+                .withDocumentName("Home water invoice")
+                .withDocumentDescription("Water supply invoice")
+                .withInvoiceNumber("WATER-123456-INV")
+                .withAccount(account)
+                .withCounterpartyId(1L)
+                .withPaymentMethod("CASH")
+                .withCurrencyCode("PLN")
+                .withExchangeRate(BigDecimal.ONE)
+                .build();
+        document.addToDocumentItems(DocumentItem.builder()
+                .withDocument(document)
+                .withDocumentItemType(DocumentItemType.EXP)
+                .withItem(item)
+                .withItemComment("WATER-123456-INV")
+                .withItemPrice(BigDecimal.valueOf(100))
+                .withItemQuantity(BigDecimal.ONE)
+                .build());
+        var entity = documentRepository.save(document);
+
+        mockMvc.perform(delete(DOCUMENTS_URL.concat("/{documentId}"), entity.getId())
+                        .param("version", document.getVersion().toString())
+                        .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
+                        .header(TRANSACTION_ID, transactionId))
+                .andExpect(status().isNoContent())
+                .andExpect(openApi().isValid(apiSpecification));
+        assertThat(documentRepository.findById(entity.getId())).isEmpty();
+    }
+
+    @Order(value = 11)
+    @DisplayName("Test Delete Document - When Document Does Not Exists")
+    @Test
+    void testDeleteDocument_WhenDocumentDoesNotExist() throws Exception {
+        var transactionId = UUID.randomUUID().toString();
+        mockMvc.perform(delete(DOCUMENTS_URL.concat("/{documentId}"), 95853)
+                        .param("version", "1")
+                        .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
+                        .header(TRANSACTION_ID, transactionId))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(openApi().isValid(apiSpecification));
+    }
+
+    @Order(value = 12)
+    @DisplayName("Test Delete Document - When Version Is Stale")
+    @Test
+    void testDeleteDocument_WhenVersionIsStale() throws Exception {
+        var transactionId = UUID.randomUUID().toString();
+        var document = Document.builder()
+                .withDocumentDate(LocalDate.now())
+                .withDocumentType(DocumentType.BILL)
+                .withDocumentName("Office electricity invoice")
+                .withDocumentDescription("Office electricity supply invoice")
+                .withInvoiceNumber("ELECTRICITY-123456-INV")
+                .withAccount(account)
+                .withCounterpartyId(1L)
+                .withPaymentMethod("DEBITCARD")
+                .withCurrencyCode("PLN")
+                .withExchangeRate(BigDecimal.ONE)
+                .build();
+        document.addToDocumentItems(DocumentItem.builder()
+                .withDocument(document)
+                .withDocumentItemType(DocumentItemType.EXP)
+                .withItem(item)
+                .withItemComment("ELECTRICITY-123456-INV")
+                .withItemPrice(BigDecimal.valueOf(100))
+                .withItemQuantity(BigDecimal.ONE)
+                .build());
+
+        // 1. Arrange: persist a new document (version 0)
+        var entity_v0 = documentRepository.save(document);
+        assertEquals(entity_v0.getVersion(), 0);
+
+        // 2. Simulate "someone else saved it": change a field and save again, so the stored version becomes 1
+        Document.builder(entity_v0)
+                .withDocumentName("Office electricity invoice")
+                .withDocumentDescription("Office electricity invoice - January")
+                .build();
+        var entity_v1 = documentRepository.save(entity_v0);
+        assertEquals(entity_v1.getVersion(), 1);
+
+        // 3. Act: DELETE with version=0
+        mockMvc.perform(delete(DOCUMENTS_URL.concat("/{documentId}"), entity_v0.getId())
+                        .param("version", entity_v0.getVersion().toString())
+                        .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
+                        .header(TRANSACTION_ID, transactionId))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.title").value("Conflict"))
+                .andExpect(jsonPath("$.detail").value("Version mismatch"))
+                .andExpect(openApi().isValid(apiSpecification));
+        assertThat(documentRepository.findById(entity_v0.getId())).isPresent();
+        var saved = documentRepository.findById(entity_v0.getId()).get();
+        assertEquals(saved.getVersion(), entity_v1.getVersion());
+        assertEquals(saved.getDocumentDescription(), entity_v1.getDocumentDescription());
+    }
+
+    @Order(value = 13)
+    @DisplayName("Test Delete Document - When Version Is Missing")
+    @Test
+    void testDeleteDocument_WhenVersionIsMissing() throws Exception {
+        var transactionId = UUID.randomUUID().toString();
+        var document = Document.builder()
+                .withDocumentDate(LocalDate.now())
+                .withDocumentType(DocumentType.BILL)
+                .withDocumentName("Office electricity invoice")
+                .withDocumentDescription("Office electricity supply invoice")
+                .withInvoiceNumber("ELECTRICITY-123456-INV")
+                .withAccount(account)
+                .withCounterpartyId(1L)
+                .withPaymentMethod("DEBITCARD")
+                .withCurrencyCode("PLN")
+                .withExchangeRate(BigDecimal.ONE)
+                .build();
+        document.addToDocumentItems(DocumentItem.builder()
+                .withDocument(document)
+                .withDocumentItemType(DocumentItemType.EXP)
+                .withItem(item)
+                .withItemComment("ELECTRICITY-123456-INV")
+                .withItemPrice(BigDecimal.valueOf(100))
+                .withItemQuantity(BigDecimal.ONE)
+                .build());
+        var entity = documentRepository.save(document);
+
+        mockMvc.perform(delete(DOCUMENTS_URL.concat("/{documentId}"), entity.getId())
+                        .header(ACCEPT_LANGUAGE_HEADER, ACCEPT_LANGUAGE)
+                        .header(TRANSACTION_ID, transactionId))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.title").value("Bad Request"))
+                .andExpect(jsonPath("$.detail").value("Required request parameter 'version' for method parameter type Integer is not present"));
+                //.andExpect(openApi().isValid(apiSpecification))
+        var saved = documentRepository.findById(entity.getId()).get();
+        assertEquals(saved.getVersion(), entity.getVersion());
+        assertEquals(saved.getDocumentDescription(), entity.getDocumentDescription());
+    }
+
 }

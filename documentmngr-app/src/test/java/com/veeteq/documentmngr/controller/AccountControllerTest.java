@@ -16,6 +16,7 @@ import java.util.UUID;
 
 import static com.atlassian.oai.validator.mockmvc.OpenApiValidationMatchers.openApi;
 import static com.veeteq.documentmngr.config.ApiConstants.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -162,7 +163,7 @@ public class AccountControllerTest extends BaseTest {
                 .andExpect(status().isNoContent())
                 .andExpect(openApi().isValid(apiSpecification));
 
-        assert accountRepository.findById(entity.getId()).isEmpty();
+        assertThat(accountRepository.findById(entity.getId())).isEmpty();
     }
 
     @Order(value = 7)

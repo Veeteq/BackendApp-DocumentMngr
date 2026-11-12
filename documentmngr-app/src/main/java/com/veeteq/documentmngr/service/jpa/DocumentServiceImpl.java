@@ -1,14 +1,15 @@
 package com.veeteq.documentmngr.service.jpa;
 
+import com.veeteq.documentmngr.exception.NotFoundException;
 import com.veeteq.documentmngr.mapper.DocumentResponseFactory;
 import com.veeteq.documentmngr.model.DocumentType;
-import com.veeteq.documentmngr.processor.DocumentProcessor;
 import com.veeteq.documentmngr.processor.DocumentProcessorFactory;
 import com.veeteq.documentmngr.repository.DocumentRepository;
 import com.veeteq.documentmngr.rest.dto.DocumentRequestDto;
 import com.veeteq.documentmngr.rest.dto.DocumentResponseDto;
 import com.veeteq.documentmngr.rest.dto.DocumentsResponseDto;
 import com.veeteq.documentmngr.service.DocumentService;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -42,9 +43,10 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public Optional<DocumentResponseDto> getDocumentById(Long id) {
-        var result = documentRepository.findById(id);
-        var response = result.map(documentResponseFactory::create);
+    public DocumentResponseDto getDocumentById(Long id) {
+        var response = documentRepository.findById(id)
+                .map(documentResponseFactory::create)
+                .orElseThrow(() -> new NotFoundException("Document not found"));
         return response;
     }
 
@@ -87,7 +89,7 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public Set<String> searchDocuments(String property, String pattern, Boolean distinct) {
+    public Set<String> getMetadata(String property, String pattern, Boolean distinct) {
         Map<String, Function<String, Set<String>>> map = Map.of(
                 "documentItemComment", p -> documentRepository.findDistinctComments(p),
                 "documentName",        p -> documentRepository.findDistinctNames(p)
@@ -99,4 +101,11 @@ public class DocumentServiceImpl implements DocumentService {
         return result;
     }
 
+    @Override
+    @Transactional
+    public void deleteById(Long id, int version) {
+        var document = documentRepository.findById(id).orElseThrow(() -> new NotFoundException("Document not found"));
+        if (!document.getVersion().equals(version)) throw new OptimisticLockException("Version mismatch");
+        documentRepository.delete(document);
+    }
 }

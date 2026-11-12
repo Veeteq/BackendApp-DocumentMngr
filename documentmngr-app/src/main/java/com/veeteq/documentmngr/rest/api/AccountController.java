@@ -92,7 +92,7 @@ public class AccountController implements AccountApi {
 
     @Override
     public ResponseEntity<Void> deleteAccount(Long id, UUID transactionId, String acceptLanguage) {
-        LOGGER.info("Request received to delete account with Id: {}", id);
+        LOGGER.info("Request received to delete account with ID: {}. TransactionID: {}", id, transactionId);
 
         accountService.deleteById(id);
         return ResponseEntity.noContent()
