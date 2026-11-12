@@ -41,9 +41,6 @@ public class BaseTest {
 
     @BeforeEach
     void setUp() {
-        documentRepository.findAll().forEach(document -> {
-            System.out.println(document.getId());
-        });
         item = itemRepository.findById(3L).get();
         account = accountRepository.findById(1L).get();
         document = documentRepository.findById(1L).get();

@@ -161,14 +161,12 @@ public class Document {
         return documentItems.stream()
                 .map(item -> {
                     if (item.getFinancialRecord() instanceof Expense expense) {
-                    	System.out.println("expense id: " + expense.getId());
                         var totalAmount = expense.getPrice()
                                 .multiply(expense.getCount())
                                 .setScale(2, RoundingMode.HALF_UP)
                                 .negate();
                         return totalAmount;
                     } else if (item.getFinancialRecord() instanceof Income income) {
-                    	System.out.println("income id: " + income.getId());
                     	var incomeCount = income.getCount() != null ? income.getCount() : BigDecimal.ONE;
                         var totalAmount =  income.getPrice()
                                 .multiply(incomeCount)

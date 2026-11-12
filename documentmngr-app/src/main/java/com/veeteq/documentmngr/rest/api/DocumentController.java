@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.Set;
 import java.util.UUID;
 
@@ -65,13 +66,10 @@ public class DocumentController implements DocumentApi {
 
         var headers = new HttpHeaders();
         headers.set(TRANSACTION_ID, transactionId.toString());
-        var response = documentService.getDocumentById(id)
-                .map(itemDto -> ResponseEntity.ok()
-                        .headers(headers)
-                        .body(itemDto))
-                .orElse(ResponseEntity.notFound()
-                        .headers(headers)
-                        .build());
+        var result = documentService.getDocumentById(id);
+        var response = ResponseEntity.ok()
+                .headers(headers)
+                .body(result);
         return response;
     }
 
@@ -94,10 +92,15 @@ public class DocumentController implements DocumentApi {
     }
 
     @Override
-    public ResponseEntity<Set<String>> searchDocuments(String property, String pattern, UUID transactionId, Boolean distinct, String acceptLanguage) {
+    public ResponseEntity<DocumentsResponseDto> searchDocuments(UUID transactionId, LocalDate documentDate, Integer pageNumber, Integer pageSize, String orderBy, String orderDirection, String acceptLanguage) {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    @Override
+    public ResponseEntity<Set<String>> getMetadata(String property, String pattern, UUID transactionId, Boolean distinct, String acceptLanguage) {
         LOGGER.info("Request received to list {} document with pattern: {}. TransactionID: {}", property, pattern, transactionId);
 
-        var result = documentService.searchDocuments(property, pattern, distinct);
+        var result = documentService.getMetadata(property, pattern, distinct);
 
         return ResponseEntity
                 .ok()
@@ -124,7 +127,17 @@ public class DocumentController implements DocumentApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteDocument(Long id, UUID transactionId, String acceptLanguage) {
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> deleteDocument(Long id, Integer version, UUID transactionId, String acceptLanguage) {
+        LOGGER.info("Request received to delete document with ID: {}. TransactionID: {}", id, transactionId);
+
+        var headers = new HttpHeaders();
+        headers.set(TRANSACTION_ID, transactionId.toString());
+
+        documentService.deleteById(id);
+
+        return ResponseEntity.noContent()
+                .headers(headers)
+                .build();
     }
+
 }

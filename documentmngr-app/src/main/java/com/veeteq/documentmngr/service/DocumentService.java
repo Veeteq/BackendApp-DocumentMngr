@@ -12,11 +12,13 @@ public interface DocumentService {
 
     DocumentResponseDto createDocument(DocumentRequestDto documentDto);
 
-    Optional<DocumentResponseDto> getDocumentById(Long id);
+    DocumentResponseDto getDocumentById(Long id);
 
     DocumentsResponseDto listDocuments(Pageable pageable);
 
     Optional<DocumentResponseDto> updateDocument(Long id, DocumentRequestDto dto);
 
-    Set<String> searchDocuments(String property, String pattern, Boolean distinct);
+    Set<String> getMetadata(String property, String pattern, Boolean distinct);
+
+    void deleteById(Long id);
 }
