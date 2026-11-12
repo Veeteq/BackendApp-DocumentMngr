@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 public interface DocumentRepository extends JpaRepository<Document, Long> {
@@ -29,4 +30,6 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
      WHERE LOWER(i.comment) LIKE LOWER(CONCAT('%', :pattern, '%'))
     """)
     Set<String> findDistinctComments(@Param("pattern") String pattern);
+
+    Set<Document> findByDocumentDate(@Param("documentDate") LocalDate documentDate);
 }

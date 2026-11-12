@@ -68,20 +68,17 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @Transactional
     public void deleteById(Long id) {
-        accountRepository.findById(id).ifPresentOrElse(account -> {
-            if (documentRepository.countByAccount(account) > 0) {
-                throw new ConflictException("Account is referenced by Documents");
-            }
-            accountRepository.delete(account);
-        }, () -> {
-            throw new NotFoundException("Account not found");
-        });
+        var account = accountRepository.findById(id).orElseThrow(() -> new NotFoundException("Account not found"));
+        if (documentRepository.countByAccount(account) > 0) {
+            throw new ConflictException("Account is referenced by Documents");
+        }
+        accountRepository.delete(account);
     }
 
     @Override
     public List<AccountDto> searchAccounts(String pattern) {
-
         return accountRepository
                 .findByNameStartsWithIgnoreCase(pattern)
                 .stream()
