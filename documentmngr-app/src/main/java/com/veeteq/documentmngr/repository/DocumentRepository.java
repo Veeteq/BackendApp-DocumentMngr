@@ -2,6 +2,8 @@ package com.veeteq.documentmngr.repository;
 
 import com.veeteq.documentmngr.model.Account;
 import com.veeteq.documentmngr.model.Document;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -31,5 +33,5 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
     """)
     Set<String> findDistinctComments(@Param("pattern") String pattern);
 
-    Set<Document> findByDocumentDate(@Param("documentDate") LocalDate documentDate);
+    Page<Document> findByDocumentDate(@Param("documentDate") LocalDate documentDate, Pageable pageable);
 }

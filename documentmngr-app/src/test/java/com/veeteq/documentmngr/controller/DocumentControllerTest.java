@@ -1,5 +1,6 @@
 package com.veeteq.documentmngr.controller;
 
+import com.jayway.jsonpath.JsonPath;
 import com.veeteq.documentmngr.DocumentMngrApp;
 import com.veeteq.documentmngr.integration.addressbook.AddressBookClient;
 import com.veeteq.documentmngr.model.Document;
@@ -585,4 +586,79 @@ public class DocumentControllerTest extends BaseTest {
         assertEquals(saved.getDocumentDescription(), entity.getDocumentDescription());
     }
 
+    @Transactional
+    @DisplayName("Test Search Document By Date")
+    @Test
+    @Order(14)
+    void testSearchDocumentByDate() throws Exception {
+        var transactionId = UUID.randomUUID().toString();
+        var documentDate = LocalDate.now().minusMonths(1);
+        var document = Document.builder()
+                .withDocumentDate(documentDate)
+                .withDocumentType(DocumentType.BILL)
+                .withDocumentName("Office electricity invoice")
+                .withDocumentDescription("Office electricity supply invoice")
+                .withInvoiceNumber("ELECTRICITY-123456-INV")
+                .withAccount(account)
+                .withCounterpartyId(1L)
+                .withPaymentMethod("DEBITCARD")
+                .withCurrencyCode("PLN")
+                .withExchangeRate(BigDecimal.ONE)
+                .build();
+        document.addToDocumentItems(DocumentItem.builder()
+                .withDocument(document)
+                .withDocumentItemType(DocumentItemType.EXP)
+                .withItem(item)
+                .withItemComment("ELECTRICITY-123456-INV")
+                .withItemPrice(BigDecimal.valueOf(100))
+                .withItemQuantity(BigDecimal.ONE)
+                .build());
+        var saved = documentRepository.save(document);
+
+        var result = mockMvc.perform(get(DOCUMENTS_URL.concat("/search"))
+                        .param("documentDate", saved.getDocumentDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                        .param("pageSize", "10")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(TRANSACTION_ID, transactionId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(header().exists(TRANSACTION_ID))
+                .andExpect(header().string(TRANSACTION_ID, transactionId))
+                .andExpect(jsonPath("$.pageSize", Long.class).value(10))
+                .andExpect(jsonPath("$.totalItems", Integer.class).value(1))
+                .andExpect(jsonPath("$.totalPages", Integer.class).value(1))
+                .andExpect(jsonPath("$.currentPage", Integer.class).value(0))
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.data").isNotEmpty())
+                .andReturn();
+
+        var json = result.getResponse().getContentAsString();
+        Map documentData = JsonPath.read(json, "$.data[0]");
+        assertEquals(saved.getId().intValue(), documentData.get("documentId"));
+        System.out.println(documentData);/*
+                .andExpect(jsonPath("$.invoiceNumber", equalTo(document.getInvoiceNumber())))
+                .andExpect(jsonPath("$.documentAmount").value(document.getTotalAmount().doubleValue()))
+                .andExpect(jsonPath("$.paymentMethod", equalTo(document.getPaymentMethod().name())))
+                .andExpect(jsonPath("$.currencyCode", equalTo(document.getCurrency().getCurrencyCode())))
+                .andExpect(jsonPath("$.exchangeRate", equalTo(1.0)))
+
+                .andExpect(jsonPath("$.account.accountId", Long.class).value(document.getAccount().getId()))
+                .andExpect(jsonPath("$.account.accountName", equalTo(document.getAccount().getName())))
+                .andExpect(jsonPath("$.account.accountDescription", equalTo(document.getAccount().getDescription())))
+                .andExpect(jsonPath("$.account.accountCurrency", equalTo(document.getAccount().getCurrency().getCurrencyCode())))
+                .andExpect(jsonPath("$.account.accountImageUrl", equalTo(document.getAccount().getImageUrl())))
+
+                .andExpect(jsonPath("$.documentItemsCount", equalTo(1)))
+                .andExpect(jsonPath("$.documentItems", hasSize(1)))
+                .andExpect(jsonPath("$.documentItems[0].documentItemId", equalTo(document.getDocumentItems().get(0).getId().getSequenceNumber())))
+                .andExpect(jsonPath("$.documentItems[0].itemQuantity", equalTo(document.getDocumentItems().get(0).getExpense().getCount().doubleValue())))
+                .andExpect(jsonPath("$.documentItems[0].itemPrice", equalTo(document.getDocumentItems().get(0).getExpense().getPrice().doubleValue())))
+                .andExpect(jsonPath("$.documentItems[0].itemComment", equalTo(document.getDocumentItems().get(0).getExpense().getComment())))
+                .andExpect(jsonPath("$.documentItems[0].item.itemId", Long.class).value(document.getDocumentItems().get(0).getExpense().getItem().getId()))
+                .andExpect(jsonPath("$.documentItems[0].item.itemName", equalTo(document.getDocumentItems().get(0).getExpense().getItem().getName())))
+                .andExpect(jsonPath("$.documentItems[0].item.itemCategory.categoryId", Long.class).value(document.getDocumentItems().get(0).getExpense().getItem().getCategory().getId()))
+                .andExpect(jsonPath("$.documentItems[0].item.itemCategory.categoryName", equalTo(document.getDocumentItems().get(0).getExpense().getItem().getCategory().getName())))
+
+                .andExpect(jsonPath("$.transferDetails").doesNotExist());*/
+    }
 }
