@@ -2,6 +2,7 @@ package com.veeteq.documentmngr.service.jpa;
 
 import com.veeteq.documentmngr.exception.NotFoundException;
 import com.veeteq.documentmngr.mapper.DocumentResponseFactory;
+import com.veeteq.documentmngr.model.Document;
 import com.veeteq.documentmngr.model.DocumentType;
 import com.veeteq.documentmngr.processor.DocumentProcessorFactory;
 import com.veeteq.documentmngr.repository.DocumentRepository;
@@ -11,9 +12,11 @@ import com.veeteq.documentmngr.rest.dto.DocumentsResponseDto;
 import com.veeteq.documentmngr.service.DocumentService;
 import jakarta.persistence.OptimisticLockException;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -54,16 +57,8 @@ public class DocumentServiceImpl implements DocumentService {
     @Transactional
     public DocumentsResponseDto listDocuments(Pageable pageable) {
         var page = documentRepository.findAll(pageable);
-        var dtos = page.getContent().stream()
-                .map(documentResponseFactory::create)
-                .toList();
-        var retVal = new DocumentsResponseDto()
-                .data(dtos)
-                .currentPage(page.getNumber())
-                .pageSize(page.getSize())
-                .totalItems(page.getTotalElements())
-                .totalPages(page.getTotalPages());
-        return retVal;
+        var response = toDocumentsResponseDto(page);
+        return response;
     }
 
     @Override
@@ -103,9 +98,30 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     @Transactional
+    public DocumentsResponseDto searchDocuments(LocalDate documentDate, Pageable pageable) {
+        var page = documentRepository.findByDocumentDate(documentDate, pageable);
+        var response = toDocumentsResponseDto(page);
+        return response;
+    }
+
+    @Override
+    @Transactional
     public void deleteById(Long id, int version) {
         var document = documentRepository.findById(id).orElseThrow(() -> new NotFoundException("Document not found"));
         if (!document.getVersion().equals(version)) throw new OptimisticLockException("Version mismatch");
         documentRepository.delete(document);
+    }
+
+    private DocumentsResponseDto toDocumentsResponseDto(Page<Document> page) {
+        var dtos = page.getContent().stream()
+                .map(documentResponseFactory::create)
+                .toList();
+        var retVal = new DocumentsResponseDto()
+                .data(dtos)
+                .currentPage(page.getNumber())
+                .pageSize(page.getSize())
+                .totalItems(page.getTotalElements())
+                .totalPages(page.getTotalPages());
+        return retVal;
     }
 }

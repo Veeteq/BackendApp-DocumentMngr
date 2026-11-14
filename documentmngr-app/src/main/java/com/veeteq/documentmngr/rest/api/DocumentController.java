@@ -93,7 +93,20 @@ public class DocumentController implements DocumentApi {
 
     @Override
     public ResponseEntity<DocumentsResponseDto> searchDocuments(UUID transactionId, LocalDate documentDate, Integer pageNumber, Integer pageSize, String orderBy, String orderDirection, String acceptLanguage) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        LOGGER.info("Request received to search for documents for given date:{}. TransactionID: {}", documentDate, transactionId);
+
+        var direction = Sort.Direction.fromString(orderDirection);
+        var sort = Sort.by(direction, orderBy);
+        var pageRequest = PageRequest.of(pageNumber, pageSize, sort);
+
+        var headers = new HttpHeaders();
+        headers.set(TRANSACTION_ID, transactionId.toString());
+
+        var result = documentService.searchDocuments(documentDate, pageRequest);
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .body(result);
     }
 
     @Override
