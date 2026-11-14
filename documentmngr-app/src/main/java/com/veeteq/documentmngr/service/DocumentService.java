@@ -20,5 +20,5 @@ public interface DocumentService {
 
     Set<String> getMetadata(String property, String pattern, Boolean distinct);
 
-    void deleteById(Long id);
+    void deleteById(Long id, int version);
 }

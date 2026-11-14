@@ -133,7 +133,7 @@ public class DocumentController implements DocumentApi {
         var headers = new HttpHeaders();
         headers.set(TRANSACTION_ID, transactionId.toString());
 
-        documentService.deleteById(id);
+        documentService.deleteById(id, version);
 
         return ResponseEntity.noContent()
                 .headers(headers)

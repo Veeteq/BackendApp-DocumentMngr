@@ -9,6 +9,7 @@ import com.veeteq.documentmngr.rest.dto.DocumentRequestDto;
 import com.veeteq.documentmngr.rest.dto.DocumentResponseDto;
 import com.veeteq.documentmngr.rest.dto.DocumentsResponseDto;
 import com.veeteq.documentmngr.service.DocumentService;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -102,8 +103,9 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     @Transactional
-    public void deleteById(Long id) {
+    public void deleteById(Long id, int version) {
         var document = documentRepository.findById(id).orElseThrow(() -> new NotFoundException("Document not found"));
+        if (!document.getVersion().equals(version)) throw new OptimisticLockException("Version mismatch");
         documentRepository.delete(document);
     }
 }
