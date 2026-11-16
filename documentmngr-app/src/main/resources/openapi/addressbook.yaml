@@ -1,0 +1,346 @@
+openapi: 3.0.0
+info:
+  title: Address Book API
+  version: 1.0.0
+  description: A REST API for managing an Address Book.
+
+servers:
+  - url: http://localhost:8083/api
+    description: Main API server
+
+paths:
+  /contacts/{id}:
+    get:
+      tags:
+        - contacts
+      summary: Get a single contact by ID
+      operationId: getContactById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: A contact object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+        '404':
+          description: Contact not found
+
+    put:
+      tags:
+        - contacts
+      summary: Update a contact by ID
+      operationId: updateContact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactRequest'
+      responses:
+        '200':
+          description: Contact updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+        '404':
+          description: Contact not found
+
+    delete:
+      tags:
+        - contacts
+      summary: Delete a contact by ID
+      operationId: deleteContact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Contact deleted successfully
+        '404':
+          description: Contact not found
+
+  /contacts:
+    get:
+      tags:
+        - contacts
+      summary: Get all contacts (pageable)
+      operationId: getContacts
+      parameters:
+        - $ref: '#/components/parameters/PageNumber'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/OrderBy'
+        - $ref: '#/components/parameters/OrderDirection'
+      responses:
+        '200':
+          description: A paginated list of contacts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactsResponse'
+    post:
+      tags:
+        - contacts
+      summary: Create a new contact
+      operationId: createContact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactRequest'
+      responses:
+        '201':
+          description: Contact created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+
+  /contacts/search:
+    get:
+      tags:
+        - contacts
+      summary: Search contacts by text
+      operationId: searchContacts
+      parameters:
+        - $ref: '#/components/parameters/SearchText'
+      responses:
+        '200':
+          description: A paginated list of contacts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Contact'
+
+components:
+  schemas:
+    Contact:
+      type: object
+      discriminator:
+        propertyName: contactType
+        mapping:
+          PERSON: '#/components/schemas/Person'
+          COMPANY: '#/components/schemas/Company'
+      required:
+        - contactType
+      properties:
+        contactType:
+          type: string
+        id:
+          type: integer
+          format: int64
+        address:
+          $ref: '#/components/schemas/Address'
+        displayName:
+          type: string
+        bankAccountNumber:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+          example: [ "tag1", "tag2", "tag3" ]
+        version:
+          type: integer
+    Company:
+      allOf:
+        - $ref: '#/components/schemas/Contact'
+        - type: object
+          properties:
+            companyName:
+              type: string
+            taxId:
+              type: string
+    Person:
+      allOf:
+        - $ref: '#/components/schemas/Contact'
+        - type: object
+          properties:
+            firstName:
+              type: string
+            lastName:
+              type: string
+    Address:
+      type: object
+      properties:
+        country:
+          type: string
+        postcode:
+          type: string
+        city:
+          type: string
+        street:
+          type: string
+      required:
+        - country
+        - postcode
+        - city
+        - street
+    ContactRequest:
+      type: object
+      discriminator:
+        propertyName: contactType
+        mapping:
+          PERSON: '#/components/schemas/PersonRequest'
+          COMPANY: '#/components/schemas/CompanyRequest'
+      required:
+        - contactType
+      properties:
+        contactType:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+        displayName:
+          type: string
+        bankAccountNumber:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+          example: [ "tag1", "tag2", "tag3" ]
+        version:
+          $ref: '#/components/schemas/Version'
+    CompanyRequest:
+      allOf:
+        - $ref: '#/components/schemas/ContactRequest'
+        - type: object
+          required:
+            - companyName
+          properties:
+            companyName:
+              type: string
+            taxId:
+              type: string
+    PersonRequest:
+      allOf:
+        - $ref: '#/components/schemas/ContactRequest'
+        - type: object
+          required:
+            - firstName
+            - lastName
+          properties:
+            firstName:
+              type: string
+            lastName:
+              type: string
+    ContactsResponse:
+      allOf:
+        - $ref: '#/components/schemas/Pagination'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Contact'
+          additionalProperties: true
+    Pagination:
+      type: object
+      properties:
+        pageSize:
+          type: integer
+          description: Number of items on page.
+          example: 25
+        totalItems:
+          type: integer
+          format: int64
+          description: The total number of items available.
+          example: 100
+        totalPages:
+          type: integer
+          description: The total number of pages available.
+          example: 10
+        currentPage:
+          type: integer
+          description: The current page number.
+          example: 1
+    Version:
+      type: integer
+      description: Version number of the entity
+      title: Version
+      example: 1
+  parameters:
+    Accept-Language:
+      name: Accept-Language
+      in: header
+      description: 'The language you prefer for messages. Supported values are: en-AU, en-CA, en-GB, en-US, pl-PL. Default is pl-PL.'
+      required: false
+      schema:
+        type: string
+        default: pl-PL
+        example: [en-US, pl-PL]
+    Transaction-Id:
+      name: Transaction-Id
+      in: header
+      description: Transaction-Id header parameter.
+      required: true
+      schema:
+        type: string
+        format: uuid
+    PageNumber:
+      name: pageNumber
+      in: query
+      required: false
+      description: The page number to retrieve (0-based index).
+      schema:
+        type: integer
+        default: 0
+        example: 0
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      description: The number of items to return per page.
+      schema:
+        type: integer
+        default: 25
+        example: 25
+    OrderBy:
+      name: orderBy
+      in: query
+      required: false
+      description: The field to order the items by.
+      schema:
+        type: string
+        default: id
+        example: itemName
+    OrderDirection:
+      name: orderDirection
+      in: query
+      required: false
+      description: The direction to order the items (asc or desc).
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+        default: asc
+        example: asc
+    SearchText:
+      name: searchText
+      in: query
+      required: true
+      description: Text to search for the contacts
+      schema:
+        type: string

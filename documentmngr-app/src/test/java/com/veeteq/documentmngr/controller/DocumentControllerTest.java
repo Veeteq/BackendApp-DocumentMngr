@@ -68,9 +68,13 @@ public class DocumentControllerTest extends BaseTest {
     @Order(2)
     void testGetDocumentById() throws Exception {
         var transactionId = UUID.randomUUID().toString();
+        when(addressBookClient
+                .getContact(anyLong()))
+                .thenReturn(Optional.of(new CompanyDto().id(1L).displayName("ACME Corporation")));
         mockMvc.perform(get(DOCUMENTS_URL.concat("/{document_id}"), document.getId())
                         .accept(MediaType.APPLICATION_JSON)
                         .header(TRANSACTION_ID, transactionId))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.documentId").value(document.getId()))
                 .andExpect(header().exists(TRANSACTION_ID))
@@ -170,7 +174,7 @@ public class DocumentControllerTest extends BaseTest {
     void testCreateDocument() throws Exception {
         when(addressBookClient
                 .getContact(anyLong()))
-                .thenReturn(Optional.of(new CounterpartyDto().counterpartyId(1L).counterpartyName("ACME Corporation")));
+                .thenReturn(Optional.of(new CompanyDto().id(1L).displayName("ACME Corporation")));
         var dto = new DocumentRequestDto()
                 .documentType(DocumentTypeDto.INVOICE)
                 .documentName("Home electricity")

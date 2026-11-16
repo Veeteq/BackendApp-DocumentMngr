@@ -1,5 +1,6 @@
 package com.veeteq.documentmngr.integration.addressbook;
 
+import com.veeteq.documentmngr.integration.addressbook.dto.ABContactDto;
 import com.veeteq.documentmngr.rest.dto.CounterpartyDto;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -26,7 +27,7 @@ public class AddressBookRestClient implements AddressBookClient {
             var response = restClient.get()
                     .uri("/api/addressbook/contacts/{id}", contactId)
                     .retrieve()
-                    .body(ContactResponseDto.class);
+                    .body(ABContactDto.class);
             var counterparty = mapper.map(response);
             return Optional.ofNullable(counterparty);
 
