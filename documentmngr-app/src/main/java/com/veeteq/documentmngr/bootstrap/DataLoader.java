@@ -102,6 +102,7 @@ public class DataLoader implements CommandLineRunner {
                 .withAccount(accRef)
                 .withCurrencyCode(Currency.getInstance("PLN").getCurrencyCode())
                 .withExchangeRate(BigDecimal.ONE)
+                .withCounterpartyId(1L)
                 .build();
         document.addToDocumentItems(
                 DocumentItem.builder()

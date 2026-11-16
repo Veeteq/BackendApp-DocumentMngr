@@ -136,6 +136,50 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
             <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>7.27.0</version>
+
+                <executions>
+                    <execution>
+                        <id>generate-addressbook-models</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+
+                        <configuration>
+                            <inputSpec>
+                                ${project.basedir}/src/main/resources/openapi/addressbook.yaml
+                            </inputSpec>
+
+                            <generatorName>java</generatorName>
+
+                            <modelPackage>
+                                com.veeteq.documentmngr.integration.addressbook.dto
+                            </modelPackage>
+
+                            <generateApis>false</generateApis>
+                            <generateModels>true</generateModels>
+                            <generateModelTests>false</generateModelTests>
+                            <generateModelDocumentation>false</generateModelDocumentation>
+                            <generateApiTests>false</generateApiTests>
+                            <generateApiDocumentation>false</generateApiDocumentation>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <modelNamePrefix>AB</modelNamePrefix>
+                            <modelNameSuffix>Dto</modelNameSuffix>
+
+                            <configOptions>
+                                <library>restclient</library>
+                                <useJakartaEe>true</useJakartaEe>
+                                <dateLibrary>java8</dateLibrary>
+                                <openApiNullable>false</openApiNullable>
+                                <serializationLibrary>jackson</serializationLibrary>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
@@ -153,3 +197,5 @@
     </build>
 
 </project>
+
+

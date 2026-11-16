@@ -1,21 +1,31 @@
 package com.veeteq.documentmngr.integration.addressbook;
 
+import com.veeteq.documentmngr.integration.addressbook.dto.ABAddressDto;
+import com.veeteq.documentmngr.integration.addressbook.dto.ABCompanyDto;
+import com.veeteq.documentmngr.integration.addressbook.dto.ABContactDto;
+import com.veeteq.documentmngr.integration.addressbook.dto.ABPersonDto;
+import com.veeteq.documentmngr.rest.dto.CompanyDto;
 import com.veeteq.documentmngr.rest.dto.CounterpartyDto;
+import com.veeteq.documentmngr.rest.dto.PersonDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface AddressBookMapper {
 
-    @Mapping(target = "counterpartyId",   source = "id")
-    @Mapping(target = "counterpartyName", expression = "java(resolveCounterpartyName(source))")
-    CounterpartyDto map(ContactResponseDto source);
+    default CounterpartyDto map(ABContactDto source) {
+        if (source == null) return null;
+        if (source instanceof ABPersonDto person) return map(person);
+        if (source instanceof ABCompanyDto company) return map(company);
 
-    default String resolveCounterpartyName(ContactResponseDto source) {
-        return switch (source.contactType()) {
-            case COMPANY -> source.companyName() + " / " + source.displayName();
-            case PERSON -> source.firstName() + " " + source.lastName();
-        };
+        throw new IllegalArgumentException("Unsupported AddressBook contact type: " + source.getClass().getName());
     }
 
+    @Mapping(target = "type", constant = "PERSON")
+    PersonDto map(ABPersonDto source);
+
+    @Mapping(target = "type", constant = "COMPANY")
+    CompanyDto map(ABCompanyDto source);
+
+    AddressDto map(ABAddressDto source);
 }
